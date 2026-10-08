@@ -1,0 +1,69 @@
+# Harnesses de Active Stack (directorios por agente — no forman parte del entregable)
+.agents/
+.amazonq/
+.augment/
+.bob/
+.claude/
+.cline/
+.clinerules/
+.codeartsdoer/
+.codeassistant/
+.codebuddy/
+.commandcode/
+.continue/
+.cospec/
+.crush/
+.cursor/
+.devin/
+.factory/
+.forge/
+.gemini/
+.hermes/
+.iflow/
+.junie/
+.kilo/
+.kilocode/
+.kimi-code/
+.kiro/
+.lingma/
+.omp/
+.pi/
+.qoder/
+.qwen/
+.roo/
+.rovodev/
+.trae/
+.vibe/
+.zcode/
+.github/prompts/
+.github/skills/
+
+# Skills OpenSpec redundantes instaladas por `openspec init` (ya existen globales)
+.opencode/skills/
+
+# Registro de skills generado (solo se versiona el registry canónico)
+.atl/*
+!.atl/skill-registry.md
+
+# Dependencias y temporales
+node_modules/
+.opencode/node_modules/
+*.log
+.DS_Store
+Thumbs.db
+
+# Secretos y entorno real (solo .env.example se versiona)
+.env
+!.env.example
+
+# Python / backend (FastAPI)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+.coverage
+htmlcov/
