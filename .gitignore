@@ -1,5 +1,7 @@
 # Harnesses de Active Stack (directorios por agente — no forman parte del entregable)
-.agents/
+# EXCEPCIÓN: .agents/skills/ SÍ se versiona (fuente canónica de skills del proyecto)
+.agents/*
+!.agents/skills/
 .amazonq/
 .augment/
 .bob/
