@@ -40,8 +40,8 @@
 .github/prompts/
 .github/skills/
 
-# Skills OpenSpec redundantes instaladas por `openspec init` (ya existen globales)
-.opencode/skills/
+# OpenCode (agente): todo local, no forma parte del entregable ni lo necesitan los compañeros
+.opencode/
 
 # Registro de skills generado (solo se versiona el registry canónico)
 .atl/*
@@ -49,7 +49,6 @@
 
 # Dependencias y temporales
 node_modules/
-.opencode/node_modules/
 *.log
 .DS_Store
 Thumbs.db
