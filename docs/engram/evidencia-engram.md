@@ -44,29 +44,3 @@ Resultado real obtenido:
 Esto cubre lo pedido: checklist/scrape Oclusar (#1), 6 AR adicionales (#4), 6 Latam (#3), 6 intl (#2), informe+PDF (#10) y session summaries (#6, #19).
 
 **Cómo evita arrancar de cero:** un agente nuevo recupera sin repreguntar que el stack es **FastAPI + JWT + SQLAlchemy + Postgres + Redis + Docker / React + TS + Vite**, que **C-01 está archivado 10/10** (spec sincronizado en `openspec/specs/platform/health/spec.md`), y las decisiones **«no crear CLAUDE.md»** y **«solo `docs/discovery/`»** (#28/#29). También recupera gotchas (openspec vía `cmd /c`, PDF con reportlab, `Get-FileHash` en vez de `diff`).
-
-## 3. Cómo reproducirlo en el video
-
-Opción A — CLI:
-
-```powershell
-engram mem_context --project turnos-odontologia
-engram mem_search "discovery turnos odontologia" --project turnos-odontologia
-```
-
-Opción B — herramientas MCP del agente: `mem_context` y `mem_search` (mismos parámetros).
-
-Para versionar la memoria (opcional):
-
-```powershell
-engram sync
-git add .engram
-```
-
-> ⚠️ Aviso de privacidad: solo versionar `.engram` si el repo es privado o la memoria no contiene datos sensibles. Si el repo es público, no commitear `.engram` (este proyecto además prohíbe datos reales de pacientes — RN-GL-02 — y secretos en el repo).
-
-## 4. Estado actual
-
-- Proyecto: `turnos-odontologia` (detectado por remote git).
-- Sesión principal: `turnos-odontologia` iniciada **2026-09-29 11:34:27** con **27 observaciones** (ver `mem_context`); total global **30 observaciones en 2 sesiones** (ver `mem_stats`, corte 2026-10-08).
-- Evidencia generada sin commit, como se pidió.
