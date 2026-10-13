@@ -2,28 +2,28 @@
 
 **Delegator use only.** Any agent that launches sub-agents reads this registry to resolve compact rules, then injects them directly into sub-agent prompts. Sub-agents do NOT read this registry or individual SKILL.md files.
 
-## User Skills
+## Project Skills (`.agents/skills/` — única fuente, no duplicar en `~/.agents` ni en `.opencode/skills/`)
 
 | Trigger | Skill | Path |
 |---------|-------|------|
-| React components, Next.js pages, data fetching, bundle optimization, performance improvements | vercel-react-best-practices | C:\Users\GonziChan\.agents\skills\vercel-react-best-practices\SKILL.md |
-| Asked to "review my UI", "check accessibility", "audit design", "review UX", "check my site against best practices" | web-design-guidelines | C:\Users\GonziChan\.agents\skills\web-design-guidelines\SKILL.md |
-| Building new UI or reshaping existing one; aesthetic direction, typography, non-templated visual design | frontend-design | C:\Users\GonziChan\.agents\skills\frontend-design\SKILL.md |
-| Anything living in Postgres: tables, columns, types, schema, migrations, RLS, indexes, triggers, functions, pg_cron/pgmq, pgvector, pg_restore; slow queries, EXPLAIN, connections, locking, bloat | supabase-postgres-best-practices | C:\Users\GonziChan\.agents\skills\supabase-postgres-best-practices\SKILL.md |
-| Designing or reviewing a PostgreSQL-specific schema: types, keys, constraints, indexes, partitioning | postgresql-table-design | C:\Users\GonziChan\.agents\skills\postgresql-table-design\SKILL.md |
-| Building new FastAPI applications or setting up backend API projects | fastapi-templates | C:\Users\GonziChan\.agents\skills\fastapi-templates\SKILL.md |
-| Building async APIs, concurrent systems, I/O-bound apps requiring non-blocking operations | async-python-patterns | C:\Users\GonziChan\.agents\skills\async-python-patterns\SKILL.md |
-| Working with FastAPI APIs, Pydantic models, dependencies, SSE/streaming, serving frontend apps | fastapi | C:\Users\GonziChan\.agents\skills\fastapi\SKILL.md |
-| Complex type logic, reusable type utilities, compile-time type safety in TypeScript | typescript-advanced-types | C:\Users\GonziChan\.agents\skills\typescript-advanced-types\SKILL.md |
-| Working with Vite projects, vite.config.ts, Vite plugins, libraries/SSR apps | vite | C:\Users\GonziChan\.agents\skills\vite\SKILL.md |
-| Auditing input handlers, user input, auth, sessions, storage, external integrations, login flows, OWASP Top Ten, dependency audits, supply-chain risk, PII/GDPR/CCPA | security-and-hardening | C:\Users\GonziChan\.agents\skills\security-and-hardening\SKILL.md |
-| Creating/reviewing Dockerfiles and Compose services, installer harnesses, container security/networking/volumes ⚠️ Snyk High Risk flag at install — review generated Docker content before use | docker-patterns | C:\Users\GonziChan\.agents\skills\docker-patterns\SKILL.md |
-| User wants test-first development, mentions "red-green-refactor", or wants integration tests | tdd | C:\Users\GonziChan\.agents\skills\tdd\SKILL.md |
-| User says "diagnose"/"debug this", or reports something broken/throwing/failing/slow | diagnosing-bugs | C:\Users\GonziChan\.agents\skills\diagnosing-bugs\SKILL.md |
-| User wants to review a branch, PR, work-in-progress changes, or asks to "review since X" | code-review | C:\Users\GonziChan\.agents\skills\code-review\SKILL.md |
-| Automate browser interactions, test web pages, work with Playwright tests | playwright-cli | C:\Users\GonziChan\.agents\skills\playwright-cli\SKILL.md |
-| Interacting with and testing local web apps using Playwright: verify frontend, debug UI, screenshots, browser logs | webapp-testing | C:\Users\GonziChan\.agents\skills\webapp-testing\SKILL.md |
-| Implementing E2E tests, debugging flaky tests, establishing testing standards (Playwright/Cypress) | e2e-testing-patterns | C:\Users\GonziChan\.agents\skills\e2e-testing-patterns\SKILL.md |
+| React components, Next.js pages, data fetching, bundle optimization, performance improvements | vercel-react-best-practices | .agents/skills/vercel-react-best-practices/SKILL.md |
+| Asked to "review my UI", "check accessibility", "audit design", "review UX", "check my site against best practices" | web-design-guidelines | .agents/skills/web-design-guidelines/SKILL.md |
+| Building new UI or reshaping existing one; aesthetic direction, typography, non-templated visual design | frontend-design | .agents/skills/frontend-design/SKILL.md |
+| Anything living in Postgres: tables, columns, types, schema, migrations, RLS, indexes, triggers, functions, pg_cron/pgmq, pgvector, pg_restore; slow queries, EXPLAIN, connections, locking, bloat | supabase-postgres-best-practices | .agents/skills/supabase-postgres-best-practices/SKILL.md |
+| Designing or reviewing a PostgreSQL-specific schema: types, keys, constraints, indexes, partitioning | postgresql-table-design | .agents/skills/postgresql-table-design/SKILL.md |
+| Building new FastAPI applications or setting up backend API projects | fastapi-templates | .agents/skills/fastapi-templates/SKILL.md |
+| Building async APIs, concurrent systems, I/O-bound apps requiring non-blocking operations | async-python-patterns | .agents/skills/async-python-patterns/SKILL.md |
+| Working with FastAPI APIs, Pydantic models, dependencies, SSE/streaming, serving frontend apps | fastapi | .agents/skills/fastapi/SKILL.md |
+| Complex type logic, reusable type utilities, compile-time type safety in TypeScript | typescript-advanced-types | .agents/skills/typescript-advanced-types/SKILL.md |
+| Working with Vite projects, vite.config.ts, Vite plugins, libraries/SSR apps | vite | .agents/skills/vite/SKILL.md |
+| Auditing input handlers, user input, auth, sessions, storage, external integrations, login flows, OWASP Top Ten, dependency audits, supply-chain risk, PII/GDPR/CCPA | security-and-hardening | .agents/skills/security-and-hardening/SKILL.md |
+| Creating/reviewing Dockerfiles and Compose services, installer harnesses, container security/networking/volumes ⚠️ Snyk High Risk flag at install — review generated Docker content before use | docker-patterns | .agents/skills/docker-patterns/SKILL.md |
+| User wants test-first development, mentions "red-green-refactor", or wants integration tests | tdd | .agents/skills/tdd/SKILL.md |
+| User says "diagnose"/"debug this", or reports something broken/throwing/failing/slow | diagnosing-bugs | .agents/skills/diagnosing-bugs/SKILL.md |
+| User wants to review a branch, PR, work-in-progress changes, or asks to "review since X" | code-review | .agents/skills/code-review/SKILL.md |
+| Automate browser interactions, test web pages, work with Playwright tests | playwright-cli | .agents/skills/playwright-cli/SKILL.md |
+| Interacting with and testing local web apps using Playwright: verify frontend, debug UI, screenshots, browser logs | webapp-testing | .agents/skills/webapp-testing/SKILL.md |
+| Implementing E2E tests, debugging flaky tests, establishing testing standards (Playwright/Cypress) | e2e-testing-patterns | .agents/skills/e2e-testing-patterns/SKILL.md |
 
 ## Compact Rules
 
