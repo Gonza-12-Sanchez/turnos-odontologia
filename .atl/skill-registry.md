@@ -24,6 +24,7 @@
 | Automate browser interactions, test web pages, work with Playwright tests | playwright-cli | .agents/skills/playwright-cli/SKILL.md |
 | Interacting with and testing local web apps using Playwright: verify frontend, debug UI, screenshots, browser logs | webapp-testing | .agents/skills/webapp-testing/SKILL.md |
 | Implementing E2E tests, debugging flaky tests, establishing testing standards (Playwright/Cypress) | e2e-testing-patterns | .agents/skills/e2e-testing-patterns/SKILL.md |
+| Creating/reviewing SQLAlchemy models, Alembic migrations, EXCLUDE constraints, money in cents, TIMESTAMPTZ, seeds for turns/sillones/tratamientos/cobros (C-02/C-04/C-05/C-06) | turnos-core-guardian | .agents/skills/turnos-core-guardian/SKILL.md |
 
 ## Compact Rules
 
@@ -159,6 +160,13 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 - Selectors: `data-testid`/`getByRole`/`getByLabel` — never CSS classes, nth-child, or DOM structure
 - Flakes: proper auto-waits, never fixed timeouts; mock external APIs; parallelize; create+destroy test data per test
 - Debug: `--headed`, `--debug`, trace viewer + screenshots/video, `page.pause()` inspector
+
+### turnos-core-guardian
+- Activar al crear/revisar modelos SQLAlchemy, migraciones Alembic, constraints EXCLUDE, montos en centavos, TIMESTAMPTZ, seeds (C-02/C-04/C-05/C-06)
+- Verificar motor: `CREATE EXTENSION btree_gist` + `EXCLUDE USING GIST (sillon_id WITH =, tstzrange(inicio,fin) WITH &&) WHERE (is_active AND estado NOT IN ('cancelado','ausente'))`
+- Invariantes: `fin = inicio + duracion_min` (nunca input cliente), `monto INTEGER` centavos (jamás Float/money), `origen IN (online,mostrador,whatsapp)`, `AuditMixin`, teléfono AR en app, seeds 100% ficticios
+- Ejecutar script: `python .agents/skills/turnos-core-guardian/scripts/check_turnos_invariants.py backend/app/models backend/alembic/versions` → debe salir OK antes de proponer
+- Veredicto binario: `[VEREDICTO: OK]` o `[VEREDICTO: BLOQUEADO]` con lista de violaciones archivo:línea; reglas duras de AGENTS.md prevalecen
 
 ## Project Conventions
 

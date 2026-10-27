@@ -44,12 +44,19 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 
 | Agente | Rol | Skills que carga |
 |--------|-----|------------------|
-| **Backend Core** | FastAPI / async / Postgres / TDD | `fastapi-templates`, `fastapi`, `async-python-patterns`, `supabase-postgres-best-practices`, `postgresql-table-design`, `tdd` |
+| **Backend Core** | FastAPI / async / Postgres / TDD | `fastapi-templates`, `fastapi`, `async-python-patterns`, `supabase-postgres-best-practices`, `postgresql-table-design`, `tdd`, `turnos-core-guardian` (skill propia — invariantes núcleo) |
 | **Backend Aux** | Seguridad / integraciones / deploy | `security-and-hardening`, `docker-patterns` (⚠️ flag Snyk High Risk: revisar Dockerfiles línea por línea) |
 | **Frontend** | React / TS / Vite PWA + testing | `vercel-react-best-practices`, `web-design-guidelines`, `frontend-design`, `typescript-advanced-types`, `vite`, `webapp-testing` |
 | **Calidad** | Debug / review / E2E | `diagnosing-bugs`, `code-review`, `playwright-cli`, `e2e-testing-patterns` |
 
 Cargá la skill correspondiente al contexto ANTES de escribir código.
+
+### Skill propia: `turnos-core-guardian`
+
+- **Ubicación:** `.agents/skills/turnos-core-guardian/` (`SKILL.md`, `references/`, `scripts/check_turnos_invariants.py`).
+- **Cuándo usarla:** al crear o revisar modelos SQLAlchemy, migraciones Alembic, constraints `EXCLUDE`, montos en centavos, fechas `TIMESTAMPTZ`, seeds (changes C-02, C-04, C-05, C-06). No aplica a WhatsApp (C-08), Mercado Pago (C-09) ni UI (C-10/C-11).
+- **Qué necesita:** archivos de modelos (`backend/app/models/*.py`), migraciones (`backend/alembic/versions/*.py`), seeds o artefactos de diseño del change.
+- **Cómo revisar el resultado:** el agente emite `Veredicto Guardian: OK / BLOQUEADO` con detalle por categoría (EXCLUDE, invariantes, seeds). Si es `BLOQUEADO`, corregir antes de avanzar. Las reglas duras de este archivo prevalecen ante cualquier contradicción.
 
 > Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry`; no versionado — no está en el repo). Esta tabla solo mapea skill→rol.
 
