@@ -77,6 +77,40 @@ Suite C-01 (verificada 2026-10-06, local + Docker real):
 
 Detalle de la evidencia en `openspec/changes/archive/2026-10-06-c-01-foundation-setup/` (`tasks.md` 10/10, `docker-review.md`).
 
+## MCP: PostgreSQL (desarrollo)
+
+El agente puede consultar la base de datos de desarrollo mediante el servidor MCP
+`@modelcontextprotocol/server-postgres` (solo lectura). Configuración en
+`~/.config/opencode/opencode.json` (ver plantilla `docs/skills-mcp/mcp-postgres.opencode.example.json`).
+
+### Requisitos
+
+- Node.js 18+ con `npx`.
+- Un Postgres accesible en `localhost:5432` con la base `turnos_test` y el usuario `turnos`/`turnos`
+  (puede ser el contenedor `db` del compose o un Postgres local).
+- Si el puerto 5432 está ocupado por otro Postgres, detenerlo o cambiar el puerto en la config del MCP.
+
+### Comprobación
+
+```bash
+opencode mcp list          # debe mostrar "postgres connected"
+```
+
+Ejemplo de invocación real (ejecutado y verificado):
+
+```
+postgres_query {"sql":"SELECT current_database() AS db, current_user AS usuario, version() AS version;"}
+→ db: turnos_test · usuario: turnos · PostgreSQL 17.10
+```
+
+### Solución de problemas
+
+- **`postgres` no aparece en `opencode mcp list`**: revisar que la entrada `mcp.postgres` exista en
+  `~/.config/opencode/opencode.json` y que `npx` esté en el PATH.
+- **Error de conexión (ECONNREFUSED)**: el Postgres no está levantado o el puerto no coincide.
+- **Autenticación fallida**: verificar usuario/contraseña (`turnos`/`turnos`) y que la base `turnos_test` exista.
+- El servidor MCP solo acepta `SELECT`/inspección de catálogo; cualquier `INSERT/UPDATE/DELETE/DDL` es rechazado.
+
 ## Reglas del dominio
 
 - Nunca almacenar datos reales de pacientes en el repositorio ni en los ejemplos.

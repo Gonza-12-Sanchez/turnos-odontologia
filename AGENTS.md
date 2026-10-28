@@ -75,6 +75,14 @@ El plan de implementación completo está en [CHANGES.md](CHANGES.md). Resumen:
 
 ---
 
+## Integración MCP: PostgreSQL (solo lectura)
+
+- **Servidor:** `@modelcontextprotocol/server-postgres` (local, vía `npx`), configurado en `~/.config/opencode/opencode.json` bajo `mcp.postgres`.
+- **Propósito:** verificar en vivo los invariantes del motor de base de datos (constraints, tipos, estructura) que la skill `turnos-core-guardian` exige; no reemplaza a la skill, la complementa.
+- **Capacidades que usamos:** `postgres_query` (SQL `SELECT`/inspección del catálogo, modo `READ ONLY`) y `postgres_schema` (describir columnas e índices de una tabla).
+- **Cuándo usarlo:** al revisar modelos/migraciones de C-02, C-04, C-05 o C-06; para confirmar que el `EXCLUDE`, los tipos `TIMESTAMPTZ`, los montos en centavos y los índices existen realmente en Postgres.
+- **Límites de acceso:** solo la base de desarrollo `turnos_test` en `localhost:5432`; nunca producción. Solo `SELECT`/inspección de catálogo (el servidor rechaza `INSERT/UPDATE/DELETE/DDL`). Datos ficticios (RN-GL-02), consultas con `LIMIT` (5–100) y timeout de 5 s. El MCP se documenta como integración, no se registra como skill.
+
 ## Reglas Duras
 
 > No hay `~/.claude/CLAUDE.md` global en esta máquina: las reglas universales viven acá hasta que exista uno. Son contrato; romperlas es un defecto.
