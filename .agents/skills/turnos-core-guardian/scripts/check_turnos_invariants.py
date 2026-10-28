@@ -28,9 +28,22 @@ def scan(path: Path, pattern: str, label: str, allow: bool = False) -> None:
 def main() -> int:
     base = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("backend/app/models")
     mig = Path(sys.argv[2]) if len(sys.argv) > 2 else Path("backend/alembic/versions")
-    # 1. Fechas naive: DateTime( sin timezone=True
+    # 1. Fechas naive: DateTime( sin timezone=True (incluye Column(DateTime) y mapped_column(DateTime))
     scan(base, r"DateTime\s*\(\s*\)", "FECHA-NAIVE DateTime() sin timezone=True")
+    scan(base, r"(?:Column|mapped_column)\s*\(\s*DateTime\s*\)", "FECHA-NAIVE Column/mapped_column(DateTime) sin timezone=True")
     scan(mig, r"sa\.DateTime\s*\(\s*\)", "FECHA-NAIVE sa.DateTime() sin timezone")
+    # 1b. DateTime con argumentos pero sin timezone=True (heuristica por linea)
+    for root in (base, mig):
+        if not root.exists():
+            continue
+        for f in (root.rglob("*.py") if root.is_dir() else [root]):
+            try:
+                text = f.read_text(encoding="utf-8", errors="ignore")
+            except OSError:
+                continue
+            for i, line in enumerate(text.splitlines(), 1):
+                if "DateTime" in line and "timezone=True" not in line and ("Column(" in line or "mapped_column(" in line or "sa.DateTime" in line):
+                    FAIL.append(f"FECHA-NAIVE DateTime sin timezone=True: {f}:{i}: {line.strip()[:160]}")
     # 2. Dinero en float / money
     scan(base, r"Column\s*\(\s*Float", "DINERO-FLOAT prohibido, usar centavos INTEGER")
     scan(base, r"\bMONEY\b", "DINERO-MONEY prohibido")
