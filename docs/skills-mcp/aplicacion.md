@@ -36,4 +36,3 @@
 
 - No se implementó C-02 (solo se preparó); la implementación queda para una instancia posterior.
 - El MCP se probó contra Postgres 17 local (el compose usa 16); la diferencia de versión no afecta la verificación de conexión, pero el compose sigue siendo la fuente de verdad de versión.
-- No se generó video de demostración (fuera del alcance automatizable).
