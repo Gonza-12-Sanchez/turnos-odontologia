@@ -126,8 +126,8 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-02] `core-models`
-- **Estado**: `[ ]` pendiente (preparado 2026-10-28: artefactos OPSX listos, no implementado)
-- **Artefactos preparados**: `openspec/changes/2026-10-27-c-02-core-models/{proposal,design,tasks}.md` + `specs/core/models/spec.md` (≥3 escenarios verificables)
+- **Estado**: `[x]` archivado 2026-11-02 (35/35 tasks, guardian OK, 17/17 tests)
+- **Artefactos**: `openspec/changes/archive/2026-10-27-c-02-core-models/` (proposal, design, tasks, specs) + spec sincronizada en `openspec/specs/core/models/spec.md`
 - **Scope**: Modelos base + constraint anti-solapamiento + migraciones iniciales + seed ficticio
   - Modelos SQLAlchemy 2.x async: `Consultorio`, `Sillon`, `Tratamiento`, `Usuario` (rol paciente|odontologo|secretaria), `Paciente` (1↔1 con Usuario rol paciente), `Turno` (inicio timestamptz + fin calculado), `Bloqueo`, `RecordatorioWA`, `Cobro` (monto en centavos ARS)
   - `AuditMixin`: `is_active`, `created_at`, `updated_at`, `deleted_at`; `origen` en Turno (online|mostrador|whatsapp) para RN-GL-03
