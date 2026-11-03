@@ -37,6 +37,11 @@ dev = [
 target-version = "py312"
 line-length = 100
 
+[tool.ruff.lint]
+ignore = [
+  "B008",  # FastAPI Depends idiomático en firmas de endpoints
+]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]

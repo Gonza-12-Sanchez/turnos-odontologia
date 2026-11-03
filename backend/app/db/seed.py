@@ -6,7 +6,6 @@ from sqlalchemy import select
 
 from app.models import Consultorio, Paciente, Sillon, Tratamiento, Usuario
 
-
 PLACEHOLDER_PASSWORD_HASH = "placeholder-hash-c02"
 
 
@@ -24,9 +23,7 @@ async def seed_demo(session) -> None:
     # Sillones activos
     for nombre in ("Sillón 1", "Sillón 2"):
         result = await session.execute(
-            select(Sillon).where(
-                Sillon.nombre == nombre, Sillon.consultorio_id == consultorio.id
-            )
+            select(Sillon).where(Sillon.nombre == nombre, Sillon.consultorio_id == consultorio.id)
         )
         if result.scalar_one_or_none() is None:
             session.add(Sillon(consultorio_id=consultorio.id, nombre=nombre))
@@ -34,9 +31,7 @@ async def seed_demo(session) -> None:
     # Tratamientos
     tratamientos = (("Limpieza", 30, 500000), ("Control", 15, 250000), ("Conducto", 60, 1200000))
     for nombre, duracion, precio in tratamientos:
-        result = await session.execute(
-            select(Tratamiento).where(Tratamiento.nombre == nombre)
-        )
+        result = await session.execute(select(Tratamiento).where(Tratamiento.nombre == nombre))
         if result.scalar_one_or_none() is None:
             session.add(
                 Tratamiento(
@@ -64,9 +59,7 @@ async def seed_demo(session) -> None:
 
     # Paciente vinculado al usuario paciente
     paciente_user = user_by_rol["paciente"]
-    result = await session.execute(
-        select(Paciente).where(Paciente.usuario_id == paciente_user.id)
-    )
+    result = await session.execute(select(Paciente).where(Paciente.usuario_id == paciente_user.id))
     if result.scalar_one_or_none() is None:
         session.add(
             Paciente(

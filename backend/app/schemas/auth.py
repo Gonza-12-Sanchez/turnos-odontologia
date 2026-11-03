@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, field_validator
 
 from app.schemas.phone import validate_ar_phone
 
@@ -31,7 +30,7 @@ class RegistroIn(BaseModel):
     password: str
     nombre: str
     telefono: str
-    obra_social: Optional[str] = None
+    obra_social: str | None = None
 
     @field_validator("email")
     @classmethod
@@ -75,10 +74,10 @@ class TokenOut(BaseModel):
 
 class UserOut(BaseModel):
     id: uuid.UUID
-    email: Optional[str] = None
+    email: str | None = None
     rol: str
-    nombre: Optional[str] = None
-    telefono: Optional[str] = None
+    nombre: str | None = None
+    telefono: str | None = None
 
 
 class RefreshOut(BaseModel):

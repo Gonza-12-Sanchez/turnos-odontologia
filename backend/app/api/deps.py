@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import uuid
-from typing import Optional
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jose import JWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db import engine as db_engine
 from app.db import redis as redis_client
 from app.db.engine import get_session_factory
 from app.models.usuario import Usuario
@@ -28,7 +27,7 @@ async def get_db() -> AsyncSession:
 async def _load_user_from_token(token: str, db: AsyncSession) -> Usuario:
     try:
         payload = decode_token(token)
-    except Exception:
+    except (JWTError, ValueError, TypeError):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
     if payload.get("type") != "access":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
@@ -47,7 +46,7 @@ async def _load_user_from_token(token: str, db: AsyncSession) -> Usuario:
 
 
 async def get_current_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),
 ) -> Usuario:
     if credentials is None or not credentials.credentials:
@@ -69,9 +68,9 @@ def require_admin():
 
 
 async def get_optional_user(
-    credentials: Optional[HTTPAuthorizationCredentials] = Depends(bearer_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: AsyncSession = Depends(get_db),
-) -> Optional[Usuario]:
+) -> Usuario | None:
     if credentials is None or not credentials.credentials:
         return None
     try:

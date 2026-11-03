@@ -30,9 +30,7 @@ class RecordatorioWA(Base, AuditMixin):
     respuesta: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     __table_args__ = (
-        CheckConstraint(
-            "tipo IN ('recordatorio','confirmacion')", name="ck_recordatorio_tipo"
-        ),
+        CheckConstraint("tipo IN ('recordatorio','confirmacion')", name="ck_recordatorio_tipo"),
         CheckConstraint(
             "estado IN ('enviado','entregado','leido','respondido','fallido')",
             name="ck_recordatorio_estado",

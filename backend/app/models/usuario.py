@@ -24,9 +24,7 @@ class Usuario(Base, AuditMixin):
     rol: Mapped[str] = mapped_column(String(20), nullable=False)
 
     __table_args__ = (
-        CheckConstraint(
-            "rol IN ('paciente','odontologo','secretaria')", name="ck_usuario_rol"
-        ),
+        CheckConstraint("rol IN ('paciente','odontologo','secretaria')", name="ck_usuario_rol"),
         CheckConstraint(
             "email IS NOT NULL OR telefono IS NOT NULL",
             name="ck_usuario_contacto",

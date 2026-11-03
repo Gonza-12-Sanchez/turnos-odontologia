@@ -32,9 +32,7 @@ def _is_prod() -> bool:
     debug_env = os.getenv("DEBUG")
     if debug_env is not None and debug_env.lower() in {"0", "false", "no"}:
         return True
-    if getattr(settings, "debug", True) is False:
-        return True
-    return False
+    return getattr(settings, "debug", True) is False
 
 
 def validate_jwt_secret() -> None:

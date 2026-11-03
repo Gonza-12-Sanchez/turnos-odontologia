@@ -5,8 +5,8 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
+import app.models
 from app.db.base import Base
-import app.models  # noqa: F401 (registra metadata; enlaza nombre 'app' al paquete)
 from app.main import app  # re-importar app después del import de modelos
 
 DATABASE_URL = "postgresql+asyncpg://turnos:turnos@localhost:5432/turnos_test"

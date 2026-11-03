@@ -2,20 +2,17 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
-from app.db.base import Base
 from app.models import (
-    AuditMixin,
-    Bloqueo,
     Cobro,
     Consultorio,
     Paciente,
-    RecordatorioWA,
     Sillon,
     Tratamiento,
     Turno,
@@ -24,7 +21,6 @@ from app.models import (
 from app.repositories.base_repository import BaseRepository
 from app.repositories.unit_of_work import UnitOfWork
 from app.schemas.phone import validate_ar_phone
-from sqlalchemy.ext.asyncio import async_sessionmaker
 
 
 async def _make_base(session):
@@ -34,9 +30,7 @@ async def _make_base(session):
     sillon = Sillon(consultorio_id=consultorio.id, nombre="Sillon 1")
     session.add(sillon)
     await session.flush()
-    tratamiento = Tratamiento(
-        nombre="Limpieza", duracion_min=30, precio_referencia_centavos=500000
-    )
+    tratamiento = Tratamiento(nombre="Limpieza", duracion_min=30, precio_referencia_centavos=500000)
     session.add(tratamiento)
     await session.flush()
     usuario = Usuario(email="paciente@test.example", password_hash="x", rol="paciente")
@@ -53,7 +47,7 @@ async def _make_base(session):
 @pytest.mark.asyncio
 async def test_turno_valido_persiste(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=1)
     fin = inicio + timedelta(minutes=tratamiento.duracion_min)
     turno = Turno(
         paciente_id=paciente.id,
@@ -71,7 +65,7 @@ async def test_turno_valido_persiste(session):
 @pytest.mark.asyncio
 async def test_turno_solapado_rechazado(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=1)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=1)
     fin = inicio + timedelta(minutes=30)
     t1 = Turno(
         paciente_id=paciente.id,
@@ -99,7 +93,7 @@ async def test_turno_solapado_rechazado(session):
 @pytest.mark.asyncio
 async def test_cancelado_no_bloquea(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=2)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=2)
     fin = inicio + timedelta(minutes=30)
     t1 = Turno(
         paciente_id=paciente.id,
@@ -126,7 +120,7 @@ async def test_cancelado_no_bloquea(session):
 @pytest.mark.asyncio
 async def test_softdeleted_no_bloquea(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=3)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=3)
     fin = inicio + timedelta(minutes=30)
     t1 = Turno(
         paciente_id=paciente.id,
@@ -159,7 +153,7 @@ async def test_sillones_distintos_no_bloquean(session):
     session.add(sillon2)
     await session.flush()
 
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=4)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=4)
     fin = inicio + timedelta(minutes=30)
     t1 = Turno(
         paciente_id=paciente.id,
@@ -185,7 +179,7 @@ async def test_sillones_distintos_no_bloquean(session):
 @pytest.mark.asyncio
 async def test_turnos_adyacentes_no_solapan(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=5)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=5)
     fin = inicio + timedelta(minutes=30)
     t1 = Turno(
         paciente_id=paciente.id,
@@ -213,7 +207,7 @@ async def test_turnos_adyacentes_no_solapan(session):
 @pytest.mark.asyncio
 async def test_timestamps_tz(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=6)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=6)
     fin = inicio + timedelta(minutes=30)
     turno = Turno(
         paciente_id=paciente.id,
@@ -246,15 +240,13 @@ async def test_naive_rechazado(session):
         await session.commit()
         # Si no lanza, el test falla: se esperaba rechazo
         pytest.fail("Se esperaba rechazo de datetime naive")
-    except Exception:
+    except (ValueError, TypeError, SQLAlchemyError):
         await session.rollback()
 
 
 @pytest.mark.asyncio
 async def test_centavos(session):
-    tratamiento = Tratamiento(
-        nombre="T2", duracion_min=10, precio_referencia_centavos=123
-    )
+    tratamiento = Tratamiento(nombre="T2", duracion_min=10, precio_referencia_centavos=123)
     session.add(tratamiento)
     await session.commit()
     await session.refresh(tratamiento)
@@ -274,7 +266,7 @@ async def test_centavos(session):
     paciente = Paciente(usuario_id=usuario.id, nombre="P2", telefono="+54 9 11 0000-0000")
     session.add(paciente)
     await session.flush()
-    inicio = datetime.now(timezone.utc).replace(microsecond=0) + timedelta(days=8)
+    inicio = datetime.now(UTC).replace(microsecond=0) + timedelta(days=8)
     turno = Turno(
         paciente_id=paciente.id,
         sillon_id=sillon.id,
@@ -284,9 +276,7 @@ async def test_centavos(session):
     )
     session.add(turno)
     await session.commit()
-    cobro = Cobro(
-        turno_id=turno.id, monto_centavos=500000, medio="efectivo", tipo="total"
-    )
+    cobro = Cobro(turno_id=turno.id, monto_centavos=500000, medio="efectivo", tipo="total")
     session.add(cobro)
     await session.commit()
     await session.refresh(cobro)
@@ -304,9 +294,7 @@ async def test_soft_delete(session):
     await session.commit()
     assert consultorio.is_active is False
     assert consultorio.deleted_at is not None
-    res = await session.execute(
-        select(Consultorio).where(Consultorio.id == consultorio.id)
-    )
+    res = await session.execute(select(Consultorio).where(Consultorio.id == consultorio.id))
     assert res.scalar_one_or_none() is not None
 
 
@@ -345,7 +333,8 @@ async def test_phone_ar():
 @pytest.mark.asyncio
 async def test_seed_idempotente():
     # import here to use engine? Use direct DB session
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
     from app.db.seed import seed_demo
 
     engine = create_async_engine(
@@ -357,6 +346,7 @@ async def test_seed_idempotente():
         await seed_demo(s)
     async with factory() as s:
         from sqlalchemy import func
+
         c1 = (await s.execute(select(func.count()).select_from(Consultorio))).scalar()
         u1 = (await s.execute(select(func.count()).select_from(Usuario))).scalar()
         t1 = (await s.execute(select(func.count()).select_from(Tratamiento))).scalar()

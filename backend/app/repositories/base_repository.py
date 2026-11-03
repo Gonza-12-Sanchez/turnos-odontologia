@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from typing import Generic, TypeVar
+from datetime import UTC, datetime
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-T = TypeVar("T")
 
-
-class BaseRepository(Generic[T]):
+class BaseRepository[T]:
     def __init__(self, session: AsyncSession, model: type[T]) -> None:
         self.session = session
         self.model = model
@@ -26,5 +23,5 @@ class BaseRepository(Generic[T]):
 
     async def soft_delete(self, entity: T) -> None:
         entity.is_active = False  # type: ignore[attr-defined]
-        entity.deleted_at = datetime.now(timezone.utc)  # type: ignore[attr-defined]
+        entity.deleted_at = datetime.now(UTC)  # type: ignore[attr-defined]
         await self.session.flush()

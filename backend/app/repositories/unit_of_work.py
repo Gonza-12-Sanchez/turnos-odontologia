@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, Awaitable
+from typing import Self
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -14,7 +14,7 @@ class UnitOfWork:
         self._committed = False
         self._rolled_back = False
 
-    async def __aenter__(self) -> "UnitOfWork":
+    async def __aenter__(self) -> Self:
         self._session = self._session_factory()
         self._committed = False
         self._rolled_back = False

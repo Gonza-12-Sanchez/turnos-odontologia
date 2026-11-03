@@ -24,7 +24,5 @@ class Tratamiento(Base, AuditMixin):
 
     __table_args__ = (
         CheckConstraint("duracion_min > 0", name="ck_tratamiento_duracion_min"),
-        CheckConstraint(
-            "precio_referencia_centavos >= 0", name="ck_tratamiento_precio_centavos"
-        ),
+        CheckConstraint("precio_referencia_centavos >= 0", name="ck_tratamiento_precio_centavos"),
     )

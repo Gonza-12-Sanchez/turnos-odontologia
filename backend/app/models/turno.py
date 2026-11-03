@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import sqlalchemy as sa
 import uuid
 from datetime import datetime
 
-from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Index, String, Text, func, column
-from sqlalchemy.dialects.postgresql import ExcludeConstraint, UUID as PG_UUID
+import sqlalchemy as sa
+from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Index, String, Text, column, func
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import ExcludeConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
@@ -52,9 +53,7 @@ class Turno(Base, AuditMixin):
             "estado IN ('reservado','confirmado','asistido','cancelado','ausente')",
             name="ck_turno_estado",
         ),
-        CheckConstraint(
-            "origen IN ('online','mostrador','whatsapp')", name="ck_turno_origen"
-        ),
+        CheckConstraint("origen IN ('online','mostrador','whatsapp')", name="ck_turno_origen"),
         ExcludeConstraint(
             ("sillon_id", "="),
             (func.tstzrange(column("inicio"), column("fin")), "&&"),

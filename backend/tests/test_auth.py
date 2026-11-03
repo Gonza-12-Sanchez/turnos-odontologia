@@ -19,8 +19,8 @@ from __future__ import annotations
 
 import asyncio
 import uuid
-from datetime import datetime, timedelta, timezone
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -30,14 +30,12 @@ from sqlalchemy.pool import NullPool
 
 from app.api.deps import get_db
 from app.core.config import settings
-from app.db import engine as db_engine_module
 from app.db import redis as redis_client
 from app.main import app
 from app.models.usuario import Usuario
 from app.repositories.usuario_repository import UsuarioRepository
 from app.shared.security import (
     create_access_token,
-    create_refresh_token,
     hash_password,
 )
 
@@ -56,7 +54,7 @@ class _FakeRedis:
     async def set(self, key: str, value: str, ex: int | None = None) -> None:
         expiry = None
         if ex is not None:
-            expiry = datetime.now(timezone.utc).timestamp() + ex
+            expiry = datetime.now(UTC).timestamp() + ex
         self._store[key] = (value, expiry)
 
     async def get(self, key: str) -> str | None:
@@ -64,7 +62,7 @@ class _FakeRedis:
         if entry is None:
             return None
         value, expiry = entry
-        if expiry is not None and datetime.now(timezone.utc).timestamp() > expiry:
+        if expiry is not None and datetime.now(UTC).timestamp() > expiry:
             del self._store[key]
             return None
         return value
@@ -83,7 +81,7 @@ class _FakeRedis:
             self._store[key] = ("1", None)
             return 1
         value, expiry = entry
-        if expiry is not None and datetime.now(timezone.utc).timestamp() > expiry:
+        if expiry is not None and datetime.now(UTC).timestamp() > expiry:
             del self._store[key]
             self._store[key] = ("1", None)
             return 1
@@ -96,17 +94,17 @@ class _FakeRedis:
         if entry is None:
             return
         value, _ = entry
-        expiry = datetime.now(timezone.utc).timestamp() + ttl
+        expiry = datetime.now(UTC).timestamp() + ttl
         self._store[key] = (value, expiry)
 
     async def ttl(self, key: str) -> int:
         entry = self._store.get(key)
         if entry is None:
             return -2
-        value, expiry = entry
+        _value, expiry = entry
         if expiry is None:
             return -1
-        remaining = int(expiry - datetime.now(timezone.utc).timestamp())
+        remaining = int(expiry - datetime.now(UTC).timestamp())
         if remaining < 0:
             del self._store[key]
             return -2
@@ -165,7 +163,6 @@ async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
     Crea UNA sesión de BD por test y la comparte entre `get_db()` y `UnitOfWork`
     para evitar "another operation is in progress" de asyncpg en Windows.
     """
-    import app.db.engine as engine_module
     from app.repositories import unit_of_work as uow_module
 
     # Sesión única compartida por este test
@@ -236,7 +233,7 @@ def _make_access_token(user_id: uuid.UUID, rol: str = "paciente", email: str | N
 
 
 def _make_expired_access_token(user_id: uuid.UUID, rol: str = "paciente") -> str:
-    now = datetime.now(timezone.utc) - timedelta(minutes=5)
+    now = datetime.now(UTC) - timedelta(minutes=5)
     jti = str(uuid.uuid4())
     payload = {
         "sub": str(user_id),
@@ -323,7 +320,9 @@ async def test_registro_contrasenia_debil(auth_client: AsyncClient, fake_redis, 
 async def test_login_exitoso(auth_client: AsyncClient, fake_redis, engine):
     """Feliz: login devuelve access_token y cookie refresh."""
     await _create_user(engine, "login@example.com", "Abc12345")
-    resp = await auth_client.post("/auth/login", json={"email": "login@example.com", "password": "Abc12345"})
+    resp = await auth_client.post(
+        "/auth/login", json={"email": "login@example.com", "password": "Abc12345"}
+    )
     assert resp.status_code == 200, resp.text
     data = resp.json()
     assert "access_token" in data
@@ -336,14 +335,18 @@ async def test_login_exitoso(auth_client: AsyncClient, fake_redis, engine):
 async def test_login_credenciales_invalidas(auth_client: AsyncClient, fake_redis, engine):
     """Error de negocio: contraseña errónea → 401 genérico."""
     await _create_user(engine, "invalido@example.com", "Abc12345")
-    resp = await auth_client.post("/auth/login", json={"email": "invalido@example.com", "password": "WrongPass1!"})
+    resp = await auth_client.post(
+        "/auth/login", json={"email": "invalido@example.com", "password": "WrongPass1!"}
+    )
     assert resp.status_code == 401, resp.text
 
 
 @pytest.mark.asyncio
 async def test_login_usuario_inexistente(auth_client: AsyncClient, fake_redis, engine):
     """Error de negocio: email desconocido → 401 genérico."""
-    resp = await auth_client.post("/auth/login", json={"email": "noexiste@example.com", "password": "Abc12345"})
+    resp = await auth_client.post(
+        "/auth/login", json={"email": "noexiste@example.com", "password": "Abc12345"}
+    )
     assert resp.status_code == 401, resp.text
 
 
@@ -380,7 +383,9 @@ async def test_token_blacklisted_rechazado(auth_client: AsyncClient, fake_redis,
 async def test_refresh_rotacion_exitosa(auth_client: AsyncClient, fake_redis, engine):
     """Feliz: refresh rotativo devuelve nuevo access y nueva cookie."""
     await _create_user(engine, "refresh@example.com", "Abc12345")
-    login_resp = await auth_client.post("/auth/login", json={"email": "refresh@example.com", "password": "Abc12345"})
+    login_resp = await auth_client.post(
+        "/auth/login", json={"email": "refresh@example.com", "password": "Abc12345"}
+    )
     assert login_resp.status_code == 200
     refresh_cookie = login_resp.cookies.get("refresh_token")
     assert refresh_cookie is not None
@@ -396,7 +401,9 @@ async def test_refresh_rotacion_exitosa(auth_client: AsyncClient, fake_redis, en
 async def test_refresh_reuso_revoca_familia(auth_client: AsyncClient, fake_redis, engine):
     """Borde: reuso de refresh token blacklisted → 401 y familia eliminada."""
     await _create_user(engine, "reuse@example.com", "Abc12345")
-    login_resp = await auth_client.post("/auth/login", json={"email": "reuse@example.com", "password": "Abc12345"})
+    login_resp = await auth_client.post(
+        "/auth/login", json={"email": "reuse@example.com", "password": "Abc12345"}
+    )
     assert login_resp.status_code == 200
     refresh_cookie = login_resp.cookies.get("refresh_token")
 
@@ -423,7 +430,9 @@ async def test_refresh_sin_cookie(auth_client: AsyncClient, fake_redis, engine):
 async def test_logout_exitoso(auth_client: AsyncClient, fake_redis, engine):
     """Feliz: logout devuelve 204 y limpia cookie."""
     await _create_user(engine, "logout@example.com", "Abc12345")
-    login_resp = await auth_client.post("/auth/login", json={"email": "logout@example.com", "password": "Abc12345"})
+    login_resp = await auth_client.post(
+        "/auth/login", json={"email": "logout@example.com", "password": "Abc12345"}
+    )
     assert login_resp.status_code == 200
     token = login_resp.json()["access_token"]
     refresh_cookie = login_resp.cookies.get("refresh_token")

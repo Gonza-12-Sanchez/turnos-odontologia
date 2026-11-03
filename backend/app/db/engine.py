@@ -1,7 +1,12 @@
 """Engine async de PostgreSQL (modelos y sesiones en C-02)."""
 
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from app.shared.settings import settings
 
@@ -19,7 +24,9 @@ def get_engine() -> AsyncEngine:
 def get_session_factory() -> async_sessionmaker[AsyncSession]:
     global _session_factory
     if _session_factory is None:
-        _session_factory = async_sessionmaker(get_engine(), expire_on_commit=False, class_=AsyncSession)
+        _session_factory = async_sessionmaker(
+            get_engine(), expire_on_commit=False, class_=AsyncSession
+        )
     return _session_factory
 
 

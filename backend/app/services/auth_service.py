@@ -2,21 +2,24 @@
 
 from __future__ import annotations
 
+import logging
 import uuid
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+from jose import JWTError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
+
+logger = logging.getLogger(__name__)
 from app.db import redis as redis_client
 from app.models.paciente import Paciente
 from app.models.usuario import Usuario
 from app.repositories.paciente_repository import PacienteRepository
-from app.repositories.usuario_repository import UsuarioRepository
 from app.repositories.unit_of_work import UnitOfWork
+from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.auth import TokenOut, UserOut
 from app.shared.security import (
     create_access_token,
@@ -45,7 +48,9 @@ class AuthService:
 
         existing_tel = await user_repo.get_by_telefono(payload.telefono)
         if existing_tel is not None:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Teléfono ya registrado")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Teléfono ya registrado"
+            )
 
         from fastapi.concurrency import run_in_threadpool
 
@@ -69,7 +74,9 @@ class AuthService:
             await self.uow.commit()
         except IntegrityError:
             await self.uow.rollback()
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Conflicto de unicidad")
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT, detail="Conflicto de unicidad"
+            )
 
         return user
 
@@ -104,13 +111,13 @@ class AuthService:
         )
         return token_out, refresh_token, refresh_ttl
 
-    async def refresh(self, refresh_cookie: Optional[str]) -> tuple[TokenOut, str, int]:
+    async def refresh(self, refresh_cookie: str | None) -> tuple[TokenOut, str, int]:
         if not refresh_cookie:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh ausente")
 
         try:
             payload = decode_token(refresh_cookie)
-        except Exception:
+        except (JWTError, ValueError, TypeError):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh inválido")
 
         if payload.get("type") != "refresh":
@@ -126,18 +133,19 @@ class AuthService:
         # reuso detectado
         if await redis_client.is_refresh_blacklisted(jti):
             await redis_client.delete_refresh_family(fid)
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh reutilizado")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh reutilizado"
+            )
 
         family_jti = await redis_client.get_refresh_family(fid)
         if family_jti is None or family_jti != jti:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh inválido")
 
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         remaining = 0
         if exp is not None:
             remaining = int(float(exp) - now.timestamp())
-        if remaining < 0:
-            remaining = 0
+        remaining = max(remaining, 0)
         await redis_client.blacklist_refresh(jti, remaining)
 
         user_repo = UsuarioRepository(self.session)
@@ -162,8 +170,8 @@ class AuthService:
         )
         return token_out, new_refresh, new_refresh_ttl
 
-    async def logout(self, access_token: Optional[str], refresh_cookie: Optional[str]) -> None:
-        now = datetime.now(timezone.utc)
+    async def logout(self, access_token: str | None, refresh_cookie: str | None) -> None:
+        now = datetime.now(UTC)
 
         if access_token:
             try:
@@ -173,12 +181,11 @@ class AuthService:
                 remaining = 0
                 if exp is not None:
                     remaining = int(float(exp) - now.timestamp())
-                if remaining < 0:
-                    remaining = 0
+                remaining = max(remaining, 0)
                 if jti:
                     await redis_client.blacklist_access(jti, remaining)
-            except Exception:
-                pass
+            except (JWTError, ValueError, TypeError) as exc:
+                logger.debug("Error procesando access token en logout: %s", exc)
 
         if refresh_cookie:
             try:
@@ -189,16 +196,15 @@ class AuthService:
                 remaining = 0
                 if exp is not None:
                     remaining = int(float(exp) - now.timestamp())
-                if remaining < 0:
-                    remaining = 0
+                remaining = max(remaining, 0)
                 if rjti:
                     await redis_client.blacklist_refresh(rjti, remaining)
                 if fid:
                     await redis_client.delete_refresh_family(fid)
-            except Exception:
-                pass
+            except (JWTError, ValueError, TypeError) as exc:
+                logger.debug("Error procesando refresh token en logout: %s", exc)
 
-    async def me(self, user: Usuario, session: Optional[AsyncSession] = None) -> UserOut:
+    async def me(self, user: Usuario, session: AsyncSession | None = None) -> UserOut:
         nombre = None
         telefono = user.telefono
         if user.rol == "paciente":

@@ -7,9 +7,8 @@ import uuid
 from typing import Any
 
 import bcrypt
-
 from fastapi.concurrency import run_in_threadpool
-from jose import JWTError, jwt
+from jose import jwt
 
 from app.core.config import settings
 
@@ -24,14 +23,12 @@ def hash_password(password: str) -> str:
 def verify_password(plain: str, hashed: str) -> bool:
     try:
         return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
-    except Exception:
+    except (ValueError, TypeError):
         return False
 
 
-def create_access_token(
-    user_id: Any, roles: list[str], email: str | None
-) -> tuple[str, str, int]:
-    now = datetime.datetime.now(datetime.timezone.utc)
+def create_access_token(user_id: Any, roles: list[str], email: str | None) -> tuple[str, str, int]:
+    now = datetime.datetime.now(datetime.UTC)
     jti = str(uuid.uuid4())
     expire = now + datetime.timedelta(minutes=settings.jwt_expire_minutes)
     payload = {
@@ -49,7 +46,7 @@ def create_access_token(
 
 
 def create_refresh_token(user_id: Any, fid: str) -> tuple[str, str, int]:
-    now = datetime.datetime.now(datetime.timezone.utc)
+    now = datetime.datetime.now(datetime.UTC)
     jti = str(uuid.uuid4())
     expire = now + datetime.timedelta(days=settings.refresh_expire_days)
     payload = {
@@ -73,10 +70,10 @@ def decode_token(token: str) -> dict[str, Any]:
 
 __all__ = [
     "ALGORITHM",
-    "hash_password",
-    "verify_password",
     "create_access_token",
     "create_refresh_token",
     "decode_token",
+    "hash_password",
     "run_in_threadpool",
+    "verify_password",
 ]

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, get_db
@@ -94,7 +94,6 @@ async def logout(
     async with uow:
         await AuthService(uow).logout(access_token, cookie)
     response.delete_cookie("refresh_token", path="/auth")
-    return None
 
 
 @router.get("/me", response_model=UserOut)

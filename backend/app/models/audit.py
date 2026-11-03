@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-import sqlalchemy as sa
 from datetime import datetime
+
+import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.types import TZTimestamp
