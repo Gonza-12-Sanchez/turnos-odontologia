@@ -1,0 +1,1 @@
+"""Core de configuración (settings, security)."""
