@@ -108,6 +108,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 
 ### [C-01] `foundation-setup`
 - **Estado**: `[x]` verificado 2026-10-06 (compose up + happy/degraded en vivo + upgrade head exit 0)
+- **Evidencia**: `openspec/changes/archive/2026-10-06-c-01-foundation-setup/verification.md` (reconstrucción retroactiva 2026-11-04, con lo re-verificado y lo no repetido) + `docker-review.md`
 - **Scope**: Scaffolding completo del monorepo + infraestructura base
   - Estructura de directorios según `08`: `backend/app/{api,services,workers,cobros,db}`, `backend/tests`, `frontend/src/{features,shared,pages}`, `docker-compose.yml`
   - `backend/`: Python 3.12+, FastAPI 0.115+ app mínima con `GET /api/health`, SQLAlchemy 2.x async configurado, Alembic inicializado, `shared/` con settings (Pydantic), logger, excepciones de negocio
@@ -128,6 +129,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ### [C-02] `core-models`
 - **Estado**: `[x]` archivado 2026-11-02 (35/35 tasks, guardian OK, 17/17 tests)
 - **Artefactos**: `openspec/changes/archive/2026-10-27-c-02-core-models/` (proposal, design, tasks, specs) + spec sincronizada en `openspec/specs/core/models/spec.md`
+- **Evidencia**: `openspec/changes/archive/2026-10-27-c-02-core-models/verification.md` (reconstrucción retroactiva 2026-11-04; invariantes confirmados en el catálogo real de PostgreSQL)
 - **Scope**: Modelos base + constraint anti-solapamiento + migraciones iniciales + seed ficticio
   - Modelos SQLAlchemy 2.x async: `Consultorio`, `Sillon`, `Tratamiento`, `Usuario` (rol paciente|odontologo|secretaria), `Paciente` (1↔1 con Usuario rol paciente), `Turno` (inicio timestamptz + fin calculado), `Bloqueo`, `RecordatorioWA`, `Cobro` (monto en centavos ARS)
   - `AuditMixin`: `is_active`, `created_at`, `updated_at`, `deleted_at`; `origen` en Turno (online|mostrador|whatsapp) para RN-GL-03
