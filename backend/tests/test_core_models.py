@@ -227,7 +227,7 @@ async def test_timestamps_tz(session):
 @pytest.mark.asyncio
 async def test_naive_rechazado(session):
     sillon, tratamiento, paciente = await _make_base(session)
-    naive = datetime.now().replace(microsecond=0) + timedelta(days=7)
+    naive = datetime.now().replace(microsecond=0) + timedelta(days=7)  # noqa: DTZ005 (intencional)
     turno = Turno(
         paciente_id=paciente.id,
         sillon_id=sillon.id,

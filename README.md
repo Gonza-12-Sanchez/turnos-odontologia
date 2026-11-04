@@ -48,7 +48,7 @@ cp backend/.env.example backend/.env
 ## Cómo correr los tests
 
 ```bash
-# Backend: 4 tests del spec platform/health (feliz, error, borde, público)
+# Backend: suite completa (213 tests: health, core models, auth y catálogo)
 python -m pytest backend/tests -v
 
 # Frontend: 3 tests del api client JWT
