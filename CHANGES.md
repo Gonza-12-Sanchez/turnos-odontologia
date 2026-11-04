@@ -151,7 +151,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 
 ### [C-03] `auth-jwt-rbac`
 - **Estado**: `[x]` archivado 2026-11-02 (36/36 tasks, guardian OK, 19/19 tests)
-- **Seguimiento correctivo**: aprobado 2026-11-04, `2026-11-04-c-03-auth-jwt-rbac-fixes` (18/18 tasks; suite backend 102 tests; JWT/rotación concurrente/rate limit/bcrypt corregidos; spec `identity/auth` sincronizada).
+- **Seguimiento correctivo**: aprobado 2026-11-04 y consolidado dentro de este archivo en `correctivo/` (18/18 tasks; suite backend 102 tests; JWT/rotación concurrente/rate limit/bcrypt corregidos; spec `identity/auth` sincronizada).
 - **Scope**: Autenticación JWT + RBAC por matriz 03 (US-002 exige login para reservar)
   - `POST /auth/registro` — alta paciente (crea Usuario + Paciente, hash bcrypt/argon2, validación teléfono AR); `POST /auth/login` — JWT access + refresh; `POST /auth/refresh` — rotación con blacklist del anterior en Redis; `POST /auth/logout` — blacklist access; `GET /auth/me`
   - Claims JWT: `sub`, `roles`, `email`, `jti`, `type`, `iat`, `exp`; refresh en cookie HttpOnly (secure, samesite=lax); expiración por `JWT_EXPIRE_MINUTES`
