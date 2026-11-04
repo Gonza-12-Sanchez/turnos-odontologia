@@ -3,8 +3,8 @@
 Trabajo de integración (Metodología I): del Discovery al primer Change, con
 Spec-Driven Development (OpenSpec) y Active Stack. Mercado objetivo: Argentina.
 
-Estado actual: C-01, C-02 y C-03 archivados; correcciones de C-03 sincronizadas y archivadas el 2026-11-04.
-C-04 `catalogo-config` implementado y verificado (24/24 tareas, suite backend 213 tests), pendiente revisión de Apply y Archive.
+Estado actual: C-01, C-02, C-03 y C-04 archivados; correcciones de C-03 y catálogo/configuración C-04 cerrados el 2026-11-04.
+C-04 `catalogo-config`: 24/24 tareas, suite backend 213 tests, Guardian OK y spec sincronizada tras revisión aprobada.
 Herramienta activa: OpenCode (`.opencode/`); scaffolds de otros agentes eliminados.
 
 ## Estructura

@@ -174,8 +174,8 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 > C-04 debe archivarse antes de C-05 (los endpoints de disponibilidad referencian sillones/tratamientos/bloqueos).
 
 ### [C-04] `catalogo-config`
-- **Estado**: `[ ]` Apply implementado y verificado 2026-11-04 (24/24 tasks, suite backend 213 tests, Guardian OK); pendiente revisión de Apply y Archive.
-- **Artefactos**: `openspec/changes/c-04-catalogo-config/` (proposal, design, delta specs, tasks y verification). Migración `002` para auditoría de configuración.
+- **Estado**: `[x]` archivado 2026-11-04 tras revisión aprobada (24/24 tasks, suite backend 213 tests, Guardian OK).
+- **Artefactos**: `openspec/changes/archive/2026-11-04-c-04-catalogo-config/` (proposal, design, delta specs, tasks y verification); spec sincronizada en `openspec/specs/agenda/catalogo-config/spec.md`. Migración `002` para auditoría de configuración.
 - **Scope**: CRUD de catálogo y configuración del consultorio (solo secretaria)
   - Modelos ya creados en C-02; aquí los endpoints: `CRUD /api/config/sillones`, `CRUD /api/config/tratamientos` (nombre, `duracion_min > 0`, `precio_referencia` nullable, `activo`), `CRUD /api/config/bloqueos` (`sillon_id` nullable = todos, `desde/hasta`, motivo)
   - Reglas: desactivar sillón no borra turnos históricos (soft delete `is_active=false`); bloqueo quita disponibilidad (RN-TU-06); sobreturno NO se crea aquí (lo crea secretaria en C-06, marcado explícito)

@@ -1,6 +1,6 @@
 # Verificación Apply — C-04
 
-Fecha: 2026-11-04. Implementación terminada; pendiente revisión del usuario antes de Archive.
+Fecha: 2026-11-04. Implementación terminada y revisión de Apply aprobada por el usuario para sincronizar specs y archivar.
 
 ## Gate respetado
 
@@ -45,8 +45,8 @@ Entorno aislado: Python3.14, PostgreSQL18.6 en puerto55432/base turnos_test y Re
 - Invariantes: timestamps de agenda y auditoría con zona horaria; precio/monto en INTEGER centavos; FK actor de auditoría ON DELETE RESTRICT y ambos índices presentes.
 - Seeds: únicamente datos ficticios; core/models e idempotencia pasan en suite completa.
 - Script determinista del Guardian: OK.
-- Siguiente paso: revisión de Apply del usuario, sync agenda/catalogo-config y Archive; marcar `[x]` en CHANGES.md solo entonces.
+- Cierre: revisión de Apply aprobada; spec agenda/catalogo-config sincronizada y validada, Archive autorizado y roadmap marcado `[x]` al cerrar.
 
 ## Control de cambios
 
-Commit autorizado explícitamente por el usuario después de las verificaciones. Se revisan status/diff/log antes de incluir solo los archivos intencionales; sin push. Este commit puede incluir C-04 activo y completo en Apply; no implica aprobación anticipada de su Archive.
+La implementación quedó registrada en el commit autorizado `898d996`. El usuario aprobó posteriormente el cierre de C-04. Se creó la spec principal `openspec/specs/agenda/catalogo-config/spec.md`, conservando íntegros el propósito y todos los requisitos/escenarios del delta: solo cambian el título y el encabezado de requisitos al formato principal. La validación estricta conjunta pasó 5/5 antes de Archive. El cierre documental y archivo se registran en un commit posterior autorizado; sin push.
