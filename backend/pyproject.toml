@@ -38,9 +38,15 @@ target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
+extend-select = ["DTZ"]
 ignore = [
   "B008",  # FastAPI Depends idiomático en firmas de endpoints
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Los tests construyen datetimes naive a propósito para verificar que el motor los rechaza.
+"tests/test_config.py" = ["DTZ001"]
+"tests/test_core_models.py" = ["DTZ005"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

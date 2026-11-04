@@ -402,7 +402,7 @@ async def test_auditoria_restricciones_motor(session, invalid):
     if invalid == "actor":
         values["actor_id"] = uuid4()
     elif invalid == "naive":
-        values["created_at"] = datetime(2026, 12, 1)  # noqa: DTZ001 (naive intencional)
+        values["created_at"] = datetime(2026, 12, 1)
     else:
         values[invalid] = "invalido"
     session.add(ConfigAudit(**values))
