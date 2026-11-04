@@ -3,5 +3,3 @@ __pycache__/
 .env
 .venv/
 tests/
-alembic/versions/*.py
-!alembic/versions/.gitkeep
