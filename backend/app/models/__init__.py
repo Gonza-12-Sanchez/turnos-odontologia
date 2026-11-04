@@ -3,6 +3,7 @@
 from app.models.audit import AuditMixin
 from app.models.bloqueo import Bloqueo
 from app.models.cobro import Cobro
+from app.models.config_audit import ConfigAudit
 from app.models.consultorio import Consultorio
 from app.models.paciente import Paciente
 from app.models.recordatorio_wa import RecordatorioWA
@@ -15,6 +16,7 @@ __all__ = [
     "AuditMixin",
     "Bloqueo",
     "Cobro",
+    "ConfigAudit",
     "Consultorio",
     "Paciente",
     "RecordatorioWA",

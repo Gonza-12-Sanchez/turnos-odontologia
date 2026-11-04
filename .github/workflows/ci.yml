@@ -8,6 +8,34 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: turnos
+          POSTGRES_PASSWORD: turnos # Credencial ficticia, solo contenedor efímero de CI.
+          POSTGRES_DB: turnos_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U turnos -d turnos_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://turnos:turnos@127.0.0.1:5432/turnos_test
+      TEST_DATABASE_URL: postgresql+asyncpg://turnos:turnos@127.0.0.1:5432/turnos_test
+      REDIS_URL: redis://127.0.0.1:6379/15
+      TEST_REDIS_URL: redis://127.0.0.1:6379/15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -18,11 +46,10 @@ jobs:
         working-directory: .
       - run: ruff format --check backend/app backend/tests
         working-directory: .
+      - run: alembic upgrade head
+        working-directory: ./backend
       - run: pytest tests -q
         working-directory: ./backend
-        env:
-          DATABASE_URL: ${{ vars.DATABASE_URL }}
-          REDIS_URL: ${{ vars.REDIS_URL }}
 
   frontend:
     runs-on: ubuntu-latest

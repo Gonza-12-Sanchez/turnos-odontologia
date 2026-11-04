@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import redis as redis_client
 from app.db.engine import get_session_factory
 from app.models.usuario import Usuario
+from app.repositories.unit_of_work import UnitOfWork
 from app.repositories.usuario_repository import UsuarioRepository
 from app.shared.security import decode_token
 
@@ -22,6 +23,11 @@ async def get_db() -> AsyncSession:
     factory = get_session_factory()
     async with factory() as session:
         yield session
+
+
+async def get_uow():
+    async with UnitOfWork(get_session_factory()) as uow:
+        yield uow
 
 
 async def _load_user_from_token(token: str, db: AsyncSession) -> Usuario:

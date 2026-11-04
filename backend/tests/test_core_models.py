@@ -331,17 +331,10 @@ async def test_phone_ar():
 
 
 @pytest.mark.asyncio
-async def test_seed_idempotente():
-    # import here to use engine? Use direct DB session
-    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
-
+async def test_seed_idempotente(session):
     from app.db.seed import seed_demo
 
-    engine = create_async_engine(
-        "postgresql+asyncpg://turnos:turnos@localhost:5432/turnos_test",
-        poolclass=__import__("sqlalchemy.pool", fromlist=["NullPool"]).NullPool,
-    )
-    factory = async_sessionmaker(engine, expire_on_commit=False)
+    factory = async_sessionmaker(session.bind, expire_on_commit=False)
     async with factory() as s:
         await seed_demo(s)
     async with factory() as s:
@@ -362,4 +355,3 @@ async def test_seed_idempotente():
     assert (c1, u1, t1, p1) == (c2, u2, t2, p2)
     # counts expected at least
     assert c1 >= 1 and u1 >= 3 and t1 >= 3 and p1 >= 1
-    await engine.dispose()

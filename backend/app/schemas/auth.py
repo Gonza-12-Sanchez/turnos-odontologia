@@ -16,8 +16,8 @@ PASSWORD_REGEX_DIGIT = re.compile(r"\d")
 def _validate_password(v: str) -> str:
     if len(v) < 8:
         raise ValueError("La contraseña debe tener al menos 8 caracteres")
-    if len(v) > 128:
-        raise ValueError("La contraseña no puede superar 128 caracteres")
+    if len(v.encode("utf-8")) > 72:
+        raise ValueError("La contraseña no puede superar 72 bytes UTF-8")
     if not PASSWORD_REGEX_LETTER.search(v):
         raise ValueError("La contraseña debe contener al menos una letra")
     if not PASSWORD_REGEX_DIGIT.search(v):

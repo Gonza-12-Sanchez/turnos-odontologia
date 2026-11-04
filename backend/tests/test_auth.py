@@ -10,9 +10,8 @@ Escenarios verificables del spec `identity/auth`:
 - Rate limiting: 429 (error negocio).
 - RBAC: paciente no accede a /agenda (borde), anónimo no puede POST /turnos (borde).
 
-Redis se mockea con un fake en memoria para no depender de un servidor externo.
-BD: se usa una única sesión compartida por test para evitar el error de asyncpg
-"another operation is in progress" en Windows.
+PostgreSQL de test y Redis real aislado por prefijo. Cada solicitud usa su propia
+sesión SQL, también en las pruebas de concurrencia.
 """
 
 from __future__ import annotations
@@ -38,88 +37,14 @@ from app.shared.security import (
     create_access_token,
     hash_password,
 )
-
-DATABASE_URL = "postgresql+asyncpg://turnos:turnos@localhost:5432/turnos_test"
-
-
-# ---------------------------------------------------------------------------
-# Fake Redis en memoria (sustituye a get_redis() para no depender de servidor)
-# ---------------------------------------------------------------------------
-
-
-class _FakeRedis:
-    def __init__(self) -> None:
-        self._store: dict[str, tuple[str, float | None]] = {}
-
-    async def set(self, key: str, value: str, ex: int | None = None) -> None:
-        expiry = None
-        if ex is not None:
-            expiry = datetime.now(UTC).timestamp() + ex
-        self._store[key] = (value, expiry)
-
-    async def get(self, key: str) -> str | None:
-        entry = self._store.get(key)
-        if entry is None:
-            return None
-        value, expiry = entry
-        if expiry is not None and datetime.now(UTC).timestamp() > expiry:
-            del self._store[key]
-            return None
-        return value
-
-    async def delete(self, *keys: str) -> None:
-        for k in keys:
-            self._store.pop(k, None)
-
-    async def keys(self, pattern: str) -> list[str]:
-        prefix = pattern.rstrip("*")
-        return [k for k in self._store if k.startswith(prefix)]
-
-    async def incr(self, key: str) -> int:
-        entry = self._store.get(key)
-        if entry is None:
-            self._store[key] = ("1", None)
-            return 1
-        value, expiry = entry
-        if expiry is not None and datetime.now(UTC).timestamp() > expiry:
-            del self._store[key]
-            self._store[key] = ("1", None)
-            return 1
-        new_val = int(value) + 1
-        self._store[key] = (str(new_val), expiry)
-        return new_val
-
-    async def expire(self, key: str, ttl: int) -> None:
-        entry = self._store.get(key)
-        if entry is None:
-            return
-        value, _ = entry
-        expiry = datetime.now(UTC).timestamp() + ttl
-        self._store[key] = (value, expiry)
-
-    async def ttl(self, key: str) -> int:
-        entry = self._store.get(key)
-        if entry is None:
-            return -2
-        _value, expiry = entry
-        if expiry is None:
-            return -1
-        remaining = int(expiry - datetime.now(UTC).timestamp())
-        if remaining < 0:
-            del self._store[key]
-            return -2
-        return remaining
-
-    async def aclose(self) -> None:
-        self._store.clear()
+from tests.conftest import DATABASE_URL
 
 
 @pytest.fixture
-def fake_redis():
-    """Reemplaza get_redis() por un fake en memoria."""
-    fake = _FakeRedis()
-    with patch.object(redis_client, "get_redis", return_value=fake):
-        yield fake
+async def fake_redis(real_redis):
+    """Nombre histórico de fixture: ahora utiliza Redis real aislado."""
+    with patch.object(redis_client, "get_redis", return_value=real_redis):
+        yield real_redis
 
 
 # ---------------------------------------------------------------------------
@@ -132,7 +57,7 @@ def anyio_backend():
     return "asyncio"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 async def engine():
     eng = create_async_engine(DATABASE_URL, poolclass=NullPool)
     yield eng
@@ -158,56 +83,22 @@ _db_lock = asyncio.Lock()
 
 @pytest.fixture
 async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
-    """Cliente HTTP con sesión de BD compartida y Redis faked.
-
-    Crea UNA sesión de BD por test y la comparte entre `get_db()` y `UnitOfWork`
-    para evitar "another operation is in progress" de asyncpg en Windows.
-    """
-    from app.repositories import unit_of_work as uow_module
-
-    # Sesión única compartida por este test
+    """Cliente con sesiones independientes y Redis real en cada test."""
     factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
-    shared_session = factory()
 
     async def _get_db() -> AsyncGenerator[AsyncSession, None]:
-        yield shared_session
-
-    # Monkeypatch UnitOfWork para usar la sesión compartida (no crear nueva)
-    original_uow_init = uow_module.UnitOfWork.__init__
-    original_uow_aenter = uow_module.UnitOfWork.__aenter__
-    original_uow_aexit = uow_module.UnitOfWork.__aexit__
-
-    def patched_init(self, session_factory=None):
-        self._session_factory = session_factory
-        self._session = None
-        self._committed = False
-        self._rolled_back = False
-
-    async def patched_aenter(self):
-        self._session = shared_session
-        self._committed = False
-        self._rolled_back = False
-        return self
-
-    async def patched_aexit(self, exc_type, exc, tb):
-        pass  # No cerrar la sesión compartida
-
-    uow_module.UnitOfWork.__init__ = patched_init
-    uow_module.UnitOfWork.__aenter__ = patched_aenter
-    uow_module.UnitOfWork.__aexit__ = patched_aexit
+        async with factory() as session:
+            yield session
 
     app.dependency_overrides[get_db] = _get_db
 
     try:
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="http://test") as c:
-            yield c
+        with patch("app.api.auth.get_session_factory", return_value=factory):
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="https://test") as c:
+                yield c
     finally:
         app.dependency_overrides.clear()
-        uow_module.UnitOfWork.__init__ = original_uow_init
-        uow_module.UnitOfWork.__aenter__ = original_uow_aenter
-        uow_module.UnitOfWork.__aexit__ = original_uow_aexit
-        await shared_session.close()
 
 
 # ---------------------------------------------------------------------------
@@ -515,3 +406,465 @@ async def test_anonimo_no_puede_post_turnos(auth_client: AsyncClient, fake_redis
     """Borde: anónimo no puede POST /turnos → 401."""
     resp = await auth_client.post("/turnos", json={})
     assert resp.status_code == 401, resp.text
+
+
+@pytest.mark.parametrize(
+    "password,expected",
+    [
+        ("A1" + "a" * 70, 201),
+        ("A1" + "a" * 71, 422),
+        ("A1" + "é" * 36, 422),
+    ],
+)
+async def test_registro_limite_bytes(auth_client, password, expected):
+    response = await auth_client.post(
+        "/auth/registro",
+        json={
+            "email": "bytes@example.com",
+            "password": password,
+            "nombre": "Paciente Ficticio",
+            "telefono": "+549111111111",
+        },
+    )
+    assert response.status_code == expected, response.text
+    if expected == 201:
+        login = await auth_client.post(
+            "/auth/login",
+            json={
+                "email": "bytes@example.com",
+                "password": password,
+            },
+        )
+        assert login.status_code == 200
+
+
+async def test_login_largo_no_trunca(auth_client, engine):
+    await _create_user(engine, "largo@example.com", "A1" + "a" * 70)
+    response = await auth_client.post(
+        "/auth/login",
+        json={
+            "email": "largo@example.com",
+            "password": "A1" + "a" * 71,
+        },
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize("cost,password_ok", [(4, True), (6, True), (4, False)])
+async def test_login_actualiza_costo_solo_si_corresponde(
+    auth_client,
+    engine,
+    monkeypatch,
+    cost,
+    password_ok,
+):
+    import bcrypt
+
+    monkeypatch.setattr(settings, "bcrypt_rounds", 5)
+    stored = bcrypt.hashpw(b"Abc12345", bcrypt.gensalt(cost)).decode()
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    async with factory() as session:
+        user = Usuario(email="rehash@example.com", password_hash=stored, rol="paciente")
+        session.add(user)
+        await session.commit()
+        uid = user.id
+    response = await auth_client.post(
+        "/auth/login",
+        json={
+            "email": "rehash@example.com",
+            "password": "Abc12345" if password_ok else "Erronea1",
+        },
+    )
+    assert response.status_code == (200 if password_ok else 401)
+    async with factory() as session:
+        user = await session.get(Usuario, uid)
+        assert int(user.password_hash.split("$")[2]) == (5 if cost == 4 and password_ok else cost)
+        assert bcrypt.checkpw(b"Abc12345", user.password_hash.encode())
+        if cost == 6 or not password_ok:
+            assert user.password_hash == stored
+
+
+_BAD_CLAIMS = [
+    (claim, None, True)
+    for claim in (
+        "sub",
+        "roles",
+        "email",
+        "jti",
+        "type",
+        "iat",
+        "exp",
+    )
+] + [
+    ("sub", "not-a-uuid", False),
+    ("jti", "bad", False),
+    ("roles", "paciente", False),
+    ("roles", ["admin"], False),
+    ("email", [], False),
+    ("iat", True, False),
+    ("exp", True, False),
+    ("iat", "0", False),
+    ("type", "other", False),
+    ("iat", 9999999999, False),
+    ("exp", 0, False),
+]
+
+
+@pytest.mark.parametrize("kind", ["access", "refresh"])
+@pytest.mark.parametrize("claim,value,remove", _BAD_CLAIMS)
+async def test_jwt_claims_invalidos(auth_client, engine, kind, claim, value, remove):
+    from jose import jwt
+
+    from app.shared.security import create_refresh_token
+
+    uid = await _create_user(engine, "claims@example.com", "Abc12345")
+    token = (
+        _make_access_token(uid)
+        if kind == "access"
+        else create_refresh_token(uid, str(uuid.uuid4()))[0]
+    )
+    claims = jwt.get_unverified_claims(token)
+    if remove:
+        claims.pop(claim)
+    else:
+        claims[claim] = value
+    token = jwt.encode(claims, settings.jwt_secret_key, algorithm="HS256")
+    if kind == "access":
+        response = await auth_client.get("/auth/me", headers={"Authorization": f"Bearer {token}"})
+    else:
+        # Registrar familia válida para que claims inválidos no se oculten tras un 401 por familia.
+        await redis_client.set_refresh_family(claims.get("fid", ""), claims.get("jti", ""), 60)
+        response = await auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={token}",
+            },
+        )
+    assert response.status_code == 401, response.text
+
+
+@pytest.mark.parametrize("fid", [None, "no-uuid", 123])
+async def test_refresh_exige_fid_uuid(auth_client, engine, fid):
+    from jose import jwt
+
+    from app.shared.security import create_refresh_token
+
+    uid = await _create_user(engine, "familia@example.com", "Abc12345")
+    claims = jwt.get_unverified_claims(create_refresh_token(uid, str(uuid.uuid4()))[0])
+    if fid is None:
+        claims.pop("fid")
+    else:
+        claims["fid"] = fid
+        await redis_client.set_refresh_family(str(fid), claims["jti"], 60)
+    token = jwt.encode(claims, settings.jwt_secret_key, algorithm="HS256")
+    response = await auth_client.post("/auth/refresh", headers={"Cookie": f"refresh_token={token}"})
+    assert response.status_code == 401
+
+
+async def test_tipos_tokens_y_firma(auth_client, engine):
+    from app.shared.security import create_refresh_token
+
+    uid = await _create_user(engine, "tipos@example.com", "Abc12345")
+    access = _make_access_token(uid)
+    refresh = create_refresh_token(uid, str(uuid.uuid4()))[0]
+    assert (
+        await auth_client.get(
+            "/auth/me",
+            headers={
+                "Authorization": f"Bearer {refresh}",
+            },
+        )
+    ).status_code == 401
+    assert (
+        await auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={access}",
+            },
+        )
+    ).status_code == 401
+    parts = access.split(".")
+    parts[2] = ("A" if parts[2][0] != "A" else "B") + parts[2][1:]
+    assert (
+        await auth_client.get(
+            "/auth/me",
+            headers={
+                "Authorization": "Bearer " + ".".join(parts),
+            },
+        )
+    ).status_code == 401
+
+
+async def _login_session(client, engine):
+    await _create_user(engine, "sesion@example.com", "Abc12345")
+    response = await client.post(
+        "/auth/login",
+        json={
+            "email": "sesion@example.com",
+            "password": "Abc12345",
+        },
+    )
+    assert response.status_code == 200
+    return response.json()["access_token"], response.cookies["refresh_token"]
+
+
+async def test_cookie_y_logout_revocan_sesion(auth_client, engine):
+    access, refresh = await _login_session(auth_client, engine)
+    for path in ("/auth/login", "/auth/refresh"):
+        if path.endswith("login"):
+            response = await auth_client.post(
+                path,
+                json={
+                    "email": "sesion@example.com",
+                    "password": "Abc12345",
+                },
+            )
+        else:
+            response = await auth_client.post(path)
+        assert response.status_code == 200
+        cookie = response.headers["set-cookie"].lower()
+        for attribute in ("httponly", "secure", "samesite=lax", "path=/auth", "max-age="):
+            assert attribute in cookie
+        assert "refresh_token" not in response.json()
+        access = response.json()["access_token"]
+        refresh = response.cookies["refresh_token"]
+    response = await auth_client.post("/auth/logout", headers={"Authorization": f"Bearer {access}"})
+    assert response.status_code == 204
+    assert "max-age=0" in response.headers["set-cookie"].lower()
+    assert (
+        await auth_client.get(
+            "/auth/me",
+            headers={
+                "Authorization": f"Bearer {access}",
+            },
+        )
+    ).status_code == 401
+    assert (
+        await auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={refresh}",
+            },
+        )
+    ).status_code == 401
+
+
+async def test_refresh_concurrente_revoca_familia(auth_client, engine, fake_redis, monkeypatch):
+    _, refresh = await _login_session(auth_client, engine)
+    original = fake_redis.execute_command
+    barrier = asyncio.Event()
+    reads = 0
+
+    async def interleave(*args, **kwargs):
+        nonlocal reads
+        result = await original(*args, **kwargs)
+        if args[0] == "GET" and str(args[1]).startswith("auth:refresh:family:"):
+            reads += 1
+            if reads == 2:
+                barrier.set()
+            await asyncio.wait_for(barrier.wait(), 5)
+        return result
+
+    monkeypatch.setattr(fake_redis, "execute_command", interleave)
+    responses = await asyncio.gather(
+        *[
+            auth_client.post("/auth/refresh", headers={"Cookie": f"refresh_token={refresh}"})
+            for _ in range(2)
+        ]
+    )
+    assert sorted(r.status_code for r in responses) == [200, 401]
+    new_refresh = next(r for r in responses if r.status_code == 200).cookies["refresh_token"]
+    # La comprobación siguiente ya no participa de la barrera de dos requests.
+    monkeypatch.setattr(fake_redis, "execute_command", original)
+    assert (
+        await auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={new_refresh}",
+            },
+        )
+    ).status_code == 401
+
+
+async def test_refresh_no_resucita_logout(auth_client, engine, fake_redis, monkeypatch):
+    access, refresh = await _login_session(auth_client, engine)
+    reached, release = asyncio.Event(), asyncio.Event()
+    original = fake_redis.execute_command
+
+    async def interleave(*args, **kwargs):
+        if args[0] == "GET" and str(args[1]).startswith("auth:refresh:family:"):
+            result = await original(*args, **kwargs)
+            reached.set()
+            await asyncio.wait_for(release.wait(), 5)
+            return result
+        if args[0] == "EVAL" and any(
+            str(arg).startswith("auth:refresh:family:") for arg in args[3:5]
+        ):
+            reached.set()
+            await asyncio.wait_for(release.wait(), 5)
+        return await original(*args, **kwargs)
+
+    monkeypatch.setattr(fake_redis, "execute_command", interleave)
+    pending = asyncio.create_task(
+        auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={refresh}",
+            },
+        )
+    )
+    try:
+        await asyncio.wait_for(reached.wait(), 5)
+        logout = await auth_client.post(
+            "/auth/logout",
+            headers={
+                "Authorization": f"Bearer {access}",
+                "Cookie": f"refresh_token={refresh}",
+            },
+        )
+        assert logout.status_code == 204
+    finally:
+        release.set()
+    assert (await pending).status_code == 401
+
+
+async def test_reuso_invalida_reemplazo_y_ttl(auth_client, engine, fake_redis):
+    from jose import jwt
+
+    _, refresh = await _login_session(auth_client, engine)
+    claims = jwt.get_unverified_claims(refresh)
+    response = await auth_client.post("/auth/refresh")
+    assert response.status_code == 200
+    assert 0 < await fake_redis.ttl(f"auth:blacklist:refresh:{claims['jti']}") <= 7 * 86400
+    replacement = response.cookies["refresh_token"]
+    assert (
+        await auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={refresh}",
+            },
+        )
+    ).status_code == 401
+    assert (
+        await auth_client.post(
+            "/auth/refresh",
+            headers={
+                "Cookie": f"refresh_token={replacement}",
+            },
+        )
+    ).status_code == 401
+
+
+async def test_header_ip_no_evade_limite(auth_client):
+    responses = [
+        await auth_client.post(
+            "/auth/login",
+            json={
+                "email": "limite@example.com",
+                "password": "Erronea1",
+            },
+            headers={"X-Forwarded-For": f"198.51.100.{i}"},
+        )
+        for i in range(6)
+    ]
+    assert [r.status_code for r in responses] == [401, 401, 401, 401, 401, 429]
+    assert 0 < int(responses[-1].headers["retry-after"]) <= 60
+
+
+async def test_limite_concurrente_y_expiracion(auth_client, fake_redis):
+    responses = await asyncio.gather(
+        *[
+            auth_client.post(
+                "/auth/login",
+                json={
+                    "email": "concurrente@example.com",
+                    "password": "Erronea1",
+                },
+            )
+            for _ in range(6)
+        ]
+    )
+    assert sorted(r.status_code for r in responses) == [401, 401, 401, 401, 401, 429]
+    key = "auth:rl:login:127.0.0.1:concurrente@example.com"
+    assert 0 < await fake_redis.ttl(key) <= 60
+    await fake_redis.pexpire(key, 1)
+    await asyncio.sleep(0.02)
+    response = await auth_client.post(
+        "/auth/login",
+        json={
+            "email": "concurrente@example.com",
+            "password": "Erronea1",
+        },
+    )
+    assert response.status_code == 401
+
+
+async def test_limite_repara_contador_sin_ttl(auth_client, fake_redis):
+    key = "auth:rl:login:127.0.0.1:sin-ttl@example.com"
+    await fake_redis.set(key, "5")
+    response = await auth_client.post(
+        "/auth/login",
+        json={
+            "email": "sin-ttl@example.com",
+            "password": "Erronea1",
+        },
+    )
+    assert response.status_code == 429
+    assert 0 < await fake_redis.ttl(key) <= 60
+
+
+@pytest.mark.parametrize(
+    "phase", ["login-limit", "registro", "login-family", "refresh", "logout", "me"]
+)
+@pytest.mark.parametrize("failure", ["connection", "timeout"])
+async def test_redis_caido_responde_503(
+    auth_client, engine, fake_redis, monkeypatch, phase, failure
+):
+    import redis.exceptions
+
+    access, refresh = await _login_session(auth_client, engine)
+    original = fake_redis.execute_command
+
+    async def unavailable(*args, **kwargs):
+        command = args[0]
+        is_rate_limit = command == "EVAL" and args[2] == 1
+        if phase not in {"login-limit", "registro"} and is_rate_limit:
+            return await original(*args, **kwargs)
+        cls = (
+            redis.exceptions.ConnectionError
+            if failure == "connection"
+            else redis.exceptions.TimeoutError
+        )
+        raise cls("Detalle interno que no debe aparecer")
+
+    monkeypatch.setattr(fake_redis, "execute_command", unavailable)
+    if phase in {"login-limit", "login-family"}:
+        response = await auth_client.post(
+            "/auth/login",
+            json={
+                "email": "sesion@example.com",
+                "password": "Abc12345",
+            },
+        )
+    elif phase == "registro":
+        response = await auth_client.post(
+            "/auth/registro",
+            json={
+                "email": "caido@example.com",
+                "password": "Abc12345",
+                "nombre": "Ficticio",
+                "telefono": "+549111111111",
+            },
+        )
+    elif phase == "me":
+        response = await auth_client.get("/auth/me", headers={"Authorization": f"Bearer {access}"})
+    else:
+        response = await auth_client.post(
+            f"/auth/{phase}",
+            headers={
+                "Authorization": f"Bearer {access}",
+                "Cookie": f"refresh_token={refresh}",
+            },
+        )
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Servicio no disponible"}

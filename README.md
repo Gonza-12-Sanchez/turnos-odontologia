@@ -3,8 +3,8 @@
 Trabajo de integración (Metodología I): del Discovery al primer Change, con
 Spec-Driven Development (OpenSpec) y Active Stack. Mercado objetivo: Argentina.
 
-Estado actual: C-01 `foundation-setup` implementado y verificado 10/10
-(`CHANGES.md` marcado `[x]` el 2026-10-06: tests en verde + health checks en vivo ok/degraded).
+Estado actual: C-01, C-02 y C-03 archivados; correcciones de C-03 sincronizadas y archivadas el 2026-11-04.
+C-04 `catalogo-config` implementado y verificado (24/24 tareas, suite backend 213 tests), pendiente revisión de Apply y Archive.
 Herramienta activa: OpenCode (`.opencode/`); scaffolds de otros agentes eliminados.
 
 ## Estructura
@@ -14,7 +14,7 @@ Herramienta activa: OpenCode (`.opencode/`); scaffolds de otros agentes eliminad
 - `docs/discovery/sources/` — notas por competidor (6)
 - `docs/discovery/` — `informe-discovery.md` + `informe-discovery.pdf` (mismo nombre)
 - `knowledge-base/` — base de conocimiento (10 canónicos + README)
-- `CHANGES.md` — roadmap 12 changes (C-01 `[x]` verificado)
+- `CHANGES.md` — roadmap canónico de 12 changes y dependencias
 - `openspec/` — specs y changes OpenSpec
 - `backend/` — API FastAPI (`app/`, `tests/`, `alembic/`, `Dockerfile`)
 - `frontend/` — PWA React+TS+Vite (`src/`, `Dockerfile`)
@@ -63,6 +63,11 @@ docker compose down -v                   # apaga y limpia al terminar
 ```
 
 ## Tests
+
+Backend actual (C-03 correctivo + C-04): **213 pruebas pasan** con PostgreSQL y Redis reales.
+Configuración de entorno y contratos en [docs/auth.md](docs/auth.md) y [docs/configuracion.md](docs/configuracion.md).
+Aplicar `alembic upgrade head` desde `backend/` con `DATABASE_URL` apuntando a la base autorizada antes de correr la suite.
+Los tests permiten `TEST_DATABASE_URL` y `TEST_REDIS_URL`; usan exclusivamente una base llamada `turnos_test`.
 
 Suite C-01 (verificada 2026-10-06, local + Docker real):
 

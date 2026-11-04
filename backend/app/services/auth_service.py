@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import logging
+import math
 import uuid
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+from fastapi.concurrency import run_in_threadpool
 from jose import JWTError
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-
-logger = logging.getLogger(__name__)
 from app.db import redis as redis_client
 from app.models.paciente import Paciente
 from app.models.usuario import Usuario
@@ -26,8 +26,11 @@ from app.shared.security import (
     create_refresh_token,
     decode_token,
     hash_password,
+    password_needs_rehash,
     verify_password,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class AuthService:
@@ -51,8 +54,6 @@ class AuthService:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT, detail="Teléfono ya registrado"
             )
-
-        from fastapi.concurrency import run_in_threadpool
 
         hashed = await run_in_threadpool(hash_password, payload.password)
 
@@ -86,8 +87,6 @@ class AuthService:
 
         ok = False
         if user is not None:
-            from fastapi.concurrency import run_in_threadpool
-
             ok = await run_in_threadpool(verify_password, password, user.password_hash)
 
         if user is None or not user.is_active or not ok:
@@ -95,6 +94,10 @@ class AuthService:
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Credenciales inválidas",
             )
+
+        if password_needs_rehash(user.password_hash):
+            user.password_hash = await run_in_threadpool(hash_password, password)
+            await self.uow.commit()
 
         access_token, _access_jti, _access_ttl = create_access_token(
             user.id, [user.rol], user.email
@@ -130,24 +133,6 @@ class AuthService:
         if not jti or not fid or not sub:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh inválido")
 
-        # reuso detectado
-        if await redis_client.is_refresh_blacklisted(jti):
-            await redis_client.delete_refresh_family(fid)
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh reutilizado"
-            )
-
-        family_jti = await redis_client.get_refresh_family(fid)
-        if family_jti is None or family_jti != jti:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh inválido")
-
-        now = datetime.now(UTC)
-        remaining = 0
-        if exp is not None:
-            remaining = int(float(exp) - now.timestamp())
-        remaining = max(remaining, 0)
-        await redis_client.blacklist_refresh(jti, remaining)
-
         user_repo = UsuarioRepository(self.session)
         try:
             uid = uuid.UUID(str(sub))
@@ -161,7 +146,19 @@ class AuthService:
             user.id, [user.rol], user.email
         )
         new_refresh, new_refresh_jti, new_refresh_ttl = create_refresh_token(user.id, fid)
-        await redis_client.set_refresh_family(fid, new_refresh_jti, new_refresh_ttl)
+        remaining = max(0, math.ceil(exp - datetime.now(UTC).timestamp()))
+        rotated = await redis_client.rotate_refresh(
+            fid,
+            jti,
+            new_refresh_jti,
+            remaining,
+            new_refresh_ttl,
+        )
+        if rotated != 1:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh reutilizado" if rotated == -1 else "Refresh inválido",
+            )
 
         token_out = TokenOut(
             access_token=access_token,
@@ -180,7 +177,7 @@ class AuthService:
                 exp = payload.get("exp")
                 remaining = 0
                 if exp is not None:
-                    remaining = int(float(exp) - now.timestamp())
+                    remaining = math.ceil(float(exp) - now.timestamp())
                 remaining = max(remaining, 0)
                 if jti:
                     await redis_client.blacklist_access(jti, remaining)
@@ -195,7 +192,7 @@ class AuthService:
                 exp = payload.get("exp")
                 remaining = 0
                 if exp is not None:
-                    remaining = int(float(exp) - now.timestamp())
+                    remaining = math.ceil(float(exp) - now.timestamp())
                 remaining = max(remaining, 0)
                 if rjti:
                     await redis_client.blacklist_refresh(rjti, remaining)

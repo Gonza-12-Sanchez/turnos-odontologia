@@ -4,14 +4,17 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.config import router as config_router
 from app.api.health import router as health_router
 from app.api.protected import router as protected_router
 from app.core.config import settings
 from app.db import engine as db_engine
 from app.db import redis as redis_client
+from app.shared.exceptions import AuthStorageUnavailable
 from app.shared.logging import get_logger
 
 logger = get_logger(__name__)
@@ -62,6 +65,11 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 def create_app() -> FastAPI:
     app = FastAPI(title="turnos-odontologia", version="0.1.0", lifespan=lifespan)
+
+    @app.exception_handler(AuthStorageUnavailable)
+    async def auth_storage_unavailable(request: Request, exc: AuthStorageUnavailable):
+        return JSONResponse(status_code=503, content={"detail": "Servicio no disponible"})
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.frontend_url],
@@ -72,6 +80,7 @@ def create_app() -> FastAPI:
     app.add_middleware(SecurityHeadersMiddleware)
     app.include_router(health_router, prefix="/api")
     app.include_router(auth_router, prefix="/auth")
+    app.include_router(config_router)
     app.include_router(protected_router)
     return app
 

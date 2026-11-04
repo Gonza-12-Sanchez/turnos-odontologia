@@ -5,7 +5,6 @@ from __future__ import annotations
 import contextlib
 import json
 
-import redis.exceptions
 from fastapi import HTTPException, Request, status
 
 from app.db import redis as redis_client
@@ -14,9 +13,6 @@ from app.db import redis as redis_client
 def rate_limit_auth(scope: str):
     async def _dep(request: Request) -> None:
         ip = request.client.host if request.client else "unknown"
-        xff = request.headers.get("x-forwarded-for")
-        if xff:
-            ip = xff.split(",")[0].strip()
 
         email_norm = "_"
         with contextlib.suppress(ValueError, TypeError, UnicodeDecodeError, json.JSONDecodeError):
@@ -27,17 +23,7 @@ def rate_limit_auth(scope: str):
                     email_norm = str(email).strip().lower()
 
         key = f"auth:rl:{scope}:{ip}:{email_norm}"
-        try:
-            client = redis_client.get_redis()
-            count = await client.incr(key)
-            if count == 1:
-                await client.expire(key, 60)
-            ttl = await client.ttl(key)
-        except (redis.exceptions.RedisError, RuntimeError, ConnectionError, OSError):
-            raise HTTPException(
-                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="Servicio no disponible",
-            )
+        count, ttl = await redis_client.consume_auth_attempt(key)
 
         if count > 5:
             retry_after = ttl if ttl and ttl > 0 else 60

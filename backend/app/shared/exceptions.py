@@ -9,3 +9,7 @@ class BusinessError(Exception):
     def __init__(self, detail: str) -> None:
         super().__init__(detail)
         self.detail = detail
+
+
+class AuthStorageUnavailable(Exception):
+    """No fue posible consultar/persistir el estado de seguridad de la sesión."""
