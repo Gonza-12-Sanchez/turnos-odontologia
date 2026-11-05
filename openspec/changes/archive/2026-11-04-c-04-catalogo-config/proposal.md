@@ -1,4 +1,4 @@
-# Proposal — C-04 Catálogo y configuración
+﻿# Proposal — C-04 Catálogo y configuración
 
 ## Why
 

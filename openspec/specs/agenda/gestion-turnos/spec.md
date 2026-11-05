@@ -1,4 +1,4 @@
-# agenda/gestion-turnos Specification
+﻿# agenda/gestion-turnos Specification
 
 ## Purpose
 Manage the lifecycle of a turno: confirm, cancel, reschedule and mark attendance, enforcing the 2-hour window and anti-overlap at the engine, supporting sobreturnos by secretaria and full audit trail.

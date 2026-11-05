@@ -1,4 +1,4 @@
-# Spec Delta — core/models
+﻿# Spec Delta — core/models
 
 ## Purpose
 

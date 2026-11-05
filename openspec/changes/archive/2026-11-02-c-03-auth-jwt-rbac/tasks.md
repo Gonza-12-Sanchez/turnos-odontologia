@@ -1,4 +1,4 @@
-# Tasks — C-03 auth-jwt-rbac
+﻿# Tasks — C-03 auth-jwt-rbac
 
 ## 1. Fundamentos: dependencias, config y seguridad
 

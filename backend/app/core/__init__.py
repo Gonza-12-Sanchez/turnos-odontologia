@@ -1,1 +1,1 @@
-"""Core de configuración (settings, security)."""
+﻿"""Core de configuración (settings, security)."""

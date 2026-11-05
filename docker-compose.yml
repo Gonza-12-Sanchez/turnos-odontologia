@@ -1,4 +1,4 @@
-services:
+﻿services:
   db:
     image: postgres:16-alpine
     # Puerto mapeado para desarrollo/testing desde el host (MCP, psql, tests).

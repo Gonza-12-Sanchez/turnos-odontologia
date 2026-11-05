@@ -1,4 +1,4 @@
-"""Smoke del contrato specs/platform/health/spec.md (4 escenarios)."""
+﻿"""Smoke del contrato specs/platform/health/spec.md (4 escenarios)."""
 
 import asyncio
 import time

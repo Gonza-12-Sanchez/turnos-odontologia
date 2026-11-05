@@ -1,4 +1,4 @@
-"""API administrativa de catálogo (C-04), solo secretaria."""
+﻿"""API administrativa de catálogo (C-04), solo secretaria."""
 
 from typing import Annotated
 from uuid import UUID

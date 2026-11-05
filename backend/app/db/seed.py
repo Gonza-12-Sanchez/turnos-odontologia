@@ -1,4 +1,4 @@
-"""Seed ficticio (RN-GL-02) para C-02. Idempotente por email/nombre."""
+﻿"""Seed ficticio (RN-GL-02) para C-02. Idempotente por email/nombre."""
 
 from __future__ import annotations
 

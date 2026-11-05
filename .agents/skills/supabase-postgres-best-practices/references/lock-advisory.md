@@ -1,4 +1,4 @@
----
+﻿---
 title: Use Advisory Locks for Application-Level Locking
 impact: MEDIUM
 impactDescription: Efficient coordination without row-level lock overhead

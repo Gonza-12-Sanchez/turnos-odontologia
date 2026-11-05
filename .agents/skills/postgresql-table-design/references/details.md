@@ -1,4 +1,4 @@
-# PostgreSQL table design: details
+﻿# PostgreSQL table design: details
 
 Deep material for the `postgresql-table-design` skill. `SKILL.md` carries the rules and
 the decision points; this file carries the full data-type catalog, workload patterns,

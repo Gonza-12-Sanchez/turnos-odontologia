@@ -1,4 +1,4 @@
-"""UnitOfWork sobre AsyncSession (async context manager)."""
+﻿"""UnitOfWork sobre AsyncSession (async context manager)."""
 
 from __future__ import annotations
 

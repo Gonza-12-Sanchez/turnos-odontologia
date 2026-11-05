@@ -1,4 +1,4 @@
-# Design — C-06 Gestión de turnos
+﻿# Design — C-06 Gestión de turnos
 
 ## Context
 

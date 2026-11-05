@@ -1,4 +1,4 @@
-# agenda/catalogo-config Specification
+﻿# agenda/catalogo-config Specification
 
 ## Purpose
 

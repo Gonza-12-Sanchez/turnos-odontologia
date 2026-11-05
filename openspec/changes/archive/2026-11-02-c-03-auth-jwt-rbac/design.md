@@ -1,4 +1,4 @@
-# Design — C-03 auth-jwt-rbac
+﻿# Design — C-03 auth-jwt-rbac
 
 ## Context
 

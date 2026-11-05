@@ -1,4 +1,4 @@
----
+﻿---
 title: Use Covering Indexes to Avoid Table Lookups
 impact: MEDIUM-HIGH
 impactDescription: 2-5x faster queries by eliminating heap fetches

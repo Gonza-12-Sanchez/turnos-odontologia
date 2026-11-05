@@ -1,4 +1,4 @@
-# Informe de Aplicación — Skill propia y Servidor MCP
+﻿# Informe de Aplicación — Skill propia y Servidor MCP
 
 **Proyecto:** turnos-odontologia · **Change de aplicación:** C-02 `core-models` · **Fecha:** 2026-10-28
 

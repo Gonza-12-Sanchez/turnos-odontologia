@@ -1,4 +1,4 @@
-"""Contratos de catálogo: PATCH distingue omitidos de null explícito."""
+﻿"""Contratos de catálogo: PATCH distingue omitidos de null explícito."""
 
 from typing import Annotated, ClassVar
 from uuid import UUID

@@ -1,4 +1,4 @@
-"""Settings centralizados (re-export desde app.core.config)."""
+﻿"""Settings centralizados (re-export desde app.core.config)."""
 
 from app.core.config import Settings, settings
 

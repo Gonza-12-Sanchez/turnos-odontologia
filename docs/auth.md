@@ -1,4 +1,4 @@
-# Autenticación — C-03
+﻿# Autenticación — C-03
 
 Rutas: `POST /auth/registro`, `/auth/login`, `/auth/refresh`, `/auth/logout` y `GET /auth/me`.
 

@@ -1,4 +1,4 @@
----
+﻿---
 name: vite-plugin-api
 description: Vite plugin authoring with Vite-specific hooks
 ---

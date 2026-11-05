@@ -1,4 +1,4 @@
----
+﻿---
 name: vite-config
 description: Vite configuration patterns using vite.config.ts
 ---

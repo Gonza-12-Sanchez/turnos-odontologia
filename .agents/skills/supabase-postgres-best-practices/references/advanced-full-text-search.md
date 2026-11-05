@@ -1,4 +1,4 @@
----
+﻿---
 title: Use tsvector for Full-Text Search
 impact: MEDIUM
 impactDescription: 100x faster than LIKE, with ranking support

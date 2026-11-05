@@ -1,4 +1,4 @@
-# Design — C-04 Catálogo y configuración
+﻿# Design — C-04 Catálogo y configuración
 
 ## Context
 

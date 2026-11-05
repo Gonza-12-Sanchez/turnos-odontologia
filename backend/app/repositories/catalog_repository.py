@@ -1,4 +1,4 @@
-"""Consultas comunes del catálogo sobre modelos elegidos por el servidor."""
+﻿"""Consultas comunes del catálogo sobre modelos elegidos por el servidor."""
 
 from uuid import UUID
 

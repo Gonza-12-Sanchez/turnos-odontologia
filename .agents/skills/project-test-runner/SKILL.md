@@ -1,4 +1,4 @@
----
+﻿---
 name: project-test-runner
 description: Levanta el proyecto turnos-odontologia completo (db + redis + api + frontend) para dos objetivos: modo prueba (con datos ficticios para probar funcionalidades) o modo real (sin datos ficticios, para usar con datos reales). Verifica que Docker esté instalado, crea los contenedores, aplica migraciones, carga seeds ficticios si es modo prueba, y verifica health checks. Trigger cuando el usuario dice "levantar el proyecto", "correr tests", "preparar entorno de prueba", "levantar para probar", "levantar frontend y swagger", "levantar proyecto para realizar pruebas".
 ---

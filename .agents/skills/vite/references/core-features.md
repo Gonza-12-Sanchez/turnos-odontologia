@@ -1,4 +1,4 @@
----
+﻿---
 name: vite-features
 description: Vite-specific import patterns and runtime features
 ---

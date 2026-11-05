@@ -1,4 +1,4 @@
-"""Check determinista de invariantes C-02 (sin DB).
+﻿"""Check determinista de invariantes C-02 (sin DB).
 Uso: python check_turnos_invariants.py [dir_modelos] [dir_migraciones]
 Sale 0 + OK si pasa; 1 + lista de violaciones si falla.
 No lee secretos ni toca la DB.

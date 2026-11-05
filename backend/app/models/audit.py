@@ -1,4 +1,4 @@
-"""AuditMixin compartido (soft delete + timestamps) para todas las entidades core."""
+﻿"""AuditMixin compartido (soft delete + timestamps) para todas las entidades core."""
 
 from __future__ import annotations
 

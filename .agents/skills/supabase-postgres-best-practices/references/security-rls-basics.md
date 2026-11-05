@@ -1,4 +1,4 @@
----
+﻿---
 title: Enable Row Level Security for Multi-Tenant Data
 impact: CRITICAL
 impactDescription: Database-enforced tenant isolation, prevent data leaks

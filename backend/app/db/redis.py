@@ -1,4 +1,4 @@
-"""Cliente Redis async (colas y workers en C-08)."""
+﻿"""Cliente Redis async (colas y workers en C-08)."""
 
 import redis.asyncio as redis
 from redis.asyncio.retry import Retry

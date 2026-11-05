@@ -1,4 +1,4 @@
-"""GET /api/health — contrato specs/platform/health/spec.md.
+﻿"""GET /api/health — contrato specs/platform/health/spec.md.
 
 Checks inyectables por módulo (check_db/check_redis) para testear los
 4 escenarios sin infraestructura real. El endpoint es público: sin auth.

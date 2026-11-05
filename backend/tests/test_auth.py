@@ -1,4 +1,4 @@
-"""Tests de autenticación C-03 (auth-jwt-rbac).
+﻿"""Tests de autenticación C-03 (auth-jwt-rbac).
 
 Escenarios verificables del spec `identity/auth`:
 - Registro: feliz, email duplicado (error negocio), teléfono/contraseña débil (borde).

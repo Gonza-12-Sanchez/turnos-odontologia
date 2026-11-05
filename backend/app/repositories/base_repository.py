@@ -1,4 +1,4 @@
-"""BaseRepository[T] genérico sobre AsyncSession."""
+﻿"""BaseRepository[T] genérico sobre AsyncSession."""
 
 from __future__ import annotations
 

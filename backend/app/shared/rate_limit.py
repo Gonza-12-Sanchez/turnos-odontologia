@@ -1,4 +1,4 @@
-"""Rate limiting para auth (ventana fija 60s, Redis)."""
+﻿"""Rate limiting para auth (ventana fija 60s, Redis)."""
 
 from __future__ import annotations
 

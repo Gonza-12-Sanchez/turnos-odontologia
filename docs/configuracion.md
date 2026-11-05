@@ -1,4 +1,4 @@
-# Configuración del consultorio — C-04
+﻿# Configuración del consultorio — C-04
 
 ## Persistencia y migración
 

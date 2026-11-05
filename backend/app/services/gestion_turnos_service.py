@@ -1,4 +1,4 @@
-"""Gestión del ciclo de vida del turno (C-06)."""
+﻿"""Gestión del ciclo de vida del turno (C-06)."""
 
 from __future__ import annotations
 

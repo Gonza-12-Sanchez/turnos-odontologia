@@ -1,4 +1,4 @@
-# Browser Session Management
+﻿# Browser Session Management
 
 Run multiple isolated browser sessions concurrently with state persistence.
 

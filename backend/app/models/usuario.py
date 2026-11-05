@@ -1,4 +1,4 @@
-"""Entidad Usuario."""
+﻿"""Entidad Usuario."""
 
 from __future__ import annotations
 

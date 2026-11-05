@@ -1,4 +1,4 @@
-"""Stubs protegidos para validar RBAC (ampliados en C-05/C-06)."""
+﻿"""Stubs protegidos para validar RBAC (ampliados en C-05/C-06)."""
 
 from fastapi import APIRouter, Depends
 

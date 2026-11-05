@@ -1,4 +1,4 @@
-# Tasks — Correcciones de C-03
+﻿# Tasks — Correcciones de C-03
 
 ## 1. Hashing compatible y actualización de costo
 

@@ -1,4 +1,4 @@
-# Verificación Apply — C-04
+﻿# Verificación Apply — C-04
 
 Fecha: 2026-11-04. Implementación terminada y revisión de Apply aprobada por el usuario para sincronizar specs y archivar.
 

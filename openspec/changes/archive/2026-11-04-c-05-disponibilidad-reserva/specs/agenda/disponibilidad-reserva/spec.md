@@ -1,4 +1,4 @@
-# Spec Delta — agenda/disponibilidad-reserva
+﻿# Spec Delta — agenda/disponibilidad-reserva
 
 ## Purpose
 

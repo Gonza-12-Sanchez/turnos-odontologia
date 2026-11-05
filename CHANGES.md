@@ -1,4 +1,4 @@
-# CHANGES — Secuencia de Implementación
+﻿# CHANGES — Secuencia de Implementación
 
 > Índice canónico de todos los changes del proyecto **turnos-odontologia** (gestión de turnos para consultorios odontológicos chicos, 1 sede, 1–3 sillones).
 > Cada change es atómico: un agente puede implementarlo en una sesión (~4-6 horas).

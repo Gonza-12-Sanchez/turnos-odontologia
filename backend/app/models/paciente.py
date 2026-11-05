@@ -1,4 +1,4 @@
-"""Entidad Paciente (1↔1 con Usuario rol paciente)."""
+﻿"""Entidad Paciente (1↔1 con Usuario rol paciente)."""
 
 from __future__ import annotations
 

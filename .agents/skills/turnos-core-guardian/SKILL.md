@@ -1,4 +1,4 @@
----
+﻿---
 name: turnos-core-guardian
 description: Guardián de invariantes núcleo de turnos-odontologia para C-02/C-04/C-05/C-06. Usar siempre que se creen o revisen modelos SQLAlchemy, migraciones Alembic, constraints EXCLUDE anti-solapamiento, cálculos fin=inicio+duración, montos en centavos o seeds. Garantiza RN-TU-01/03/04/06 y RN-GL-01/02/03, TIMESTAMPTZ y btree_gist.
 ---

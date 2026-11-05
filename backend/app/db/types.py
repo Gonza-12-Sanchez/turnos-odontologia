@@ -1,4 +1,4 @@
-"""Tipos SQLAlchemy con validación de zona horaria (TZDateTime)."""
+﻿"""Tipos SQLAlchemy con validación de zona horaria (TZDateTime)."""
 
 from __future__ import annotations
 

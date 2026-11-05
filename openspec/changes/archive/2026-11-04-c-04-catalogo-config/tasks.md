@@ -1,4 +1,4 @@
-# Tasks — C-04 Catálogo y configuración
+﻿# Tasks — C-04 Catálogo y configuración
 
 ## 1. Gate y persistencia de auditoría
 

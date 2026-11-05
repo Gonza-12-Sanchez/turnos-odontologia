@@ -1,4 +1,4 @@
-"""Seguridad: bcrypt directo y validación estricta de JWT HS256."""
+﻿"""Seguridad: bcrypt directo y validación estricta de JWT HS256."""
 
 from __future__ import annotations
 

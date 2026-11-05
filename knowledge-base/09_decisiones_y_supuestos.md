@@ -1,4 +1,4 @@
-# Decisiones y Supuestos
+﻿# Decisiones y Supuestos
 
 ## Decisiones documentadas
 

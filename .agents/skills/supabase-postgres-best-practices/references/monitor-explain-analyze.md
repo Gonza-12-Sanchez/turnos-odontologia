@@ -1,4 +1,4 @@
----
+﻿---
 title: Use EXPLAIN ANALYZE to Diagnose Slow Queries
 impact: LOW-MEDIUM
 impactDescription: Identify exact bottlenecks in query execution

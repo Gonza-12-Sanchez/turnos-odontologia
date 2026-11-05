@@ -1,1 +1,1 @@
-"""Compartido: settings, logger, excepciones de negocio."""
+﻿"""Compartido: settings, logger, excepciones de negocio."""

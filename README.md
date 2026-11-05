@@ -1,4 +1,4 @@
-# Turnos Odontología — Gestión de turnos y agenda para consultorios odontológicos
+﻿# Turnos Odontología — Gestión de turnos y agenda para consultorios odontológicos
 
 Trabajo de integración (Metodología I): del Discovery al primer Change, con
 Spec-Driven Development (OpenSpec) y Active Stack. Mercado objetivo: Argentina.

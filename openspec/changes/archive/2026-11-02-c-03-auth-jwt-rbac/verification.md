@@ -1,4 +1,4 @@
-# Verificación Apply — C-03 correctivo
+﻿# Verificación Apply — C-03 correctivo
 
 Fecha: 2026-11-04. Implementación terminada y revisión de Apply aprobada por el usuario antes de Archive.
 

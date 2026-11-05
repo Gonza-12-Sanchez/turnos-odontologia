@@ -1,4 +1,4 @@
-"""Engine async de PostgreSQL (modelos y sesiones en C-02)."""
+﻿"""Engine async de PostgreSQL (modelos y sesiones en C-02)."""
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (

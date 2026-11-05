@@ -1,4 +1,4 @@
----
+﻿---
 title: Create Composite Indexes for Multi-Column Queries
 impact: HIGH
 impactDescription: 5-10x faster multi-column queries

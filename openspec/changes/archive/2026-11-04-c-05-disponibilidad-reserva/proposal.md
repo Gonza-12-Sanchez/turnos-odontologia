@@ -1,4 +1,4 @@
-# Proposal — C-05 Disponibilidad y reserva
+﻿# Proposal — C-05 Disponibilidad y reserva
 
 ## Why
 

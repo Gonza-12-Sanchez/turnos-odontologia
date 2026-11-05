@@ -1,4 +1,4 @@
-# Evidencia: invocación de la skill `turnos-core-guardian`
+﻿# Evidencia: invocación de la skill `turnos-core-guardian`
 
 **Fecha:** 2026-10-28
 **Skill:** `.agents/skills/turnos-core-guardian/` (SKILL.md + references/ + scripts/check_turnos_invariants.py)

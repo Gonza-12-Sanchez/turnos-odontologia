@@ -1,4 +1,4 @@
----
+﻿---
 title: Choose the Right Index Type for Your Data
 impact: HIGH
 impactDescription: 10-100x improvement with correct index type

@@ -1,4 +1,4 @@
-"""Servicio de autenticación (registro, login, refresh, logout, me)."""
+﻿"""Servicio de autenticación (registro, login, refresh, logout, me)."""
 
 from __future__ import annotations
 

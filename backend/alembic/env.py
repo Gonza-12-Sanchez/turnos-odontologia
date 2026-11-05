@@ -1,4 +1,4 @@
-"""Entorno Alembic async (modelos en C-02; migración base vacía en C-01)."""
+﻿"""Entorno Alembic async (modelos en C-02; migración base vacía en C-01)."""
 
 import asyncio
 from logging.config import fileConfig

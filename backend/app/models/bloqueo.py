@@ -1,4 +1,4 @@
-"""Entidad Bloqueo de agenda."""
+﻿"""Entidad Bloqueo de agenda."""
 
 from __future__ import annotations
 

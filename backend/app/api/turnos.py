@@ -1,4 +1,4 @@
-"""API de disponibilidad y reserva (C-05)."""
+﻿"""API de disponibilidad y reserva (C-05)."""
 
 from __future__ import annotations
 

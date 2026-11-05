@@ -1,4 +1,4 @@
----
+﻿---
 title: Use Cursor-Based Pagination Instead of OFFSET
 impact: MEDIUM-HIGH
 impactDescription: Consistent O(1) performance regardless of page depth

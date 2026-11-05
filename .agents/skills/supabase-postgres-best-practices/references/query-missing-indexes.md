@@ -1,4 +1,4 @@
----
+﻿---
 title: Add Indexes on WHERE and JOIN Columns
 impact: CRITICAL
 impactDescription: 100-1000x faster queries on large tables

@@ -1,4 +1,4 @@
-# Tasks — C-02 core-models
+﻿# Tasks — C-02 core-models
 
 ## 1. Fundamentos compartidos
 

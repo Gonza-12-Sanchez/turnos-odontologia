@@ -1,4 +1,4 @@
----
+﻿---
 title: Eliminate N+1 Queries with Batch Loading
 impact: MEDIUM-HIGH
 impactDescription: 10-100x fewer database round trips

@@ -1,4 +1,4 @@
-# Preguntas Abiertas
+﻿# Preguntas Abiertas
 
 ## Entradas de discovery (baja confianza, modo ingest)
 

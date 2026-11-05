@@ -1,4 +1,4 @@
-# Flujos Principales
+﻿# Flujos Principales
 
 Cada flujo se documenta extremo a extremo. Actores y permisos en `03_actores_y_roles.md`.
 

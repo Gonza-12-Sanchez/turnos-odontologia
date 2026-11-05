@@ -1,4 +1,4 @@
----
+﻿---
 title: Optimize RLS Policies for Performance
 impact: HIGH
 impactDescription: 5-10x faster RLS queries with proper patterns

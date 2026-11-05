@@ -1,4 +1,4 @@
-# Dentalink
+﻿# Dentalink
 
 - **URL**: https://www.softwaredentalink.com/ar/
 - **Fecha de investigación**: 2026-09-29

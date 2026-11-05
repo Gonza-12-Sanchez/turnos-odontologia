@@ -1,4 +1,4 @@
-# Spec — core/models
+﻿# Spec — core/models
 
 ## Purpose
 

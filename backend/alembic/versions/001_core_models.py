@@ -1,4 +1,4 @@
-"""Migración 001: modelos core + EXCLUDE anti-solapamiento (C-02)."""
+﻿"""Migración 001: modelos core + EXCLUDE anti-solapamiento (C-02)."""
 
 from __future__ import annotations
 

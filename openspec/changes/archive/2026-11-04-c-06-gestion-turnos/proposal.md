@@ -1,4 +1,4 @@
-# Proposal — C-06 Gestión de turnos
+﻿# Proposal — C-06 Gestión de turnos
 
 ## Why
 

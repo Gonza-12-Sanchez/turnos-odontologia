@@ -1,4 +1,4 @@
-# Reglas de Negocio
+﻿# Reglas de Negocio
 
 Cada regla tiene código único `RN-{DOMINIO}-{NN}` para trazabilidad (usado en `06_funcionalidades.md`).
 

@@ -1,4 +1,4 @@
-"""Reserva de turnos con invariantes de motor (C-05)."""
+﻿"""Reserva de turnos con invariantes de motor (C-05)."""
 
 from __future__ import annotations
 

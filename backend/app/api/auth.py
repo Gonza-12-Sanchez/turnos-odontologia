@@ -1,4 +1,4 @@
-"""Router de autenticación /auth/*."""
+﻿"""Router de autenticación /auth/*."""
 
 from __future__ import annotations
 

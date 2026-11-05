@@ -1,4 +1,4 @@
-# Arquitectura Propuesta
+﻿# Arquitectura Propuesta
 
 > Stack definido el 2026-10-06 (DD-06): FastAPI + SQLAlchemy + PostgreSQL + Redis + Docker atrás; React + TS + Vite adelante. Invariantes no negociables: RN-TU-01 y RN-TU-02 a nivel de motor (RN-GL-01).
 

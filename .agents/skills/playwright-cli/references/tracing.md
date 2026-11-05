@@ -1,4 +1,4 @@
-# Tracing
+﻿# Tracing
 
 Capture detailed execution traces for debugging and analysis. Traces include DOM snapshots, screenshots, network activity, and console logs.
 

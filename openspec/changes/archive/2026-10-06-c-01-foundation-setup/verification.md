@@ -1,4 +1,4 @@
-# Verificación — C-01 foundation-setup (evidencia retroactiva)
+﻿# Verificación — C-01 foundation-setup (evidencia retroactiva)
 
 > **Aviso de reconstrucción.** Este documento se escribió el **2026-11-04** para dejar en el archivo la evidencia de verificación que faltaba; el cierre original del change fue el **2026-10-06**. Se distingue explícitamente lo **re-verificado en esta sesión** de lo que consta en el **registro original** y no se repitió.
 

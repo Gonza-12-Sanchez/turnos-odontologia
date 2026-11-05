@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """
 Start one or more servers, wait for them to be ready, run a command, then clean up.
 

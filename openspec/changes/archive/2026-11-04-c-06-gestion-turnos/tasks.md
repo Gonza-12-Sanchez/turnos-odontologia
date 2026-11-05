@@ -1,4 +1,4 @@
-# Tasks — C-06 Gestión de turnos
+﻿# Tasks — C-06 Gestión de turnos
 
 ## 1. Schemas
 
