@@ -39,7 +39,9 @@ async def gestion_client(engine, session, real_redis, monkeypatch):
         await session.flush()
         pac_obj = None
         if role == "paciente":
-            pac = Paciente(usuario_id=actor.id, nombre="Paciente ficticio", telefono="+54 9 11 0000-0000")
+            pac = Paciente(
+                usuario_id=actor.id, nombre="Paciente ficticio", telefono="+54 9 11 0000-0000"
+            )
             session.add(pac)
             await session.flush()
             pac_obj = pac
@@ -66,12 +68,15 @@ async def gestion_client(engine, session, real_redis, monkeypatch):
         base_url="https://test",
         headers={"Authorization": f"Bearer {actors['secretaria']['token']}"},
     ) as client:
-        yield client, {
-            "sillones": sillones,
-            "tratamiento": tratamiento,
-            "actors": actors,
-            "turno": turno,
-        }
+        yield (
+            client,
+            {
+                "sillones": sillones,
+                "tratamiento": tratamiento,
+                "actors": actors,
+                "turno": turno,
+            },
+        )
 
 
 @pytest.mark.asyncio

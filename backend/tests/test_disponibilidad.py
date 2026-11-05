@@ -39,7 +39,9 @@ async def turnos_client(engine, session, real_redis, monkeypatch):
         await session.flush()
         paciente_obj = None
         if role == "paciente":
-            pac = Paciente(usuario_id=actor.id, nombre="Paciente ficticio", telefono="+54 9 11 0000-0000")
+            pac = Paciente(
+                usuario_id=actor.id, nombre="Paciente ficticio", telefono="+54 9 11 0000-0000"
+            )
             session.add(pac)
             await session.flush()
             paciente_obj = pac
@@ -54,12 +56,15 @@ async def turnos_client(engine, session, real_redis, monkeypatch):
         base_url="https://test",
         headers={"Authorization": f"Bearer {actors['paciente']['token']}"},
     ) as client:
-        yield client, {
-            "consultorio_id": str(consultorio.id),
-            "sillones": sillones,
-            "tratamiento": tratamiento,
-            "actors": actors,
-        }
+        yield (
+            client,
+            {
+                "consultorio_id": str(consultorio.id),
+                "sillones": sillones,
+                "tratamiento": tratamiento,
+                "actors": actors,
+            },
+        )
 
 
 async def _seed_turno(session, context, *, sillon_index=0, start=None):
@@ -180,7 +185,9 @@ async def test_reserva_rol_no_paciente_403(turnos_client):
 @pytest.mark.asyncio
 async def test_slot_ocupado_409_con_alternativas(turnos_client, session):
     client, context = turnos_client
-    _turno, sillon = await _seed_turno(session, context, start=datetime(2026, 12, 1, 16, 0, tzinfo=UTC))
+    _turno, sillon = await _seed_turno(
+        session, context, start=datetime(2026, 12, 1, 16, 0, tzinfo=UTC)
+    )
     tratamiento = context["tratamiento"]
     response = await client.post(
         "/turnos",
@@ -240,7 +247,11 @@ async def test_cache_hit_e_invalidacion(turnos_client):
     # first call
     r1 = await client.get(
         "/horarios-libres",
-        params={"tratamiento": str(tratamiento.id), "fecha": "2026-12-01", "sillon": str(sillon.id)},
+        params={
+            "tratamiento": str(tratamiento.id),
+            "fecha": "2026-12-01",
+            "sillon": str(sillon.id),
+        },
     )
     assert r1.status_code == 200
     # reserve a slot
@@ -256,7 +267,11 @@ async def test_cache_hit_e_invalidacion(turnos_client):
     # after reservation, the slot should be gone
     r2 = await client.get(
         "/horarios-libres",
-        params={"tratamiento": str(tratamiento.id), "fecha": "2026-12-01", "sillon": str(sillon.id)},
+        params={
+            "tratamiento": str(tratamiento.id),
+            "fecha": "2026-12-01",
+            "sillon": str(sillon.id),
+        },
     )
     assert r2.status_code == 200
     starts = [s["inicio"] for s in r2.json()]

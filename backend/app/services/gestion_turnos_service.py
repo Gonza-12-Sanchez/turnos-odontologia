@@ -63,7 +63,9 @@ class GestionTurnosService:
         await self.session.refresh(turno)
         return turno
 
-    async def reprogramar(self, turno_id, inicio, sillon_id, actor, origin: str | None = None) -> Turno:
+    async def reprogramar(
+        self, turno_id, inicio, sillon_id, actor, origin: str | None = None
+    ) -> Turno:
         await self._check_permission(actor, ("secretaria", "paciente"))
         turno = await self._turno(turno_id)
         await self._check_owner(turno, actor)
@@ -101,12 +103,13 @@ class GestionTurnosService:
             Bloqueo.hasta > inicio,
         )
         bloqueos = (await self.session.scalars(bloqueos_stmt)).all()
-        blocked = any(
-            (b.sillon_id is None or b.sillon_id == new_sillon_id)
-            for b in bloqueos
-        )
+        blocked = any((b.sillon_id is None or b.sillon_id == new_sillon_id) for b in bloqueos)
         if conflict is not None or blocked:
-            alts = (await self.disp.libres(inicio.date(), tratamiento.id, new_sillon_id, use_cache=False))[:3]
+            alts = (
+                await self.disp.libres(
+                    inicio.date(), tratamiento.id, new_sillon_id, use_cache=False
+                )
+            )[:3]
             raise ReservaConflicto(alts)
 
         turno.sillon_id = new_sillon_id
@@ -118,7 +121,9 @@ class GestionTurnosService:
         await self.session.refresh(turno)
         return turno
 
-    async def marcar_asistencia(self, turno_id, estado: str, actor, origin: str | None = None) -> Turno:
+    async def marcar_asistencia(
+        self, turno_id, estado: str, actor, origin: str | None = None
+    ) -> Turno:
         await self._check_permission(actor, ("secretaria", "odontologo"))
         if estado not in ("asistido", "ausente"):
             raise HTTPException(status_code=422, detail="Estado inválido")
@@ -144,7 +149,9 @@ class GestionTurnosService:
         await self.session.refresh(turno)
         return turno
 
-    async def patch(self, turno_id, *, es_sobreturno=None, motivo_sobreturno=None, origen=None, actor) -> Turno:
+    async def patch(
+        self, turno_id, *, es_sobreturno=None, motivo_sobreturno=None, origen=None, actor
+    ) -> Turno:
         turno = await self._turno(turno_id)
         # permission for sobreturno changes
         if (es_sobreturno is True or motivo_sobreturno is not None) and actor.rol != "secretaria":

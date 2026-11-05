@@ -55,7 +55,9 @@ async def crear_turno(
     async with uow:
         paciente = await PacienteRepository(uow.session).get_by_usuario_id(user.id)
         if paciente is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Paciente no encontrado")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Paciente no encontrado"
+            )
         service = ReservaService(uow.session)
         try:
             turno = await service.reservar(payload, paciente, uow)

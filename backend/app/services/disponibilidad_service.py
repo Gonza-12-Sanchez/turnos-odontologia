@@ -49,9 +49,7 @@ class DisponibilidadService:
             if not sillon.is_active:
                 raise HTTPException(status_code=422, detail="Sillón inactivo")
             return [sillon]
-        result = await self.session.scalars(
-            select(Sillon).where(Sillon.is_active.is_(True))
-        )
+        result = await self.session.scalars(select(Sillon).where(Sillon.is_active.is_(True)))
         return list(result.all())
 
     async def _turnos_activos(self, fecha: date, sillon_ids: list[UUID]) -> list[Turno]:
@@ -129,17 +127,13 @@ class DisponibilidadService:
                     for b in bloqueos
                 )
                 if not occupied and not blocked:
-                    slots.append(
-                        HorarioLibreOut(sillon_id=sillon.id, inicio=current, fin=slot_end)
-                    )
+                    slots.append(HorarioLibreOut(sillon_id=sillon.id, inicio=current, fin=slot_end))
             current += duration
 
         slots.sort(key=lambda s: (str(s.sillon_id), s.inicio))
 
         try:
-            payload = json.dumps(
-                [s.model_dump(mode="json") for s in slots], default=str
-            )
+            payload = json.dumps([s.model_dump(mode="json") for s in slots], default=str)
             await redis.set(cache_key, payload, ex=60)
         except (RedisError, OSError):
             pass
