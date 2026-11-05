@@ -49,16 +49,17 @@ class ReservaService:
 
         inicio = payload.inicio
         fin = inicio + timedelta(minutes=tratamiento.duracion_min)
+        tratamiento_id = tratamiento.id
 
-        libres = await self.disp.libres(inicio.date(), tratamiento.id, sillon.id, use_cache=False)
+        libres = await self.disp.libres(inicio.date(), tratamiento_id, sillon.id, use_cache=False)
         if not any(l.inicio == inicio and l.sillon_id == sillon.id for l in libres):
-            alts = (await self.disp.libres(inicio.date(), tratamiento.id, use_cache=False))[:3]
+            alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
             raise ReservaConflicto(alts)
 
         turno = Turno(
             paciente_id=paciente.id,
             sillon_id=sillon.id,
-            tratamiento_id=tratamiento.id,
+            tratamiento_id=tratamiento_id,
             inicio=inicio,
             fin=fin,
             estado="reservado",
@@ -72,7 +73,7 @@ class ReservaService:
             await uow.commit()
         except IntegrityError:
             await uow.rollback()
-            alts = (await self.disp.libres(inicio.date(), tratamiento.id, use_cache=False))[:3]
+            alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
             raise ReservaConflicto(alts)
 
         await self.disp.invalidar(inicio.date())
