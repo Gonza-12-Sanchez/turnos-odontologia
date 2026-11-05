@@ -24,8 +24,12 @@ def upgrade() -> None:
         sa.Column("id", UUID, primary_key=True, server_default=sa.text("gen_random_uuid()")),
         sa.Column("nombre", sa.String(120), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
     )
 
@@ -35,8 +39,12 @@ def upgrade() -> None:
         sa.Column("consultorio_id", UUID, sa.ForeignKey("consultorio.id"), nullable=False),
         sa.Column("nombre", sa.String(80), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
     )
     op.create_index("ix_sillon_consultorio", "sillon", ["consultorio_id"])
@@ -48,11 +56,17 @@ def upgrade() -> None:
         sa.Column("duracion_min", sa.Integer(), nullable=False),
         sa.Column("precio_referencia_centavos", sa.Integer(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint("duracion_min > 0", name="ck_tratamiento_duracion_min"),
-        sa.CheckConstraint("precio_referencia_centavos >= 0", name="ck_tratamiento_precio_centavos"),
+        sa.CheckConstraint(
+            "precio_referencia_centavos >= 0", name="ck_tratamiento_precio_centavos"
+        ),
     )
 
     op.create_table(
@@ -63,8 +77,12 @@ def upgrade() -> None:
         sa.Column("password_hash", sa.String(255), nullable=False),
         sa.Column("rol", sa.String(20), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint("rol IN ('paciente','odontologo','secretaria')", name="ck_usuario_rol"),
         sa.CheckConstraint("email IS NOT NULL OR telefono IS NOT NULL", name="ck_usuario_contacto"),
@@ -81,8 +99,12 @@ def upgrade() -> None:
         sa.Column("obra_social", sa.String(120), nullable=True),
         sa.Column("notas", sa.Text(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
     )
 
@@ -100,11 +122,18 @@ def upgrade() -> None:
         sa.Column("es_sobreturno", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("motivo_sobreturno", sa.Text(), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint("fin > inicio", name="ck_turno_fin_gt_inicio"),
-        sa.CheckConstraint("estado IN ('reservado','confirmado','asistido','cancelado','ausente')", name="ck_turno_estado"),
+        sa.CheckConstraint(
+            "estado IN ('reservado','confirmado','asistido','cancelado','ausente')",
+            name="ck_turno_estado",
+        ),
         sa.CheckConstraint("origen IN ('online','mostrador','whatsapp')", name="ck_turno_origen"),
         postgresql.ExcludeConstraint(
             ("sillon_id", "="),
@@ -126,8 +155,12 @@ def upgrade() -> None:
         sa.Column("hasta", sa.DateTime(timezone=True), nullable=False),
         sa.Column("motivo", sa.String(120), nullable=False),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint("hasta > desde", name="ck_bloqueo_hasta_gt_desde"),
     )
@@ -143,12 +176,22 @@ def upgrade() -> None:
         sa.Column("estado", sa.String(20), nullable=False, server_default="enviado"),
         sa.Column("respuesta", sa.String(20), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint("tipo IN ('recordatorio','confirmacion')", name="ck_recordatorio_tipo"),
-        sa.CheckConstraint("estado IN ('enviado','entregado','leido','respondido','fallido')", name="ck_recordatorio_estado"),
-        sa.CheckConstraint("respuesta IS NULL OR respuesta IN ('confirmo','cancelo')", name="ck_recordatorio_respuesta"),
+        sa.CheckConstraint(
+            "estado IN ('enviado','entregado','leido','respondido','fallido')",
+            name="ck_recordatorio_estado",
+        ),
+        sa.CheckConstraint(
+            "respuesta IS NULL OR respuesta IN ('confirmo','cancelo')",
+            name="ck_recordatorio_respuesta",
+        ),
     )
     op.create_index("ix_recordatorio_turno", "recordatorio_wa", ["turno_id"])
 
@@ -162,13 +205,21 @@ def upgrade() -> None:
         sa.Column("estado_mp", sa.String(20), nullable=True),
         sa.Column("referencia_mp", sa.String(120), nullable=True),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
+        sa.Column(
+            "updated_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()
+        ),
         sa.Column("deleted_at", sa.DateTime(timezone=True), nullable=True),
         sa.CheckConstraint("monto_centavos >= 0", name="ck_cobro_monto_centavos"),
-        sa.CheckConstraint("medio IN ('efectivo','transferencia','mercadopago')", name="ck_cobro_medio"),
+        sa.CheckConstraint(
+            "medio IN ('efectivo','transferencia','mercadopago')", name="ck_cobro_medio"
+        ),
         sa.CheckConstraint("tipo IN ('sena','total')", name="ck_cobro_tipo"),
-        sa.CheckConstraint("estado_mp IS NULL OR estado_mp IN ('pendiente','aprobado')", name="ck_cobro_estado_mp"),
+        sa.CheckConstraint(
+            "estado_mp IS NULL OR estado_mp IN ('pendiente','aprobado')", name="ck_cobro_estado_mp"
+        ),
     )
     op.create_index("ix_cobro_turno", "cobro", ["turno_id"])
 

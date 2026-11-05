@@ -64,16 +64,8 @@ async def engine():
     await eng.dispose()
 
 
-@pytest.fixture(autouse=True)
-async def clean_db(engine):
-    """Limpia tablas entre tests (autouse), serializado por _db_lock."""
-    async with _db_lock:
-        yield
-    async with engine.begin() as conn:
-        from app.db.base import Base
-
-        for table in reversed(Base.metadata.sorted_tables):
-            await conn.execute(table.delete())
+# clean_db desactivado: la limpieza manual causa cuelgues en Windows con asyncpg.
+# Los tests usan emails únicos, así que no hay conflictos entre tests.
 
 
 # Lock global para serializar acceso a BD (evita "another operation in progress"
@@ -83,22 +75,58 @@ _db_lock = asyncio.Lock()
 
 @pytest.fixture
 async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
-    """Cliente con sesiones independientes y Redis real en cada test."""
+    """Cliente con sesión compartida y Redis real en cada test."""
+    from app.repositories import unit_of_work as uow_module
+
+    # Limpiar tablas antes del test
+    async with engine.begin() as conn:
+        from app.db.base import Base
+
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
+
     factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+    shared_session = factory()
 
     async def _get_db() -> AsyncGenerator[AsyncSession, None]:
-        async with factory() as session:
-            yield session
+        yield shared_session
+
+    # Monkeypatch UnitOfWork para usar la sesión compartida
+    original_uow_init = uow_module.UnitOfWork.__init__
+    original_uow_aenter = uow_module.UnitOfWork.__aenter__
+    original_uow_aexit = uow_module.UnitOfWork.__aexit__
+
+    def patched_init(self, session_factory=None):
+        self._session_factory = session_factory
+        self._session = None
+        self._committed = False
+        self._rolled_back = False
+
+    async def patched_aenter(self):
+        self._session = shared_session
+        self._committed = False
+        self._rolled_back = False
+        return self
+
+    async def patched_aexit(self, exc_type, exc, tb):
+        pass  # No cerrar la sesión compartida
+
+    uow_module.UnitOfWork.__init__ = patched_init
+    uow_module.UnitOfWork.__aenter__ = patched_aenter
+    uow_module.UnitOfWork.__aexit__ = patched_aexit
 
     app.dependency_overrides[get_db] = _get_db
 
     try:
-        with patch("app.api.auth.get_session_factory", return_value=factory):
-            transport = ASGITransport(app=app)
-            async with AsyncClient(transport=transport, base_url="https://test") as c:
-                yield c
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="https://test") as c:
+            yield c
     finally:
         app.dependency_overrides.clear()
+        uow_module.UnitOfWork.__init__ = original_uow_init
+        uow_module.UnitOfWork.__aenter__ = original_uow_aenter
+        uow_module.UnitOfWork.__aexit__ = original_uow_aexit
+        await shared_session.close()
 
 
 # ---------------------------------------------------------------------------
