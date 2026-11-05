@@ -41,6 +41,7 @@ line-length = 100
 extend-select = ["DTZ"]
 ignore = [
   "B008",  # FastAPI Depends idiomático en firmas de endpoints
+  "E721",  # Comparación de tipos intencional para rechazar bool en timestamps JWT
 ]
 
 [tool.ruff.lint.per-file-ignores]
