@@ -75,7 +75,7 @@ class ReservaService:
             await uow.rollback()
             alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
             raise ReservaConflicto(alts)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             # Captura errores de concurrencia de asyncpg/SQLAlchemy que no son
             # IntegrityError (ej. InvalidRequestError, MissingGreenlet) y los
             # convierte en conflicto de reserva (409) en lugar de 500.

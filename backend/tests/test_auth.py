@@ -119,6 +119,7 @@ async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
 
     try:
         from app.main import app as fastapi_app
+
         transport = ASGITransport(app=fastapi_app)
         async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             yield c
@@ -137,6 +138,7 @@ async def auth_client_concurrent(engine, fake_redis) -> AsyncGenerator[AsyncClie
 
     async with engine.begin() as conn:
         from app.db.base import Base
+
         for table in reversed(Base.metadata.sorted_tables):
             await conn.execute(table.delete())
 
@@ -148,6 +150,7 @@ async def auth_client_concurrent(engine, fake_redis) -> AsyncGenerator[AsyncClie
 
     try:
         from app.main import app as fastapi_app
+
         transport = ASGITransport(app=fastapi_app)
         async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             yield c

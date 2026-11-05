@@ -42,9 +42,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e "./backend[dev]"
-      - run: ruff check backend
+      - run: ruff check backend --config backend/pyproject.toml
         working-directory: .
-      - run: ruff format --check backend/app backend/tests
+      - run: ruff format --check backend/app backend/tests --config backend/pyproject.toml
         working-directory: .
       - run: alembic upgrade head
         working-directory: ./backend
