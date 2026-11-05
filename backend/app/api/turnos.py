@@ -14,8 +14,17 @@ from app.api.deps import get_db, require_role
 from app.models import Usuario
 from app.repositories.paciente_repository import PacienteRepository
 from app.repositories.unit_of_work import UnitOfWork
-from app.schemas.turnos import HorarioLibreOut, TurnoCreate, TurnoOut
+from app.schemas.turnos import (
+    GestionTurnoPatch,
+    HorarioLibreOut,
+    MarcarAsistenciaIn,
+    ReprogramarIn,
+    SobreturnoIn,
+    TurnoCreate,
+    TurnoOut,
+)
 from app.services.disponibilidad_service import DisponibilidadService
+from app.services.gestion_turnos_service import GestionTurnosService
 from app.services.reserva_service import (
     DepositoRequerido,
     ReservaConflicto,
@@ -63,4 +72,101 @@ async def crear_turno(
                     "alternativas": [a.model_dump(mode="json") for a in exc.alternativas],
                 },
             )
+        return TurnoOut.model_validate(turno)
+
+
+@router.patch("/turnos/{turno_id}/confirmar", response_model=TurnoOut)
+async def confirmar_turno(
+    turno_id: UUID,
+    user: Annotated[Usuario, Depends(require_role("secretaria", "paciente"))],
+    db: AsyncSession = Depends(get_db),
+):
+    uow = UnitOfWork(deps.get_session_factory())
+    async with uow:
+        service = GestionTurnosService(uow.session)
+        turno = await service.confirmar(turno_id, user)
+        return TurnoOut.model_validate(turno)
+
+
+@router.patch("/turnos/{turno_id}/cancelar", response_model=TurnoOut)
+async def cancelar_turno(
+    turno_id: UUID,
+    user: Annotated[Usuario, Depends(require_role("secretaria", "paciente"))],
+    db: AsyncSession = Depends(get_db),
+):
+    uow = UnitOfWork(deps.get_session_factory())
+    async with uow:
+        service = GestionTurnosService(uow.session)
+        turno = await service.cancelar(turno_id, user)
+        return TurnoOut.model_validate(turno)
+
+
+@router.patch("/turnos/{turno_id}/reprogramar")
+async def reprogramar_turno(
+    turno_id: UUID,
+    payload: ReprogramarIn,
+    user: Annotated[Usuario, Depends(require_role("secretaria", "paciente"))],
+    db: AsyncSession = Depends(get_db),
+):
+    uow = UnitOfWork(deps.get_session_factory())
+    async with uow:
+        service = GestionTurnosService(uow.session)
+        try:
+            turno = await service.reprogramar(turno_id, payload.inicio, payload.sillon_id, user)
+        except ReservaConflicto as exc:
+            return JSONResponse(
+                status_code=status.HTTP_409_CONFLICT,
+                content={
+                    "detail": "Hueco no disponible",
+                    "alternativas": [a.model_dump(mode="json") for a in exc.alternativas],
+                },
+            )
+        return TurnoOut.model_validate(turno)
+
+
+@router.patch("/turnos/{turno_id}/marcar-asistencia", response_model=TurnoOut)
+async def marcar_asistencia(
+    turno_id: UUID,
+    payload: MarcarAsistenciaIn,
+    user: Annotated[Usuario, Depends(require_role("secretaria", "odontologo"))],
+    db: AsyncSession = Depends(get_db),
+):
+    uow = UnitOfWork(deps.get_session_factory())
+    async with uow:
+        service = GestionTurnosService(uow.session)
+        turno = await service.marcar_asistencia(turno_id, payload.estado, user)
+        return TurnoOut.model_validate(turno)
+
+
+@router.patch("/turnos/{turno_id}/sobreturno", response_model=TurnoOut)
+async def marcar_sobreturno(
+    turno_id: UUID,
+    payload: SobreturnoIn,
+    user: Annotated[Usuario, Depends(require_role("secretaria"))],
+    db: AsyncSession = Depends(get_db),
+):
+    uow = UnitOfWork(deps.get_session_factory())
+    async with uow:
+        service = GestionTurnosService(uow.session)
+        turno = await service.sobreturno(turno_id, payload.motivo, user)
+        return TurnoOut.model_validate(turno)
+
+
+@router.patch("/turnos/{turno_id}", response_model=TurnoOut)
+async def patch_turno(
+    turno_id: UUID,
+    payload: GestionTurnoPatch,
+    user: Annotated[Usuario, Depends(require_role("secretaria", "paciente", "odontologo"))],
+    db: AsyncSession = Depends(get_db),
+):
+    uow = UnitOfWork(deps.get_session_factory())
+    async with uow:
+        service = GestionTurnosService(uow.session)
+        turno = await service.patch(
+            turno_id,
+            es_sobreturno=payload.es_sobreturno,
+            motivo_sobreturno=payload.motivo_sobreturno,
+            origen=payload.origen,
+            actor=user,
+        )
         return TurnoOut.model_validate(turno)

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from typing import Literal
 from uuid import UUID
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
@@ -37,6 +38,36 @@ class TurnoOut(BaseModel):
     fin: AwareDatetime
     estado: str
     origen: str
+    es_sobreturno: bool = False
+    motivo_sobreturno: str | None = None
+    tolerancia_min: int = 5
+
+
+class ReprogramarIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    inicio: AwareDatetime
+    sillon_id: UUID | None = None
+
+
+class MarcarAsistenciaIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    estado: Literal["asistido", "ausente"]
+
+
+class SobreturnoIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    motivo: str = Field(min_length=1, max_length=200)
+
+
+class GestionTurnoPatch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    es_sobreturno: bool | None = None
+    motivo_sobreturno: str | None = None
+    origen: str | None = None
 
 
 class ConflictoOut(BaseModel):

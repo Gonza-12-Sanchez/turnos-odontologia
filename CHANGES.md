@@ -217,7 +217,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 > C-06, C-07 y C-09 pueden proponerse en paralelo tras C-05. C-06 debe archivarse antes de C-08.
 
 ### [C-06] `gestion-turnos`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado 2026-11-04 (10/10 tasks, suite backend 233 tests, Guardian OK)
 - **Scope**: Máquina de estados del turno + gestión secretaria/paciente (US-005 backend)
   - `PATCH /turnos/{id}/confirmar`, `/cancelar`, `/reprogramar`, `/marcar-asistencia` (asistido|ausente): transiciones `reservado → confirmado → asistido | cancelado | ausente`
   - Ventana RN-TU-02 a nivel motor: cancelar/reprogramar con `< 2 h` (por `APPOINTMENT_CANCEL_MINUTES`) → `422` para paciente Y secretaria; reprogramar revalida disponibilidad + anti-solapamiento (reutiliza servicio C-05)
