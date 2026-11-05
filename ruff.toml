@@ -1,0 +1,16 @@
+# Configuración de ruff para el proyecto (raíz)
+# Los archivos Python están en backend/, pero ruff se ejecuta desde la raíz en CI.
+target-version = "py312"
+line-length = 100
+
+[lint]
+extend-select = ["DTZ"]
+ignore = [
+  "B008",  # FastAPI Depends idiomático en firmas de endpoints
+  "E721",  # Comparación de tipos intencional para rechazar bool en timestamps JWT
+]
+
+[lint.per-file-ignores]
+# Los tests construyen datetimes naive a propósito para verificar que el motor los rechaza.
+"backend/tests/test_config.py" = ["DTZ001"]
+"backend/tests/test_core_models.py" = ["DTZ005"]
