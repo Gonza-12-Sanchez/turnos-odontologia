@@ -52,7 +52,7 @@ class ReservaService:
         tratamiento_id = tratamiento.id
 
         libres = await self.disp.libres(inicio.date(), tratamiento_id, sillon.id, use_cache=False)
-        if not any(l.inicio == inicio and l.sillon_id == sillon.id for l in libres):
+        if not any(slot.inicio == inicio and slot.sillon_id == sillon.id for slot in libres):
             alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
             raise ReservaConflicto(alts)
 

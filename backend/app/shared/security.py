@@ -105,7 +105,7 @@ def decode_token(token: str) -> dict[str, Any]:
         raise JWTError("Email incompatible con refresh")
     iat, exp = payload["iat"], payload["exp"]
     now = int(datetime.datetime.now(datetime.UTC).timestamp())
-    if type(iat) is not int or type(exp) is not int:
+    if type(iat) is not int or type(exp) is not int:  # noqa: E721
         raise JWTError("Tiempos inválidos")
     if not 0 <= iat <= now or exp <= now or exp <= iat:
         raise JWTError("Tiempos incoherentes")
