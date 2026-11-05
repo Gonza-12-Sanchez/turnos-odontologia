@@ -1,4 +1,4 @@
-﻿"""Cálculo de disponibilidad y cache Redis (C-05)."""
+"""Cálculo de disponibilidad y cache Redis (C-05)."""
 
 from __future__ import annotations
 

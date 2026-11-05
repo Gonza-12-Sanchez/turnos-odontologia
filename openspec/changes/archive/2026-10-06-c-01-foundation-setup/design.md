@@ -1,4 +1,4 @@
-﻿# Design — C-01 foundation-setup
+# Design — C-01 foundation-setup
 
 ## Context
 

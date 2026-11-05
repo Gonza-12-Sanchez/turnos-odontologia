@@ -1,1 +1,1 @@
-﻿"""Persistencia: engine, Base, migraciones (modelos en C-02)."""
+"""Persistencia: engine, Base, migraciones (modelos en C-02)."""

@@ -1,4 +1,4 @@
-﻿# Ficha de Investigación: Integración de Skill y Servidor MCP en el Proyecto Odontológico
+# Ficha de Investigación: Integración de Skill y Servidor MCP en el Proyecto Odontológico
 
 > **Materia:** Metodología I (Tecnicatura Universitaria en Programación - UTN)  
 > **Change de aplicación:** `C-02 core-models` (Modelos del Dominio e Invariantes)  

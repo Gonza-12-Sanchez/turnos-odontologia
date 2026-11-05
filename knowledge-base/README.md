@@ -1,4 +1,4 @@
-﻿# turnos-odontologia — Base de Conocimiento
+# turnos-odontologia — Base de Conocimiento
 
 Base de conocimiento generada en modo **ingest** desde `docs/discovery/checklist-discovery.md`, `docs/discovery/sources/` (6 notas), `docs/discovery/informe-discovery.md` y `state.discovery`. Sin preguntas (fire-and-forget); dudas en `10_preguntas_abiertas.md`.
 

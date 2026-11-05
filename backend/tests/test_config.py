@@ -1,4 +1,4 @@
-﻿"""Contrato C-04: persistencia auditada y API de configuración por rol."""
+"""Contrato C-04: persistencia auditada y API de configuración por rol."""
 
 from datetime import UTC, datetime
 from uuid import uuid4

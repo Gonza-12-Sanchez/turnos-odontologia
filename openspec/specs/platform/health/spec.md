@@ -1,4 +1,4 @@
-﻿# Spec — platform/health
+# Spec — platform/health
 
 ## Purpose
 

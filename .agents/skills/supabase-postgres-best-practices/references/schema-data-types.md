@@ -1,4 +1,4 @@
-﻿---
+---
 title: Choose Appropriate Data Types
 impact: HIGH
 impactDescription: 50% storage reduction, faster comparisons

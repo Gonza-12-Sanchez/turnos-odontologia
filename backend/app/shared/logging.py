@@ -1,4 +1,4 @@
-﻿"""Logging base de la API."""
+"""Logging base de la API."""
 
 import logging
 

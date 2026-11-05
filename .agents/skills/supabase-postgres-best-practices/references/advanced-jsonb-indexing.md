@@ -1,4 +1,4 @@
-﻿---
+---
 title: Index JSONB Columns for Efficient Querying
 impact: MEDIUM
 impactDescription: 10-100x faster JSONB queries with proper indexing

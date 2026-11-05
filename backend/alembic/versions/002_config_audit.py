@@ -1,4 +1,4 @@
-﻿"""Auditoría transaccional de configuración (C-04)."""
+"""Auditoría transaccional de configuración (C-04)."""
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql

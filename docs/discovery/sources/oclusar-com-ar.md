@@ -1,4 +1,4 @@
-﻿# Oclusar
+# Oclusar
 
 - **URL**: https://www.oclusar.com.ar/
 - **Fecha de investigación**: 2026-09-29

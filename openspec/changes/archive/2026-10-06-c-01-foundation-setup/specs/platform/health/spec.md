@@ -1,4 +1,4 @@
-﻿# Spec Delta — platform/health
+# Spec Delta — platform/health
 
 ## Purpose
 

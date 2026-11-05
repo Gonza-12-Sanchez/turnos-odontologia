@@ -1,4 +1,4 @@
-﻿# Streaming
+# Streaming
 
 ## Stream JSON Lines
 

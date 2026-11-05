@@ -1,4 +1,4 @@
-﻿"""Contrato C-05: disponibilidad pública y reserva."""
+"""Contrato C-05: disponibilidad pública y reserva."""
 
 from datetime import UTC, datetime, timedelta
 

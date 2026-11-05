@@ -1,4 +1,4 @@
-﻿"""Entidad Consultorio."""
+"""Entidad Consultorio."""
 
 from __future__ import annotations
 

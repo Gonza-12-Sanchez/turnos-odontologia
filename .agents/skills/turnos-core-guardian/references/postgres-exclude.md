@@ -1,4 +1,4 @@
-﻿# EXCLUDE anti-solapamiento (RN-TU-01) — Postgres 16
+# EXCLUDE anti-solapamiento (RN-TU-01) — Postgres 16
 
 Patrón canónico para C-02. Fuente: https://www.postgresql.org/docs/16/rangetypes.html y https://www.postgresql.org/docs/16/sql-createtable.html
 

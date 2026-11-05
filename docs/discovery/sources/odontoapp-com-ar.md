@@ -1,4 +1,4 @@
-﻿# OdontoApp
+# OdontoApp
 
 - **URL**: https://odontoapp.com.ar/
 - **Fecha de investigación**: 2026-09-29

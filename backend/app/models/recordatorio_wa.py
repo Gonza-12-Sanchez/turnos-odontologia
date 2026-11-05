@@ -1,4 +1,4 @@
-﻿"""Entidad RecordatorioWA (persistencia; envío en C-08)."""
+"""Entidad RecordatorioWA (persistencia; envío en C-08)."""
 
 from __future__ import annotations
 

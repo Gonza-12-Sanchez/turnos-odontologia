@@ -1,4 +1,4 @@
-﻿# Proposal — Correcciones de C-03
+# Proposal — Correcciones de C-03
 
 ## Why
 

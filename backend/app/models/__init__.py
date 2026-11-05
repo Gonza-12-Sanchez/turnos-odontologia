@@ -1,4 +1,4 @@
-﻿"""Modelos core de turnos-odontologia (C-02)."""
+"""Modelos core de turnos-odontologia (C-02)."""
 
 from app.models.audit import AuditMixin
 from app.models.bloqueo import Bloqueo

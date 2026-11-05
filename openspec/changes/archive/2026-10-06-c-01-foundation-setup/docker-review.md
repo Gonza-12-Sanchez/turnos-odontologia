@@ -1,4 +1,4 @@
-﻿# Revisión Docker línea por línea — C-01 (firmada)
+# Revisión Docker línea por línea — C-01 (firmada)
 
 > Regla dura "Docker revisado": lectura completa el 2026-10-06 antes de cualquier `build`.
 > Archivos: `docker-compose.yml`, `backend/Dockerfile`, `frontend/Dockerfile` (+ `.dockerignore` de cada lado).

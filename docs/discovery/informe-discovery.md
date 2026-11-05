@@ -1,4 +1,4 @@
-﻿# Informe de Discovery — Sistema de gestión de turnos para consultorios odontológicos
+# Informe de Discovery — Sistema de gestión de turnos para consultorios odontológicos
 
 > Estado: COMPLETO — Secciones A–D y Verificación de fuentes completadas el 2026-10-06. Revisión 2026-10-06 (v2): portada completa + distinción [C]/[A] en todo el informe.
 > Base: `docs/discovery/sources/` (6 notas con fecha 2026-09-29) + `docs/discovery/checklist-discovery.md` (11 puntos) + verificación en vivo 2026-10-06.

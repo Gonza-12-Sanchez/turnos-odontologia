@@ -1,4 +1,4 @@
-﻿"""Mutaciones del catálogo y sus eventos comparten una UnitOfWork."""
+"""Mutaciones del catálogo y sus eventos comparten una UnitOfWork."""
 
 from datetime import UTC, datetime
 from uuid import UUID

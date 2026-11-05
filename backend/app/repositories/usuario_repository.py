@@ -1,4 +1,4 @@
-﻿"""Repositorio de Usuario."""
+"""Repositorio de Usuario."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-﻿"""Fixtures de test: AsyncClient (health) + engine/session sobre turnos_test."""
+"""Fixtures de test: AsyncClient (health) + engine/session sobre turnos_test."""
 
 import os
 import uuid

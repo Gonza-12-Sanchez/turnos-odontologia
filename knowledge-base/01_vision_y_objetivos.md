@@ -1,4 +1,4 @@
-﻿# Visión y Objetivos
+# Visión y Objetivos
 
 > Fuente: `docs/discovery/checklist-discovery.md` (2026-09-29) + `docs/discovery/informe-discovery.md` (2026-10-06). Modo ingest — sin preguntas.
 

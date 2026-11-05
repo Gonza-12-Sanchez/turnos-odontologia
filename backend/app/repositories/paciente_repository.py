@@ -1,4 +1,4 @@
-﻿"""Repositorio de Paciente."""
+"""Repositorio de Paciente."""
 
 from __future__ import annotations
 

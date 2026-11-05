@@ -1,4 +1,4 @@
-﻿# Spec Delta — agenda/gestion-turnos
+# Spec Delta — agenda/gestion-turnos
 
 ## Purpose
 

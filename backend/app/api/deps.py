@@ -1,4 +1,4 @@
-﻿"""Dependencias FastAPI: sesion DB, auth y RBAC."""
+"""Dependencias FastAPI: sesion DB, auth y RBAC."""
 
 from __future__ import annotations
 

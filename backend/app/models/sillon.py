@@ -1,4 +1,4 @@
-﻿"""Entidad Sillon."""
+"""Entidad Sillon."""
 
 from __future__ import annotations
 

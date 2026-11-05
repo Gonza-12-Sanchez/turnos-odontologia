@@ -1,4 +1,4 @@
-﻿# Dentiqa
+# Dentiqa
 
 - **URL**: https://dentiqa.app/ar
 - **Fecha de investigación**: 2026-09-29

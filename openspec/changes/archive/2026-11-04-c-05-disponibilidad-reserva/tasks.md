@@ -1,4 +1,4 @@
-﻿# Tasks — C-05 Disponibilidad y reserva
+# Tasks — C-05 Disponibilidad y reserva
 
 ## 1. Schemas y validación
 

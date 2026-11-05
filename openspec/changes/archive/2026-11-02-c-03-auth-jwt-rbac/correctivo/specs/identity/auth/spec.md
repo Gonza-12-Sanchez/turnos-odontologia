@@ -1,4 +1,4 @@
-﻿# Spec Delta — identity/auth
+# Spec Delta — identity/auth
 
 ## MODIFIED Requirements
 

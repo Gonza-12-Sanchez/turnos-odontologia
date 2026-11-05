@@ -1,4 +1,4 @@
-﻿"""Validador de teléfono AR en capa de aplicación (Pydantic), D-08."""
+"""Validador de teléfono AR en capa de aplicación (Pydantic), D-08."""
 
 from __future__ import annotations
 

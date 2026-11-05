@@ -1,4 +1,4 @@
-﻿# Design — C-02 core-models
+# Design — C-02 core-models
 
 ## Context
 

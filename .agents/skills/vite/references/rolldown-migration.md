@@ -1,4 +1,4 @@
-﻿---
+---
 name: vite-rolldown
 description: Vite 8 Rolldown bundler and Oxc transformer migration
 ---

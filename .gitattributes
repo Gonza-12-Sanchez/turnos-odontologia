@@ -1,7 +1,10 @@
-﻿# Forzar LF en archivos Python (evita problemas de ruff en CI Linux)
+# Forzar LF en archivos de texto (evita problemas de ruff en CI Linux)
 *.py text eol=lf
 *.md text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
 *.json text eol=lf
 *.toml text eol=lf
+*.txt text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf

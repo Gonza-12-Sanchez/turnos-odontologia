@@ -1,4 +1,4 @@
-﻿# Storage Management
+# Storage Management
 
 Manage cookies, localStorage, sessionStorage, and browser storage state.
 

@@ -1,4 +1,4 @@
-﻿# Evidencia: invocación del MCP PostgreSQL
+# Evidencia: invocación del MCP PostgreSQL
 
 **Fecha:** 2026-10-28
 **Servidor:** `@modelcontextprotocol/server-postgres` (configurado en `~/.config/opencode/opencode.json`, `mcp.postgres`)

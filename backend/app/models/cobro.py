@@ -1,4 +1,4 @@
-﻿"""Entidad Cobro (montos en centavos INTEGER, RN-CO-03)."""
+"""Entidad Cobro (montos en centavos INTEGER, RN-CO-03)."""
 
 from __future__ import annotations
 

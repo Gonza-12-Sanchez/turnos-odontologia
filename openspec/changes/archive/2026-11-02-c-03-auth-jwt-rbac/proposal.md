@@ -1,4 +1,4 @@
-﻿# Proposal — C-03 auth-jwt-rbac
+# Proposal — C-03 auth-jwt-rbac
 
 ## Why
 

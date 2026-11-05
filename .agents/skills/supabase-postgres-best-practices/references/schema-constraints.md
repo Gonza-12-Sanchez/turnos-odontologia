@@ -1,4 +1,4 @@
-﻿---
+---
 title: Add Constraints Safely in Migrations
 impact: HIGH
 impactDescription: Prevents migration failures and enables idempotent schema changes

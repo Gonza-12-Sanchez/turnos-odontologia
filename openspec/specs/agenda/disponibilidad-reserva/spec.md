@@ -1,4 +1,4 @@
-﻿# agenda/disponibilidad-reserva Specification
+# agenda/disponibilidad-reserva Specification
 
 ## Purpose
 Provide public availability calculation by treatment duration and authenticated patient reservation with engine-level anti-overlap, concurrency handling, and contracts for deposit and WhatsApp reminder.

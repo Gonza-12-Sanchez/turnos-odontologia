@@ -1,4 +1,4 @@
-﻿# Denteo
+# Denteo
 
 - **URL**: https://www.denteo.com.ar/
 - **Fecha de investigación**: 2026-09-29

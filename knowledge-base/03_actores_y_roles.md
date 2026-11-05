@@ -1,4 +1,4 @@
-﻿# Actores y Roles
+# Actores y Roles
 
 ## Actores del sistema
 

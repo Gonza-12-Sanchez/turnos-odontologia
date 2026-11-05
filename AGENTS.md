@@ -1,4 +1,4 @@
-﻿# turnos-odontologia — Instrucciones para Agentes
+# turnos-odontologia — Instrucciones para Agentes
 
 > Este archivo (y su copia `CLAUDE.md`) es lo PRIMERO que todo agente lee al entrar al repo.
 > Generado a partir de `knowledge-base/` y `CHANGES.md`. No editar a mano sin re-sincronizar ambos archivos.

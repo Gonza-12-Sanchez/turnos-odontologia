@@ -1,4 +1,4 @@
-﻿---
+---
 name: vite-build-ssr
 description: Vite library mode, multi-page apps, JavaScript API, and SSR guidance
 ---

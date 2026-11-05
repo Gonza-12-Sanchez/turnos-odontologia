@@ -1,4 +1,4 @@
-﻿# Descripción General
+# Descripción General
 
 > Fuente: `docs/discovery/checklist-discovery.md` + `docs/discovery/informe-discovery.md`. Stack DEFINIDO por el equipo el 2026-10-06 (ver DD-06 en `09_decisiones_y_supuestos.md`).
 

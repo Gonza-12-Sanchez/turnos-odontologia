@@ -1,4 +1,4 @@
-﻿# Proposal — C-02 core-models
+# Proposal — C-02 core-models
 
 ## Why
 

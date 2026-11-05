@@ -1,4 +1,4 @@
-﻿"""Contrato C-06: gestión del ciclo de vida del turno."""
+"""Contrato C-06: gestión del ciclo de vida del turno."""
 
 from datetime import UTC, datetime, timedelta
 

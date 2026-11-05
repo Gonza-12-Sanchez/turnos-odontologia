@@ -1,4 +1,4 @@
-﻿"""Entidad Turno (anti-solapamiento a nivel motor, RN-TU-01)."""
+"""Entidad Turno (anti-solapamiento a nivel motor, RN-TU-01)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-﻿---
+---
 title: Use Partial Indexes for Filtered Queries
 impact: HIGH
 impactDescription: 5-20x smaller indexes, faster writes and queries

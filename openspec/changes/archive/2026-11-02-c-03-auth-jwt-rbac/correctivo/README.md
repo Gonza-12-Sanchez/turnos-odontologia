@@ -1,4 +1,4 @@
-﻿# C-03 — Seguimiento correctivo (2026-11-04)
+# C-03 — Seguimiento correctivo (2026-11-04)
 
 Artefactos del change correctivo que se archivó originalmente como
 `2026-11-04-c-03-auth-jwt-rbac-fixes` y se consolidó aquí para mantener un

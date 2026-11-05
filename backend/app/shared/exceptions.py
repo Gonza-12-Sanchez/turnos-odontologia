@@ -1,4 +1,4 @@
-﻿"""Excepciones de negocio (mapean a respuestas HTTP en C-03+)."""
+"""Excepciones de negocio (mapean a respuestas HTTP en C-03+)."""
 
 
 class BusinessError(Exception):

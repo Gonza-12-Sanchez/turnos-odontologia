@@ -1,4 +1,4 @@
-﻿"""Eventos de configuración: historial durable, sin baja lógica de eventos."""
+"""Eventos de configuración: historial durable, sin baja lógica de eventos."""
 
 import uuid
 from datetime import datetime

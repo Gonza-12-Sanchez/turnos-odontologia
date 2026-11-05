@@ -1,4 +1,4 @@
-﻿# Design — Correcciones de C-03
+# Design — Correcciones de C-03
 
 ## Context
 

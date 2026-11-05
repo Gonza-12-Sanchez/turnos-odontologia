@@ -1,4 +1,4 @@
-﻿# Responses
+# Responses
 
 ## Return Type or Response Model
 

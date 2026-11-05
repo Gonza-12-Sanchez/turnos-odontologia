@@ -1,4 +1,4 @@
-﻿# Pydantic
+# Pydantic
 
 ## Do not use Ellipsis
 

@@ -1,4 +1,4 @@
-﻿"""Contratos de disponibilidad y reserva (C-05)."""
+"""Contratos de disponibilidad y reserva (C-05)."""
 
 from __future__ import annotations
 

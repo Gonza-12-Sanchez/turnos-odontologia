@@ -1,4 +1,4 @@
-﻿"""Settings centralizados (Pydantic). Secretos solo por entorno, jamás en repo."""
+"""Settings centralizados (Pydantic). Secretos solo por entorno, jamás en repo."""
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict

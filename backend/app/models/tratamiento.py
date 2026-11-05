@@ -1,4 +1,4 @@
-﻿"""Entidad Tratamiento."""
+"""Entidad Tratamiento."""
 
 from __future__ import annotations
 

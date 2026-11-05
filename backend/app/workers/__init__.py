@@ -1,1 +1,1 @@
-﻿"""Workers async (notificaciones WhatsApp vía Redis, C-08)."""
+"""Workers async (notificaciones WhatsApp vía Redis, C-08)."""

@@ -1,4 +1,4 @@
-﻿# Funcionalidades
+# Funcionalidades
 
 Organizadas por **épica** y luego por **historia de usuario** (formato US-NNN). Trazabilidad a `05_reglas_de_negocio.md`.
 

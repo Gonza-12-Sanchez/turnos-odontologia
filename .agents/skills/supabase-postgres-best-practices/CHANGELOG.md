@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 ## [1.6.0](https://github.com/supabase/agent-skills/compare/supabase-postgres-best-practices-v1.5.0...supabase-postgres-best-practices-v1.6.0) (2026-07-30)
 

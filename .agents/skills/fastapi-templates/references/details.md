@@ -1,4 +1,4 @@
-﻿# fastapi-templates — detailed worked examples
+# fastapi-templates — detailed worked examples
 
 ## Implementation Patterns
 

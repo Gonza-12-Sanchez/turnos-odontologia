@@ -1,4 +1,4 @@
-﻿"""Tests de invariantes y escenarios del spec core/models (C-02)."""
+"""Tests de invariantes y escenarios del spec core/models (C-02)."""
 
 from __future__ import annotations
 

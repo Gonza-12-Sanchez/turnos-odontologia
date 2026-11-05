@@ -1,4 +1,4 @@
-﻿# Video Recording
+# Video Recording
 
 Capture browser automation sessions as video for debugging, documentation, or verification. Produces WebM (VP8/VP9 codec).
 

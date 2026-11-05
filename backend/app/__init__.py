@@ -1,1 +1,1 @@
-﻿"""Turnos Odontología API."""
+"""Turnos Odontología API."""

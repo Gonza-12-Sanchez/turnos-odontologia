@@ -1,4 +1,4 @@
-﻿---
+---
 title: Index Foreign Key Columns
 impact: HIGH
 impactDescription: 10-100x faster JOINs and CASCADE operations

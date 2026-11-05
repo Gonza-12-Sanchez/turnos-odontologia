@@ -1,4 +1,4 @@
-﻿# Design — C-05 Disponibilidad y reserva
+# Design — C-05 Disponibilidad y reserva
 
 ## Context
 

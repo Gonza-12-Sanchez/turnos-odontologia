@@ -1,4 +1,4 @@
-﻿# Dependency Injection
+# Dependency Injection
 
 Use dependencies when:
 

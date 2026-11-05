@@ -1,4 +1,4 @@
-﻿"""Schemas Pydantic para autenticación."""
+"""Schemas Pydantic para autenticación."""
 
 from __future__ import annotations
 

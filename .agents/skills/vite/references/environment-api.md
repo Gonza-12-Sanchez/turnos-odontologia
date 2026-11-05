@@ -1,4 +1,4 @@
-﻿---
+---
 name: vite-environment-api
 description: Vite 6+ Environment API for multiple runtime environments
 ---

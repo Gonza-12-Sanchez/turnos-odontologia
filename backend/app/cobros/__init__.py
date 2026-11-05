@@ -1,1 +1,1 @@
-﻿"""Cobros y Mercado Pago (C-09)."""
+"""Cobros y Mercado Pago (C-09)."""

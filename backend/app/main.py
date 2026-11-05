@@ -1,4 +1,4 @@
-﻿"""Turnos Odontología API — application factory (routers por change)."""
+"""Turnos Odontología API — application factory (routers por change)."""
 
 from contextlib import asynccontextmanager
 

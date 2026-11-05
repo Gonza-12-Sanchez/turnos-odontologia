@@ -1,4 +1,4 @@
-﻿# Spec Delta — agenda/catalogo-config
+# Spec Delta — agenda/catalogo-config
 
 ## Purpose
 

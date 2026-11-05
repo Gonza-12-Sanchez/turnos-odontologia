@@ -1,4 +1,4 @@
-﻿# Tasks — C-01 foundation-setup
+# Tasks — C-01 foundation-setup
 
 ## 1. Backend base (FastAPI + SQLAlchemy async + Alembic)
 

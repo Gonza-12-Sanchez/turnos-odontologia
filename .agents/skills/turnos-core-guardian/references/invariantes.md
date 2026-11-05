@@ -1,4 +1,4 @@
-﻿# Invariantes núcleo (RN-TU / RN-CO / RN-GL)
+# Invariantes núcleo (RN-TU / RN-CO / RN-GL)
 
 Checklist para C-02, reutilizable en C-04/C-05/C-06.
 
