@@ -194,7 +194,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-05] `disponibilidad-reserva`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado 2026-11-04 (10/10 tasks, suite backend 223 tests, Guardian OK)
 - **Scope**: Disponibilidad pública + reserva con invariantes de motor (US-001, US-002 backend)
   - `GET /horarios-libres?sillon=&tratamiento=&fecha=` — público (sin login): calcula franjas reales = sillones activos − turnos activos − bloqueos, expandiendo por `duracion_min` del tratamiento (RN-TU-03/04/06); no expone datos de pacientes; cache Redis TTL corto con invalidación al crear turno
   - `POST /turnos` — requiere login paciente (RN-AU-01): valida hueco, calcula `fin = inicio + duracion`, verificación anti-solapamiento a nivel motor antes de confirmar (RN-TU-01, RN-GL-01); carrera por el mismo hueco → `409 + oferta de alternativas` (Flujo 1 caso de error)
