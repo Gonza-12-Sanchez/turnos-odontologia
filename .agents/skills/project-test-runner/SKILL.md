@@ -104,7 +104,11 @@ curl http://localhost:8000/api/health
 - **API base:** http://localhost:8000/api
 - **Health check:** http://localhost:8000/api/health
 
-### Paso 7: Limpiar datos ficticios (solo modo prueba, al finalizar)
+### Paso 7: Limpiar datos ficticios (AUTOMÁTICO al finalizar modo prueba)
+
+**Se ejecuta automáticamente cuando el usuario indica que terminó de probar.** No requiere intervención manual.
+
+**Este paso se ejecuta automáticamente al finalizar el modo prueba.** No requiere intervención manual.
 
 ```bash
 docker compose exec api alembic downgrade base
@@ -119,6 +123,8 @@ alembic upgrade head
 ```
 
 Esto elimina todos los datos (incluyendo seeds ficticios) y recrea el schema vacío.
+
+**IMPORTANTE:** Si el usuario dice "limpiá los datos de prueba" o "terminé de probar", ejecutar este paso automáticamente sin preguntar. Si el usuario dice "no limpies" o "dejá los datos", omitir este paso.
 
 ## Resultado esperado
 
