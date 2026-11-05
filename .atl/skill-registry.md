@@ -24,6 +24,7 @@
 | Automate browser interactions, test web pages, work with Playwright tests | playwright-cli | .agents/skills/playwright-cli/SKILL.md |
 | Interacting with and testing local web apps using Playwright: verify frontend, debug UI, screenshots, browser logs | webapp-testing | .agents/skills/webapp-testing/SKILL.md |
 | Implementing E2E tests, debugging flaky tests, establishing testing standards (Playwright/Cypress) | e2e-testing-patterns | .agents/skills/e2e-testing-patterns/SKILL.md |
+| Levantar el proyecto completo (db + redis + api + frontend) para pruebas o uso real: verificar Docker, crear contenedores, migraciones, seeds ficticios, health checks | project-test-runner | .agents/skills/project-test-runner/SKILL.md |
 | Creating/reviewing SQLAlchemy models, Alembic migrations, EXCLUDE constraints, money in cents, TIMESTAMPTZ, seeds for turns/sillones/tratamientos/cobros (C-02/C-04/C-05/C-06) | turnos-core-guardian | .agents/skills/turnos-core-guardian/SKILL.md |
 
 ## Compact Rules
@@ -167,6 +168,17 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 - Invariantes: `fin = inicio + duracion_min` (nunca input cliente), `monto INTEGER` centavos (jamás Float/money), `origen IN (online,mostrador,whatsapp)`, `AuditMixin`, teléfono AR en app, seeds 100% ficticios
 - Ejecutar script: `python .agents/skills/turnos-core-guardian/scripts/check_turnos_invariants.py backend/app/models backend/alembic/versions` → debe salir OK antes de proponer
 - Veredicto binario: `[VEREDICTO: OK]` o `[VEREDICTO: BLOQUEADO]` con lista de violaciones archivo:línea; reglas duras de AGENTS.md prevalecen
+
+### project-test-runner
+- Levantar proyecto completo: db + redis + api + frontend con docker compose up -d
+- Verificar Docker instalado y corriendo antes de levantar
+- Aplicar migraciones: alembic upgrade head
+- Modo prueba: cargar seed ficticio (backend/app/db/seed.py) + verificar tests
+- Modo real: NO cargar seed, solo levantar contenedores + migraciones
+- Al finalizar modo prueba: limpiar datos ficticios (downgrade + upgrade o drop+recreate)
+- Health check: curl http://localhost:8000/api/health → {"status":"ok"}
+- URLs: frontend http://localhost:4173, swagger http://localhost:8000/docs, api http://localhost:8000/api
+- Puertos mapeados: db 5432:5432, redis 6379:6379, api 8000:8000, frontend 4173:4173
 
 ## Project Conventions
 

@@ -1,6 +1,10 @@
 services:
   db:
     image: postgres:16-alpine
+    # Puerto mapeado para desarrollo/testing desde el host (MCP, psql, tests).
+    # En producción, remover este mapeo y usar red interna de Docker.
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: turnos
       POSTGRES_PASSWORD: turnos
@@ -15,6 +19,10 @@ services:
 
   redis:
     image: redis:7-alpine
+    # Puerto mapeado para desarrollo/testing desde el host (MCP, redis-cli, tests).
+    # En producción, remover este mapeo y usar red interna de Docker.
+    ports:
+      - "6379:6379"
     volumes:
       - redisdata:/data
     healthcheck:

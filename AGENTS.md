@@ -45,7 +45,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 | Agente | Rol | Skills que carga |
 |--------|-----|------------------|
 | **Backend Core** | FastAPI / async / Postgres / TDD | `fastapi-templates`, `fastapi`, `async-python-patterns`, `supabase-postgres-best-practices`, `postgresql-table-design`, `tdd`, `turnos-core-guardian` (skill propia — invariantes núcleo) |
-| **Backend Aux** | Seguridad / integraciones / deploy | `security-and-hardening`, `docker-patterns` (⚠️ flag Snyk High Risk: revisar Dockerfiles línea por línea) |
+| **Backend Aux** | Seguridad / integraciones / deploy | `security-and-hardening`, `docker-patterns` (⚠️ flag Snyk High Risk: revisar Dockerfiles línea por línea), `project-test-runner` (levantar proyecto para pruebas) |
 | **Frontend** | React / TS / Vite PWA + testing | `vercel-react-best-practices`, `web-design-guidelines`, `frontend-design`, `typescript-advanced-types`, `vite`, `webapp-testing` |
 | **Calidad** | Debug / review / E2E | `diagnosing-bugs`, `code-review`, `playwright-cli`, `e2e-testing-patterns` |
 
