@@ -50,7 +50,7 @@ async def turnos_client(engine, session, real_redis, monkeypatch):
 
     await session.commit()
 
-    transport = ASGITransport(app=app, raise_app_exceptions=True)
+    transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(
         transport=transport,
         base_url="https://test",
