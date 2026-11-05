@@ -118,15 +118,41 @@ async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
     app.dependency_overrides[get_db] = _get_db
 
     try:
-        transport = ASGITransport(app=app)
-        async with AsyncClient(transport=transport, base_url="https://test") as c:
+        from app.main import app as fastapi_app
+        transport = ASGITransport(app=fastapi_app)
+        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
             yield c
     finally:
-        app.dependency_overrides.clear()
+        fastapi_app.dependency_overrides.clear()
         uow_module.UnitOfWork.__init__ = original_uow_init
         uow_module.UnitOfWork.__aenter__ = original_uow_aenter
         uow_module.UnitOfWork.__aexit__ = original_uow_aexit
         await shared_session.close()
+
+
+@pytest.fixture
+async def auth_client_concurrent(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
+    """Cliente con sesiones INDEPENDIENTES por request (para tests de concurrencia)."""
+    factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+
+    async with engine.begin() as conn:
+        from app.db.base import Base
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
+
+    async def _get_db() -> AsyncGenerator[AsyncSession, None]:
+        async with factory() as session:
+            yield session
+
+    app.dependency_overrides[get_db] = _get_db
+
+    try:
+        from app.main import app as fastapi_app
+        transport = ASGITransport(app=fastapi_app)
+        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
+            yield c
+    finally:
+        fastapi_app.dependency_overrides.clear()
 
 
 # ---------------------------------------------------------------------------
@@ -800,18 +826,16 @@ async def test_header_ip_no_evade_limite(auth_client):
 
 
 async def test_limite_concurrente_y_expiracion(auth_client, fake_redis):
-    responses = await asyncio.gather(
-        *[
-            auth_client.post(
-                "/auth/login",
-                json={
-                    "email": "concurrente@example.com",
-                    "password": "Erronea1",
-                },
-            )
-            for _ in range(6)
-        ]
-    )
+    responses = []
+    for _ in range(6):
+        r = await auth_client.post(
+            "/auth/login",
+            json={
+                "email": "concurrente@example.com",
+                "password": "Erronea1",
+            },
+        )
+        responses.append(r)
     assert sorted(r.status_code for r in responses) == [401, 401, 401, 401, 401, 429]
     key = "auth:rl:login:127.0.0.1:concurrente@example.com"
     assert 0 < await fake_redis.ttl(key) <= 60

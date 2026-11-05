@@ -6,6 +6,7 @@ import uuid
 import pytest
 import redis.asyncio as redis
 from httpx import ASGITransport, AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
@@ -73,7 +74,8 @@ async def session(engine):
     factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     async with factory() as s:
         yield s
-    # Limpieza entre tests: vaciar tablas (soporta datos commiteados).
+    # Limpieza entre tests: TRUNCATE CASCADE (más robusto que DELETE para datos commiteados).
     async with engine.begin() as conn:
-        for table in reversed(Base.metadata.sorted_tables):
-            await conn.execute(table.delete())
+        table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
+        if table_names:
+            await conn.execute(text(f"TRUNCATE TABLE {table_names} CASCADE"))

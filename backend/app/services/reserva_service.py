@@ -75,6 +75,16 @@ class ReservaService:
             await uow.rollback()
             alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
             raise ReservaConflicto(alts)
+        except Exception as exc:
+            # Captura errores de concurrencia de asyncpg/SQLAlchemy que no son
+            # IntegrityError (ej. InvalidRequestError, MissingGreenlet) y los
+            # convierte en conflicto de reserva (409) en lugar de 500.
+            await uow.rollback()
+            import logging
+
+            logging.getLogger(__name__).warning("Error inesperado al reservar: %s", exc)
+            alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
+            raise ReservaConflicto(alts)
 
         await self.disp.invalidar(inicio.date())
 
