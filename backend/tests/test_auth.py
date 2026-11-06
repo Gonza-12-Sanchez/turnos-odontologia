@@ -81,6 +81,7 @@ async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
     # Limpiar tablas antes del test: TRUNCATE CASCADE
     async with engine.begin() as conn:
         from sqlalchemy import text
+
         from app.db.base import Base
 
         table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
@@ -140,6 +141,7 @@ async def auth_client_concurrent(engine, fake_redis) -> AsyncGenerator[AsyncClie
 
     async with engine.begin() as conn:
         from sqlalchemy import text
+
         from app.db.base import Base
 
         table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)

@@ -46,7 +46,9 @@ class GestionTurnosService:
         if turno.estado != "reservado":
             raise HTTPException(status_code=422, detail="Transición inválida")
         turno.estado = "confirmado"
-        effective_origin = origin or ("whatsapp" if actor is None else (turno.origen or "mostrador"))
+        effective_origin = origin or (
+            "whatsapp" if actor is None else (turno.origen or "mostrador")
+        )
         turno.origen = effective_origin
         await self.session.flush()
         await self.session.refresh(turno)
@@ -63,7 +65,9 @@ class GestionTurnosService:
         if not self._window_ok(turno):
             raise HTTPException(status_code=422, detail="Fuera de la ventana de cancelación")
         turno.estado = "cancelado"
-        effective_origin = origin or ("whatsapp" if actor is None else (turno.origen or "mostrador"))
+        effective_origin = origin or (
+            "whatsapp" if actor is None else (turno.origen or "mostrador")
+        )
         turno.origen = effective_origin
         await self.session.flush()
         await self.session.refresh(turno)
