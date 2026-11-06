@@ -70,5 +70,3 @@ class RecordatorioWAService:
         stmt = select(RecordatorioWA).where(RecordatorioWA.turno_id == turno_id)
         result = await self.session.scalars(stmt)
         return list(result.all())
-
-

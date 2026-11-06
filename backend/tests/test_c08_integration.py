@@ -27,12 +27,22 @@ async def integ_client(engine, session, real_redis, monkeypatch):
     session.add(pac)
     await session.commit()
     from app.shared.security import create_access_token
+
     token = create_access_token(actor.id, ["paciente"], actor.email)[0]
 
     transport = ASGITransport(app=app, raise_app_exceptions=False)
-    async with AsyncClient(transport=transport, base_url="https://test",
-                          headers={"Authorization": f"Bearer {token}"}) as client:
-        yield client, {"sillones": sillones, "tratamiento": tratamiento, "paciente": pac, "redis": real_redis}
+    async with AsyncClient(
+        transport=transport, base_url="https://test", headers={"Authorization": f"Bearer {token}"}
+    ) as client:
+        yield (
+            client,
+            {
+                "sillones": sillones,
+                "tratamiento": tratamiento,
+                "paciente": pac,
+                "redis": real_redis,
+            },
+        )
 
 
 @pytest.mark.asyncio
@@ -40,11 +50,14 @@ async def test_reserva_genera_job_wa(integ_client):
     client, ctx = integ_client
     sillon = ctx["sillones"][1]
     tratamiento = ctx["tratamiento"]
-    r = await client.post("/turnos", json={
-        "sillon_id": str(sillon.id),
-        "tratamiento_id": str(tratamiento.id),
-        "inicio": "2026-12-01T20:00:00+00:00",
-    })
+    r = await client.post(
+        "/turnos",
+        json={
+            "sillon_id": str(sillon.id),
+            "tratamiento_id": str(tratamiento.id),
+            "inicio": "2026-12-01T20:00:00+00:00",
+        },
+    )
     assert r.status_code == 201, r.text
     turno_id = r.json()["id"]
     items = await ctx["redis"].lrange("wa:reminders", 0, -1)
@@ -53,7 +66,7 @@ async def test_reserva_genera_job_wa(integ_client):
 
 @pytest.mark.asyncio
 async def test_webhook_ruta_disponible(integ_client):
-    client, ctx = integ_client
+    client, _ctx = integ_client
     r = await client.post("/webhooks/whatsapp", json={"message_id": "x", "respuesta": "confirmo"})
     # turno no encontrado -> 404 (but route exists, not 404 from router missing; could be 404 turno)
     assert r.status_code in (404, 422)

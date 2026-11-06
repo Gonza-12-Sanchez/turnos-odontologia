@@ -53,5 +53,7 @@ def test_mis_reserva_out_acciones():
 
 
 def test_agenda_sillon_out():
-    g = AgendaSillonOut(sillon_id=uuid4(), sillon_nombre="S1", sillon={"id": uuid4(), "nombre": "S1"}, turnos=[])
+    g = AgendaSillonOut(
+        sillon_id=uuid4(), sillon_nombre="S1", sillon={"id": uuid4(), "nombre": "S1"}, turnos=[]
+    )
     assert g.turnos == []

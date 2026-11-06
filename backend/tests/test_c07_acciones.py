@@ -27,15 +27,21 @@ class DummyTurno:
 @pytest.mark.asyncio
 async def test_acciones_lejano_permite_cancelar(monkeypatch):
     import app.services.agenda_lectura_service as svc
+
     monkeypatch.setattr(svc.settings, "appointment_cancel_minutes", 120)
+
     # monkeypatch repo
     class Repo:
         def __init__(self, session):
             pass
+
         async def list_for_paciente(self, *a, **k):
             sillon = type("S", (), {"id": __import__("uuid").uuid4(), "nombre": "S1"})()
-            trat = type("T", (), {"id": __import__("uuid").uuid4(), "nombre": "C", "duracion_min": 30})()
+            trat = type(
+                "T", (), {"id": __import__("uuid").uuid4(), "nombre": "C", "duracion_min": 30}
+            )()
             return [DummyTurno("reservado", datetime.now(UTC) + timedelta(hours=3), sillon, trat)]
+
     monkeypatch.setattr(svc, "AgendaLecturaRepository", Repo)
     service = AgendaLecturaService(session=None)
     res = await service.mis_reservas(paciente=None)
@@ -46,14 +52,22 @@ async def test_acciones_lejano_permite_cancelar(monkeypatch):
 @pytest.mark.asyncio
 async def test_acciones_cercano_no_cancelar(monkeypatch):
     import app.services.agenda_lectura_service as svc
+
     monkeypatch.setattr(svc.settings, "appointment_cancel_minutes", 120)
+
     class Repo:
         def __init__(self, session):
             pass
+
         async def list_for_paciente(self, *a, **k):
             sillon = type("S", (), {"id": __import__("uuid").uuid4(), "nombre": "S1"})()
-            trat = type("T", (), {"id": __import__("uuid").uuid4(), "nombre": "C", "duracion_min": 30})()
-            return [DummyTurno("reservado", datetime.now(UTC) + timedelta(minutes=30), sillon, trat)]
+            trat = type(
+                "T", (), {"id": __import__("uuid").uuid4(), "nombre": "C", "duracion_min": 30}
+            )()
+            return [
+                DummyTurno("reservado", datetime.now(UTC) + timedelta(minutes=30), sillon, trat)
+            ]
+
     monkeypatch.setattr(svc, "AgendaLecturaRepository", Repo)
     service = AgendaLecturaService(session=None)
     res = await service.mis_reservas(paciente=None)

@@ -76,9 +76,10 @@ class AgendaLecturaService:
         cancel_window = settings.appointment_cancel_minutes * 60
         result: list[MisReservaOut] = []
         for turno in turnos:
-            cancelar = turno.estado in ("reservado", "confirmado") and (
-                turno.inicio - now
-            ).total_seconds() >= cancel_window
+            cancelar = (
+                turno.estado in ("reservado", "confirmado")
+                and (turno.inicio - now).total_seconds() >= cancel_window
+            )
             acciones = AccionesOut(
                 cancelar=cancelar,
                 confirmar=turno.estado == "reservado",
