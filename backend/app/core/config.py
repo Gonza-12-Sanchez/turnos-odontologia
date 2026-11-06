@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:5173"
     whatsapp_provider: str = ""
     whatsapp_api_key: str = ""
+    whatsapp_template_name: str = "recordatorio_turno"
+    whatsapp_webhook_secret: str = ""
     mp_access_token: str = ""
     appointment_cancel_minutes: int = 120
     late_tolerance_minutes: int = 5

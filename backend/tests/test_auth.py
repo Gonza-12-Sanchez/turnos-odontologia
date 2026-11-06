@@ -78,12 +78,14 @@ async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
     """Cliente con sesión compartida y Redis real en cada test."""
     from app.repositories import unit_of_work as uow_module
 
-    # Limpiar tablas antes del test
+    # Limpiar tablas antes del test: TRUNCATE CASCADE
     async with engine.begin() as conn:
+        from sqlalchemy import text
         from app.db.base import Base
 
-        for table in reversed(Base.metadata.sorted_tables):
-            await conn.execute(table.delete())
+        table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
+        if table_names:
+            await conn.execute(text(f"TRUNCATE TABLE {table_names} CASCADE"))
 
     factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     shared_session = factory()
@@ -121,7 +123,7 @@ async def auth_client(engine, fake_redis) -> AsyncGenerator[AsyncClient, None]:
         from app.main import app as fastapi_app
 
         transport = ASGITransport(app=fastapi_app)
-        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
+        async with AsyncClient(transport=transport, base_url="https://127.0.0.1") as c:
             yield c
     finally:
         fastapi_app.dependency_overrides.clear()
@@ -137,10 +139,12 @@ async def auth_client_concurrent(engine, fake_redis) -> AsyncGenerator[AsyncClie
     factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
     async with engine.begin() as conn:
+        from sqlalchemy import text
         from app.db.base import Base
 
-        for table in reversed(Base.metadata.sorted_tables):
-            await conn.execute(table.delete())
+        table_names = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
+        if table_names:
+            await conn.execute(text(f"TRUNCATE TABLE {table_names} CASCADE"))
 
     async def _get_db() -> AsyncGenerator[AsyncSession, None]:
         async with factory() as session:
@@ -152,7 +156,7 @@ async def auth_client_concurrent(engine, fake_redis) -> AsyncGenerator[AsyncClie
         from app.main import app as fastapi_app
 
         transport = ASGITransport(app=fastapi_app)
-        async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as c:
+        async with AsyncClient(transport=transport, base_url="https://127.0.0.1") as c:
             yield c
     finally:
         fastapi_app.dependency_overrides.clear()
@@ -828,23 +832,25 @@ async def test_header_ip_no_evade_limite(auth_client):
     assert 0 < int(responses[-1].headers["retry-after"]) <= 60
 
 
-async def test_limite_concurrente_y_expiracion(auth_client, fake_redis):
-    responses = []
-    for _ in range(6):
-        r = await auth_client.post(
-            "/auth/login",
-            json={
-                "email": "concurrente@example.com",
-                "password": "Erronea1",
-            },
-        )
-        responses.append(r)
+async def test_limite_concurrente_y_expiracion(auth_client_concurrent, fake_redis):
+    responses = await asyncio.gather(
+        *[
+            auth_client_concurrent.post(
+                "/auth/login",
+                json={
+                    "email": "concurrente@example.com",
+                    "password": "Erronea1",
+                },
+            )
+            for _ in range(6)
+        ]
+    )
     assert sorted(r.status_code for r in responses) == [401, 401, 401, 401, 401, 429]
     key = "auth:rl:login:127.0.0.1:concurrente@example.com"
     assert 0 < await fake_redis.ttl(key) <= 60
     await fake_redis.pexpire(key, 1)
     await asyncio.sleep(0.02)
-    response = await auth_client.post(
+    response = await auth_client_concurrent.post(
         "/auth/login",
         json={
             "email": "concurrente@example.com",

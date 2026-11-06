@@ -235,7 +235,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-07] `agenda-mis-reservas-api`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado 2026-11-05 (17/17 tests C-07, suite backend 249 passed, Guardian n/a)
 - **Scope**: Endpoints de lectura para odontólogo y paciente (US-003, US-004 backend)
   - `GET /agenda?fecha=&sillon=` (odontólogo/secretaria): turnos del día agrupados por sillón con paciente, tratamiento, estado, tolerancia visible, aviso de sobreturnos; `GET /mis-reservas` (paciente): solo turnos propios ordenados por fecha con estado + acciones permitidas según RN-TU-02
   - Paginación por fecha, filtros por estado/sillón; sin N+1 (eager load paciente+tratamiento+sillón); respuestas mobile-friendly (payload chico para PWA)
@@ -251,7 +251,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-08] `whatsapp-notificaciones`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado 2026-11-05 (23/23 tasks, suite backend 262 passed, 1 fallo preexistente test_auth)
 - **Scope**: Recordatorio + confirmación WhatsApp automáticos con botón (US-006, única integración obligatoria v1)
   - Worker Redis (`backend/app/workers/`): al reservar (evento C-05) agenda recordatorio por plantilla Meta; reintentos con backoff; si falla el proveedor, el turno existe igual + reintento encolado (RN-NT-03, Flujo 1 caso de error)
   - `POST /webhooks/whatsapp`: recibe `confirmo|cancelo` + `message_id`; idempotencia por `message_id` (duplicados no duplican efectos); matchea turno, valida ventana 2 h si es cancelación (RN-TU-02 → rechazo con mensaje "llamar al consultorio"), actualiza estado + registra respuesta en `RecordatorioWA` (RN-NT-02/03)

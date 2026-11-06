@@ -70,6 +70,61 @@ class GestionTurnoPatch(BaseModel):
     origen: str | None = None
 
 
+class AccionesOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    cancelar: bool = False
+    confirmar: bool = False
+    reprogramar: bool = False
+
+
+class AgendaTurnoOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    sillon_id: UUID
+    sillon_nombre: str
+    paciente_id: UUID
+    paciente_nombre: str
+    tratamiento_id: UUID
+    tratamiento_nombre: str
+    duracion_min: int
+    inicio: AwareDatetime
+    fin: AwareDatetime
+    estado: str
+    origen: str
+    es_sobreturno: bool = False
+    motivo_sobreturno: str | None = None
+    tolerancia_min: int = 5
+
+
+class AgendaSillonOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    sillon_id: UUID
+    sillon_nombre: str
+    sillon: dict | None = None
+    turnos: list[AgendaTurnoOut] = Field(default_factory=list)
+
+
+class MisReservaOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    sillon_id: UUID
+    sillon_nombre: str
+    tratamiento_id: UUID
+    tratamiento_nombre: str
+    inicio: AwareDatetime
+    fin: AwareDatetime
+    estado: str
+    origen: str
+    es_sobreturno: bool = False
+    tolerancia_min: int = 5
+    acciones: AccionesOut
+    acciones_permitidas: AccionesOut | None = None
+
+
 class ConflictoOut(BaseModel):
     detail: str
     alternativas: list[HorarioLibreOut] = Field(default_factory=list)

@@ -52,7 +52,7 @@ async def real_redis():
     finally:
         async for key in client.scan_iter(match=client.prefix + "*"):
             await redis.Redis.execute_command(client, "DEL", key)
-        await client.aclose()
+        await client.close()
 
 
 @pytest.fixture

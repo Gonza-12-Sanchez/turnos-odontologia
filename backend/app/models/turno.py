@@ -4,15 +4,21 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy import Boolean, CheckConstraint, ForeignKey, Index, String, Text, column, func
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.dialects.postgresql import ExcludeConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.db.types import TZTimestamp
+
+if TYPE_CHECKING:
+    from app.models.paciente import Paciente
+    from app.models.sillon import Sillon
+    from app.models.tratamiento import Tratamiento
 from app.models.audit import AuditMixin
 
 
@@ -46,6 +52,10 @@ class Turno(Base, AuditMixin):
         Boolean, nullable=False, default=False, server_default=sa.text("false")
     )
     motivo_sobreturno: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    paciente: Mapped[Paciente] = relationship("Paciente")
+    sillon: Mapped[Sillon] = relationship("Sillon")
+    tratamiento: Mapped[Tratamiento] = relationship("Tratamiento")
 
     __table_args__ = (
         CheckConstraint("fin > inicio", name="ck_turno_fin_gt_inicio"),

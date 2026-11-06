@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import date
 from typing import Annotated
 from uuid import UUID
 
@@ -15,14 +16,17 @@ from app.models import Usuario
 from app.repositories.paciente_repository import PacienteRepository
 from app.repositories.unit_of_work import UnitOfWork
 from app.schemas.turnos import (
+    AgendaSillonOut,
     GestionTurnoPatch,
     HorarioLibreOut,
     MarcarAsistenciaIn,
+    MisReservaOut,
     ReprogramarIn,
     SobreturnoIn,
     TurnoCreate,
     TurnoOut,
 )
+from app.services.agenda_lectura_service import AgendaLecturaService
 from app.services.disponibilidad_service import DisponibilidadService
 from app.services.gestion_turnos_service import GestionTurnosService
 from app.services.reserva_service import (
@@ -172,3 +176,32 @@ async def patch_turno(
             actor=user,
         )
         return TurnoOut.model_validate(turno)
+
+
+@router.get("/agenda", response_model=list[AgendaSillonOut])
+async def agenda(
+    fecha: Annotated[date, Query()],
+    user: Annotated[Usuario, Depends(require_role("odontologo", "secretaria"))],
+    db: AsyncSession = Depends(get_db),
+    sillon: Annotated[UUID | None, Query()] = None,
+    sillon_id: Annotated[UUID | None, Query()] = None,
+    estado: Annotated[str | None, Query()] = None,
+):
+    sid = sillon if sillon is not None else sillon_id
+    service = AgendaLecturaService(db)
+    return await service.agenda(fecha, sid, estado)
+
+
+@router.get("/mis-reservas", response_model=list[MisReservaOut])
+async def mis_reservas(
+    user: Annotated[Usuario, Depends(require_role("paciente"))],
+    db: AsyncSession = Depends(get_db),
+    desde: Annotated[date | None, Query()] = None,
+    hasta: Annotated[date | None, Query()] = None,
+    estado: Annotated[str | None, Query()] = None,
+):
+    paciente = await PacienteRepository(db).get_by_usuario_id(user.id)
+    if paciente is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Paciente no encontrado")
+    service = AgendaLecturaService(db)
+    return await service.mis_reservas(paciente, desde, hasta, estado)

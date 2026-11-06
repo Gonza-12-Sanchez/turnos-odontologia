@@ -37,28 +37,34 @@ class GestionTurnosService:
         now = datetime.now(UTC)
         return (turno.inicio - now).total_seconds() >= settings.appointment_cancel_minutes * 60
 
-    async def confirmar(self, turno_id, actor, origin: str | None = None) -> Turno:
-        await self._check_permission(actor, ("secretaria", "paciente"))
+    async def confirmar(self, turno_id, actor=None, origin: str | None = None) -> Turno:
+        if actor is not None:
+            await self._check_permission(actor, ("secretaria", "paciente"))
         turno = await self._turno(turno_id)
-        await self._check_owner(turno, actor)
+        if actor is not None:
+            await self._check_owner(turno, actor)
         if turno.estado != "reservado":
             raise HTTPException(status_code=422, detail="Transición inválida")
         turno.estado = "confirmado"
-        turno.origen = origin or turno.origen or "mostrador"
+        effective_origin = origin or ("whatsapp" if actor is None else (turno.origen or "mostrador"))
+        turno.origen = effective_origin
         await self.session.flush()
         await self.session.refresh(turno)
         return turno
 
-    async def cancelar(self, turno_id, actor, origin: str | None = None) -> Turno:
-        await self._check_permission(actor, ("secretaria", "paciente"))
+    async def cancelar(self, turno_id, actor=None, origin: str | None = None) -> Turno:
+        if actor is not None:
+            await self._check_permission(actor, ("secretaria", "paciente"))
         turno = await self._turno(turno_id)
-        await self._check_owner(turno, actor)
+        if actor is not None:
+            await self._check_owner(turno, actor)
         if turno.estado in ("asistido", "ausente", "cancelado"):
             raise HTTPException(status_code=422, detail="Transición inválida")
         if not self._window_ok(turno):
             raise HTTPException(status_code=422, detail="Fuera de la ventana de cancelación")
         turno.estado = "cancelado"
-        turno.origen = origin or turno.origen or "mostrador"
+        effective_origin = origin or ("whatsapp" if actor is None else (turno.origen or "mostrador"))
+        turno.origen = effective_origin
         await self.session.flush()
         await self.session.refresh(turno)
         return turno

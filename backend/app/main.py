@@ -12,6 +12,7 @@ from app.api.config import router as config_router
 from app.api.health import router as health_router
 from app.api.protected import router as protected_router
 from app.api.turnos import router as turnos_router
+from app.api.webhooks import router as webhooks_router
 from app.core.config import settings
 from app.db import engine as db_engine
 from app.db import redis as redis_client
@@ -84,6 +85,7 @@ def create_app() -> FastAPI:
     app.include_router(config_router)
     app.include_router(protected_router)
     app.include_router(turnos_router)
+    app.include_router(webhooks_router, prefix="/webhooks")
     return app
 
 
