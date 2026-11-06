@@ -50,7 +50,12 @@ async def _attempts_key(turno_id: str) -> str:
 
 
 async def run_worker() -> None:
-    engine = create_async_engine(settings.database_url if hasattr(settings, "database_url") else "postgresql+asyncpg://turnos:turnos@localhost:5432/turnos", pool_pre_ping=True)
+    engine = create_async_engine(
+        settings.database_url
+        if hasattr(settings, "database_url")
+        else "postgresql+asyncpg://turnos:turnos@localhost:5432/turnos",
+        pool_pre_ping=True,
+    )
     # Use TEST_DATABASE_URL override? worker uses settings.database_url
     session_factory = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
     redis = redis_client.get_redis()

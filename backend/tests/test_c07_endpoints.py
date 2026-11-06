@@ -46,7 +46,9 @@ async def agenda_client(engine, session, real_redis, monkeypatch):
         actors[role] = {"id": actor.id, "token": token, "paciente": pac_obj}
 
     # segundo paciente
-    actor2 = Usuario(email="paciente2.c07@example.com", rol="paciente", password_hash="x", telefono="+54")
+    actor2 = Usuario(
+        email="paciente2.c07@example.com", rol="paciente", password_hash="x", telefono="+54"
+    )
     session.add(actor2)
     await session.flush()
     pac2 = Paciente(usuario_id=actor2.id, nombre="Paciente2", telefono="+54")
@@ -81,7 +83,15 @@ async def agenda_client(engine, session, real_redis, monkeypatch):
 
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(transport=transport, base_url="https://test") as client:
-        yield client, {"actors": actors, "sillones": sillones, "tratamiento": tratamiento, "turnos": [t1, t2]}
+        yield (
+            client,
+            {
+                "actors": actors,
+                "sillones": sillones,
+                "tratamiento": tratamiento,
+                "turnos": [t1, t2],
+            },
+        )
 
 
 @pytest.mark.asyncio

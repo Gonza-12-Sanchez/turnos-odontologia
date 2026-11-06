@@ -1,4 +1,5 @@
 import pytest
+
 from app.workers.whatsapp_worker import process_one
 
 
@@ -6,6 +7,7 @@ from app.workers.whatsapp_worker import process_one
 async def test_process_one_turno_inexistente(session):
     # turno id random -> returns True (discarded)
     import uuid
+
     ok = await process_one(str(uuid.uuid4()), session)
     assert ok is True
 
@@ -13,8 +15,10 @@ async def test_process_one_turno_inexistente(session):
 @pytest.mark.asyncio
 async def test_process_one_envio_exitoso(session, monkeypatch):
     # need a turno; build minimal
-    from app.models import Consultorio, Paciente, Sillon, Tratamiento, Turno, Usuario
     from datetime import UTC, datetime, timedelta
+
+    from app.models import Consultorio, Paciente, Sillon, Tratamiento, Turno, Usuario
+
     consultorio = Consultorio(nombre="C")
     session.add(consultorio)
     await session.flush()
@@ -29,8 +33,13 @@ async def test_process_one_envio_exitoso(session, monkeypatch):
     await session.flush()
     start = datetime(2026, 12, 1, 13, 0, tzinfo=UTC)
     turno = Turno(
-        paciente_id=pac.id, sillon_id=sillon.id, tratamiento_id=tratamiento.id,
-        inicio=start, fin=start + timedelta(minutes=30), estado="reservado", origen="online",
+        paciente_id=pac.id,
+        sillon_id=sillon.id,
+        tratamiento_id=tratamiento.id,
+        inicio=start,
+        fin=start + timedelta(minutes=30),
+        estado="reservado",
+        origen="online",
     )
     session.add(turno)
     await session.commit()

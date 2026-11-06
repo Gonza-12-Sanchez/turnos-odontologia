@@ -1,5 +1,5 @@
-import uuid
 import pytest
+
 from app.models import Consultorio, Paciente, Sillon, Tratamiento, Turno, Usuario
 from app.services.recordatorio_wa_service import RecordatorioWAService
 
@@ -19,10 +19,16 @@ async def rec_session(session):
     session.add(pac)
     await session.flush()
     from datetime import UTC, datetime, timedelta
+
     start = datetime(2026, 12, 1, 13, 0, tzinfo=UTC)
     turno = Turno(
-        paciente_id=pac.id, sillon_id=sillon.id, tratamiento_id=tratamiento.id,
-        inicio=start, fin=start + timedelta(minutes=30), estado="reservado", origen="online",
+        paciente_id=pac.id,
+        sillon_id=sillon.id,
+        tratamiento_id=tratamiento.id,
+        inicio=start,
+        fin=start + timedelta(minutes=30),
+        estado="reservado",
+        origen="online",
     )
     session.add(turno)
     await session.commit()
