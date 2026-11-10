@@ -22,9 +22,20 @@ class Settings(BaseSettings):
     whatsapp_template_name: str = "recordatorio_turno"
     whatsapp_webhook_secret: str = ""
     mp_access_token: str = ""
+    mp_mode: str = "disabled"
+    mp_webhook_secret: str = ""
+    mp_collector_id: str = ""
+    mp_notification_url: str = ""
     appointment_cancel_minutes: int = 120
     late_tolerance_minutes: int = 5
     health_check_timeout_seconds: float = 2.0
+
+    @field_validator("mp_mode")
+    @classmethod
+    def _validate_mp_mode(cls, v: str) -> str:
+        if v.lower() not in {"disabled", "mock", "sandbox", "production"}:
+            raise ValueError("MP_MODE debe ser disabled, mock, sandbox o production")
+        return v.lower()
 
     @field_validator("cookie_samesite")
     @classmethod

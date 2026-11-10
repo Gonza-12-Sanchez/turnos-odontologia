@@ -21,8 +21,17 @@ class Tratamiento(Base, AuditMixin):
     nombre: Mapped[str] = mapped_column(String(120), nullable=False)
     duracion_min: Mapped[int] = mapped_column(Integer, nullable=False)
     precio_referencia_centavos: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    sena_politica: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="deshabilitada", server_default="deshabilitada"
+    )
+    sena_centavos: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     __table_args__ = (
         CheckConstraint("duracion_min > 0", name="ck_tratamiento_duracion_min"),
         CheckConstraint("precio_referencia_centavos >= 0", name="ck_tratamiento_precio_centavos"),
+        CheckConstraint(
+            "sena_politica IN ('deshabilitada','opcional','obligatoria')",
+            name="ck_tratamiento_sena_politica",
+        ),
+        CheckConstraint("sena_centavos IS NULL OR sena_centavos > 0", name="ck_tratamiento_sena_centavos_pos"),
     )
