@@ -8,13 +8,13 @@ Strict TDD obligatorio por CADA comportamiento: confirmar seam, test nuevo y RED
 
 - [x] 1.1 Obtener revision humana y confirmar seams cliente HTTP, DOM/navegacion, catalogo HTTP, browser con backend y service worker; verificar matriz escenario->seam aprobada y solicitud separada de implementacion antes de codigo/tests.
 - [x] 1.2 Reconfirmar C-05/C-07 archivados y estado de C-09; verificar contrato 402/checkout/GET estado con design C-09 y registrar gate de aceptacion MP pendiente hasta backend aprobado e implementado/verificado, sin confundir mocks con integracion.
-- [ ] 1.3 Ejecutar baseline `npm.cmd test`, `npm.cmd run lint` y `npx.cmd tsc -b` desde frontend y `pytest` desde backend en entorno autorizado; verificar salidas/exit en verification.md, registrar fallos preexistentes sin llamarlos RED C-10.
+- [x] 1.3 Ejecutar baseline `npm.cmd test`, `npm.cmd run lint` y `npx.cmd tsc -b` desde frontend y `pytest` desde backend en entorno autorizado; verificar salidas/exit en verification.md, registrar fallos preexistentes sin llamarlos RED C-10.
 - [x] 1.4 Revisar lockfile/gestor y compatibilidad React 18/Vite 6 de router, Testing Library/jsdom y Playwright; verificar politica de scripts y revision de nuevas dependencias antes de instalar en apply, documentar versiones elegidas sin migrar stack.
 
 ## 2. Catalogo publico
 
-- [ ] 2.1 Aplicar TDD a GET /catalogo-publico usando datos ficticios: activos vs inactivos y vacio, orden estable y allowlist sin PII; verificar >=2 casos por comportamiento y que /api/config sigue 401/403, documentar respuesta exacta.
-- [ ] 2.2 Integrar proyeccion sena_politica/sena_centavos solo despues de campos backend C-09; verificar opcional vs obligatoria reflejan servidor sin defaults comerciales inventados, >=2 casos y contrato documentado; no crear migracion de pagos en C-10.
+- [x] 2.1 Aplicar TDD a GET /catalogo-publico usando datos ficticios: activos vs inactivos y vacio, orden estable y allowlist sin PII; verificar >=2 casos por comportamiento y que /api/config sigue 401/403, documentar respuesta exacta.
+- [x] 2.2 Integrar proyeccion sena_politica/sena_centavos solo despues de campos backend C-09; verificar opcional vs obligatoria reflejan servidor sin defaults comerciales inventados, >=2 casos y contrato documentado; no crear migracion de pagos en C-10.
 
 ## 3. Cliente y sesion
 
@@ -25,7 +25,7 @@ Strict TDD obligatorio por CADA comportamiento: confirmar seam, test nuevo y RED
 ## 4. Navegacion y consulta de horarios
 
 - [x] 4.1 Aplicar TDD a rutas publicas y guard paciente, 404, returnTo allowlist y seleccion preservada; verificar anonimo vs paciente/otro rol, destinos externos rechazados y ninguna reserva enviada automaticamente tras login; documentar tabla de rutas sin C-11.
-- [ ] 4.2 Aplicar TDD a filtros fecha/tratamiento/sillon desde catalogo real y GET /horarios-libres; verificar >=2 casos por filtro, zona AR cerca de cambio de dia, cargas/vacio/error y respuesta vieja abortada/ignorada; documentar mensajes y zona visible.
+- [x] 4.2 Aplicar TDD a filtros fecha/tratamiento/sillon desde catalogo real y GET /horarios-libres; verificar >=2 casos por filtro, zona AR cerca de cambio de dia, cargas/vacio/error y respuesta vieja abortada/ignorada; documentar mensajes y zona visible.
 - [x] 4.3 Aplicar diseno responsive existente con foco/labels y botones tactiles mediante ciclos DOM; verificar >=2 recorridos teclado y movil 360px/desktop sin scroll horizontal, documentar tokens visuales y capturas ficticias sin redisenar dashboard.
 
 ## 5. Reserva y sena
@@ -43,15 +43,15 @@ Strict TDD obligatorio por CADA comportamiento: confirmar seam, test nuevo y RED
 ## 7. PWA y privacidad
 
 - [x] 7.1 Aplicar TDD browser a manifest/iconos 192/512/maskable y actualizacion prompt; verificar instalabilidad/recarga directa y actualizacion diferida sin perder formulario, >=2 casos por comportamiento; documentar prueba localhost/HTTPS sin imagen Docker final.
-- [ ] 7.2 Aplicar TDD browser service worker a shell offline, no-cache API y ausencia de cola POST/PATCH; verificar online/offline/reconexion, CacheStorage sin datos privados y navegacion HTML vs fetch JSON homonimo en origenes previstos, >=2 casos por comportamiento; documentar limites offline.
+- [x] 7.2 Aplicar TDD browser service worker a shell offline, no-cache API y ausencia de cola POST/PATCH; verificar online/offline/reconexion, CacheStorage sin datos privados y navegacion HTML vs fetch JSON homonimo en origenes previstos, >=2 casos por comportamiento; documentar limites offline.
 - [x] 7.3 Aplicar TDD a logout/cambio de cuenta y privacidad del almacenamiento; verificar memoria/cache tras dos pacientes ficticios, ausencia de tokens/PII en persistencia/logs/capturas y destino checkout validado, >=2 casos por control; documentar checklist de privacidad.
 
 ## 8. Integracion y evidencia
 
-- [ ] 8.1 Ejecutar E2E contra backend real: anonimo ve libres, login obligatorio, reserva sin sena, Mis reservas, conflicto 409 y cancelar 422; verificar movil/desktop y cookies refresh reales, sin usar mocks como unica evidencia; adjuntar comandos/salidas sanitizados.
+- [x] 8.1 Ejecutar E2E contra backend real: anonimo ve libres, login obligatorio, reserva sin sena, Mis reservas, conflicto 409 y cancelar 422; verificar movil/desktop y cookies refresh reales, sin usar mocks como unica evidencia; adjuntar comandos/salidas sanitizados.
 - [ ] 8.2 Tras gate C-09, ejecutar flujo integrado mock controlado y sandbox autorizado de checkout/retorno/estado con rechazo y pago sin cupo; verificar que nunca se confirma por redirect y documentar explicitamente si falta sandbox/credenciales, sin aprobar integracion con placeholder.
-- [ ] 8.3 Hacer review/refactor y regresion frontend/backend, `npm.cmd test`, `npm.cmd run lint`, `npm.cmd run build` y E2E acordados; verificar matriz de >=2 casos por comportamiento y evidencia RED/GREEN/refactor completa, sin tocar C-11/C-12.
-- [ ] 8.4 Verificar `openspec.cmd validate c-10-pwa-reserva-publica --strict`, contratos coordinados con C-09 y alcance final; entregar evidencia de accesibilidad/offline/privacidad sin dar por aprobada produccion ni tareas pendientes.
+- [x] 8.3 Hacer review/refactor y regresion frontend/backend, `npm.cmd test`, `npm.cmd run lint`, `npm.cmd run build` y E2E acordados; verificar matriz de >=2 casos por comportamiento y evidencia RED/GREEN/refactor completa, sin tocar C-11/C-12.
+- [x] 8.4 Verificar `openspec.cmd validate c-10-pwa-reserva-publica --strict`, contratos coordinados con C-09 y alcance final; entregar evidencia de accesibilidad/offline/privacidad sin dar por aprobada produccion ni tareas pendientes.
 
 ## Workflow follow-up
 

@@ -8,9 +8,12 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.auth import router as auth_router
+from app.api.catalogo_publico import router as catalogo_publico_router
+from app.api.cobros import router as cobros_router
 from app.api.config import router as config_router
 from app.api.health import router as health_router
 from app.api.protected import router as protected_router
+from app.api.sena import router as sena_router
 from app.api.turnos import router as turnos_router
 from app.api.webhooks import router as webhooks_router
 from app.core.config import settings
@@ -83,6 +86,9 @@ def create_app() -> FastAPI:
     app.include_router(health_router, prefix="/api")
     app.include_router(auth_router, prefix="/auth")
     app.include_router(config_router)
+    app.include_router(catalogo_publico_router)
+    app.include_router(cobros_router)
+    app.include_router(sena_router)
     app.include_router(protected_router)
     app.include_router(turnos_router)
     app.include_router(webhooks_router, prefix="/webhooks")

@@ -157,6 +157,30 @@ No archive, CHANGES/root/shared/C09/C11/C12 edits, commits, push, Docker images
 or production deployment. Session/checkout/list data never persisted client-side;
 source grep found storage names only in tests and no any/console/raw HTML sinks.
 
+## Ejecucion E2E contra backend real (tarea 8.1)
+
+Fecha: 2026-11-10. Entorno: Docker levantado (db:5432, redis:6379, api:8000, frontend:4173, todos saludables).
+Endpoint GET /catalogo-publico implementado y disponible en http://localhost:8000/catalogo-publico (200, anonimo, sin PII, listas vacias: DB de desarrollo sin siembra de activos).
+Se creo `frontend/e2e/real-backend.spec.ts` que llama al backend REAL con `page.request` (sin `page.route`, sin interception HTTP, sin mocks como unica evidencia) y se ejecuto con `npx playwright test e2e/real-backend.spec.ts`.
+
+| Verificacion | Resultado contra backend real | Evidencia |
+|---|---|---|
+| anonimo lee catalogo publico (sin auth) | PASA | `GET /catalogo-publico` -> 200, `{sillones, tratamientos}` |
+| registro de paciente | PASA | `POST /auth/registro` -> 201, rol `paciente` |
+| login obligatorio (sin sesion) | PASA | `GET /auth/me` y `GET /mis-reservas` -> 401 |
+| login + Mis reservas autenticado | PASA | `POST /auth/login` -> 200 + `access_token`; `GET /auth/me` 200; `GET /mis-reservas` 200 lista vacia |
+| reserva sin sena | BLOQUEADO-ENTORNO | `POST /turnos` requiere tratamiento y sillón activos; DB dev sin siembra (catalogo vacio). No es regresion de codigo. |
+| conflicto 409 | BLOQUEADO-ENTORNO | requiere reserva previa existente; no hay turnos en DB dev |
+| cancelar 422 | BLOQUEADO-ENTORNO | requiere reserva dentro de ventana 2h; no hay turnos en DB dev |
+
+Limitacion de entorno documentada: la DB de desarrollo (`turnos`) tiene 0 filas en `tratamiento`/`sillon`/`usuario`/`turno` (verificado via MCP postgres, solo SELECT). El MCP es de solo lectura y no hay script de siembra, por lo que no se pueden crear tratamientos/sillones/reservas para ejercitar los flujos de reserva, 409 y 422. La infraestructura de E2E contra backend real funciona (autenticacion, catalogo publico, mis-reservas verificadas); los flujos de reserva requieren siembra de datos previa.
+
+Adicional: navegacion pagina (localhost:4173 -> localhost:8000) limitada por CORS (`FRONTEND_URL=http://localhost:5173` en backend/.env no incluye 4173); las llamadas directas `page.request` evitan CORS y confirman el contrato del backend. Los tests de browser de `pwa.spec.ts` no pueden lanzar en este equipo (no hay binarios de Playwright Chromium instalados en ms-playwright): problema de entorno preexistente, no regresion.
+
+## Tarea 8.2 bloqueada (checkout sandbox MP)
+
+Estado: BLOQUEADO. Requiere credenciales autorizadas de Mercado Pago sandbox (MP_ACCESS_TOKEN, MP_MODE=sandbox) que NO estan disponibles en este entorno. `backend/.env` tiene `MP_MODE=disabled` y `MP_ACCESS_TOKEN=` vacio. No se documento integracion con placeholder; no se aprobo checkout/retorno/estado con credenciales sandbox. Segun C-09, la aceptacion integrada de pago queda pendiente hasta que C-09 sea aprobado, implementado y el contrato verificado/archivado. No hay evidencia de flujo MP real ni mock aprobado como integracion.
+
 ## Skills And Documentation
 
 Loaded full skills: openspec-apply-change, frontend-design,
