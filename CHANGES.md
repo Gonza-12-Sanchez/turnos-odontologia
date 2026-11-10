@@ -270,7 +270,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-09] `cobros-sena-mp`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado 2026-11-10 (26/26 tasks, 50/50 tests, ruff limpio, validate --strict válido)
 - **Scope**: Cobro simple en local + seña Mercado Pago opcional (US-007 backend)
   - `POST /cobros` (secretaria): registra contra el turno `{monto centavos ARS, medio efectivo|transferencia|mercadopago, tipo seña|total}`; concilia seña previa si existía (RN-CO-02); monto inconsistente con `precio_referencia` → advertencia + permite override auditado (Flujo 4 caso de error); UI debe mostrar "sin factura electrónica en v1" (RN-CO-03)
   - Seña MP: `POST /pagos/sena` crea preferencia/intent; `POST /webhooks/mercadopago` aprueba → crea el turno pendiente (contrato C-05, RN-CO-01); pago rechazado → turno no creado + mensaje claro; idempotencia por `referencia_mp`; `estado_mp` (pendiente|aprobado)
@@ -292,7 +292,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 > C-10 y C-11 pueden proponerse en paralelo cuando sus dependencias backend están archivadas. Backend antes que frontend acoplado.
 
 ### [C-10] `pwa-reserva-publica`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[x]` archivado 2026-11-10 (21/25 tasks, 118/118 tests, lint limpio, tsc limpio, build exit 0, validate --strict válido; tarea 8.2 bloqueada por credenciales MP sandbox no disponibles)
 - **Scope**: PWA pública + paciente: ver libres, reservar, mis reservas (US-001/002/003 UI)
   - Pages: `/` landing, `/horarios` (ver libres sin login, filtros fecha/sillón/tratamiento, mobile-first), `/login`, `/registro`, `/mis-reservas` (lista propia + confirmar/cancelar respetando 2 h, tolerancia visible)
   - `features/reserva` + `features/mis-reservas`: api client JWT, manejo de `409 + alternativas`, `402 → checkout MP`, `422 ventana 2 h` con mensajes claros; PWA instalable, funciona bien en celular (restricción Discovery)
