@@ -9,6 +9,7 @@ SillonName = Annotated[str, Field(min_length=1, max_length=80)]
 CatalogName = Annotated[str, Field(min_length=1, max_length=120)]
 Duration = Annotated[int, Field(strict=True, gt=0, le=2147483647)]
 Centavos = Annotated[int, Field(strict=True, ge=0, le=2147483647)]
+SenaPolitica = Annotated[str, Field(strict=True, pattern="^(deshabilitada|opcional|obligatoria)$")]
 
 
 class ConfigInput(BaseModel):
@@ -42,19 +43,48 @@ class SillonPatch(ConfigInput):
 
 
 class TratamientoCreate(ConfigInput):
-    nullable_fields = frozenset({"precio_referencia_centavos"})
+    nullable_fields = frozenset({"precio_referencia_centavos", "sena_centavos"})
     nombre: CatalogName
     duracion_min: Duration
     precio_referencia_centavos: Centavos | None = None
+    sena_politica: SenaPolitica = "deshabilitada"
+    sena_centavos: Centavos | None = None
     activo: StrictBool = True
+
+    @model_validator(mode="after")
+    def validar_sena(self):
+        if self.sena_politica == "deshabilitada":
+            if self.sena_centavos is not None:
+                raise ValueError("sena_centavos debe ser null cuando sena_politica es deshabilitada")
+        else:
+            if self.sena_centavos is None or self.sena_centavos <= 0:
+                raise ValueError("sena_centavos requiere entero positivo cuando la sena está habilitada")
+        return self
 
 
 class TratamientoPatch(ConfigInput):
-    nullable_fields = frozenset({"precio_referencia_centavos"})
+    nullable_fields = frozenset({"precio_referencia_centavos", "sena_centavos"})
     nombre: CatalogName | None = None
     duracion_min: Duration | None = None
     precio_referencia_centavos: Centavos | None = None
+    sena_politica: SenaPolitica | None = None
+    sena_centavos: Centavos | None = None
     activo: StrictBool | None = None
+
+    @model_validator(mode="after")
+    def validar_sena(self):
+        politica = self.sena_politica
+        centavos = self.sena_centavos
+        if politica is not None:
+            if politica == "deshabilitada":
+                if centavos is not None:
+                    raise ValueError("sena_centavos debe ser null cuando sena_politica es deshabilitada")
+            else:
+                if centavos is None or centavos <= 0:
+                    raise ValueError("sena_centavos requiere entero positivo cuando la sena está habilitada")
+        elif centavos is not None:
+            raise ValueError("sena_centavos no se puede establecer sin definir sena_politica")
+        return self
 
 
 class BloqueoCreate(ConfigInput):
@@ -104,6 +134,8 @@ class TratamientoOut(CatalogOut):
     nombre: str
     duracion_min: int
     precio_referencia_centavos: int | None
+    sena_politica: str = "deshabilitada"
+    sena_centavos: int | None = None
 
 
 class BloqueoOut(CatalogOut):
