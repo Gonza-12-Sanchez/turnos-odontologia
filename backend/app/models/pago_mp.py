@@ -26,9 +26,13 @@ class PagoMP(Base, AuditMixin):
     payment_id: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
     estado_proveedor: Mapped[str] = mapped_column(String(20), nullable=False)
     monto_centavos: Mapped[int] = mapped_column(Integer, nullable=False)
-    moneda: Mapped[str] = mapped_column(String(3), nullable=False, default="ARS", server_default="ARS")
+    moneda: Mapped[str] = mapped_column(
+        String(3), nullable=False, default="ARS", server_default="ARS"
+    )
     receptor_id: Mapped[str] = mapped_column(String(120), nullable=False)
-    modo: Mapped[str] = mapped_column(String(20), nullable=False, default="mock", server_default="mock")
+    modo: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="mock", server_default="mock"
+    )
     resultado: Mapped[str] = mapped_column(
         String(20), nullable=False, default="pendiente", server_default="pendiente"
     )

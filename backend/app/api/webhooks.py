@@ -117,6 +117,7 @@ async def whatsapp_webhook(
 
 # --- Webhook Mercado Pago (C-09) ---
 
+
 def _verificar_firma_mp(raw_body: bytes, x_signature: str | None) -> None:
     """Valida firma HMAC-SHA256 de Mercado Pago en tiempo constante."""
     if not settings.mp_webhook_secret:
@@ -137,9 +138,12 @@ def _verificar_firma_mp(raw_body: bytes, x_signature: str | None) -> None:
     if abs(ahora - timestamp) > 300:
         raise HTTPException(status_code=401, detail="Firma de MP expirada")
     mensaje = f"ts={timestamp}.".encode() + raw_body
-    esperado = "ts=" + timestamp_str + ";v1=" + hmac.new(
-        settings.mp_webhook_secret.encode("utf-8"), mensaje, hashlib.sha256
-    ).hexdigest()
+    esperado = (
+        "ts="
+        + timestamp_str
+        + ";v1="
+        + hmac.new(settings.mp_webhook_secret.encode("utf-8"), mensaje, hashlib.sha256).hexdigest()
+    )
     if not hmac.compare_digest(esperado, x_signature):
         raise HTTPException(status_code=401, detail="Firma de MP invalida")
 
@@ -181,6 +185,7 @@ async def mercadopago_webhook(
 
 
 # --- Incidencias de seña MP (C-09, tarea 6.3) ---
+
 
 @router.get("/pagos/incidencias", response_model=IncidenciaListOut)
 async def listar_incidencias(

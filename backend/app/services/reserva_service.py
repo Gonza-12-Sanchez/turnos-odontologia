@@ -36,9 +36,7 @@ class ReservaConflicto(Exception):
 
 
 class ReservaService:
-    def __init__(
-        self, session: AsyncSession, mp_adapter: MPAdapter | None = None
-    ) -> None:
+    def __init__(self, session: AsyncSession, mp_adapter: MPAdapter | None = None) -> None:
         self.session = session
         self.disp = DisponibilidadService(session)
         self._mp_adapter = mp_adapter
@@ -158,7 +156,10 @@ class ReservaService:
         if tratamiento.sena_politica == "deshabilitada" and requiere_sena:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail={"code": "SENA_DESHABILITADA", "detail": "La seña no está habilitada para este tratamiento"},
+                detail={
+                    "code": "SENA_DESHABILITADA",
+                    "detail": "La seña no está habilitada para este tratamiento",
+                },
             )
         if tratamiento.sena_politica == "opcional" and requiere_sena:
             checkout = await self._crear_checkout_seña(

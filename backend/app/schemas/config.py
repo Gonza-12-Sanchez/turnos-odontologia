@@ -55,10 +55,14 @@ class TratamientoCreate(ConfigInput):
     def validar_sena(self):
         if self.sena_politica == "deshabilitada":
             if self.sena_centavos is not None:
-                raise ValueError("sena_centavos debe ser null cuando sena_politica es deshabilitada")
+                raise ValueError(
+                    "sena_centavos debe ser null cuando sena_politica es deshabilitada"
+                )
         else:
             if self.sena_centavos is None or self.sena_centavos <= 0:
-                raise ValueError("sena_centavos requiere entero positivo cuando la sena está habilitada")
+                raise ValueError(
+                    "sena_centavos requiere entero positivo cuando la sena está habilitada"
+                )
         return self
 
 
@@ -78,10 +82,14 @@ class TratamientoPatch(ConfigInput):
         if politica is not None:
             if politica == "deshabilitada":
                 if centavos is not None:
-                    raise ValueError("sena_centavos debe ser null cuando sena_politica es deshabilitada")
+                    raise ValueError(
+                        "sena_centavos debe ser null cuando sena_politica es deshabilitada"
+                    )
             else:
                 if centavos is None or centavos <= 0:
-                    raise ValueError("sena_centavos requiere entero positivo cuando la sena está habilitada")
+                    raise ValueError(
+                        "sena_centavos requiere entero positivo cuando la sena está habilitada"
+                    )
         elif centavos is not None:
             raise ValueError("sena_centavos no se puede establecer sin definir sena_politica")
         return self

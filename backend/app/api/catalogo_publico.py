@@ -42,7 +42,5 @@ async def catalogo_publico(db: Annotated[AsyncSession, Depends(get_db)]):
 
     return CatalogoPublicoOut(
         sillones=[SillonPublicoOut.model_validate(s) for s in sillones],
-        tratamientos=[
-            TratamientoPublicoOut.model_validate(t) for t in tratamientos
-        ],
+        tratamientos=[TratamientoPublicoOut.model_validate(t) for t in tratamientos],
     )

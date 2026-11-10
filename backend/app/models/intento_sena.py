@@ -33,7 +33,9 @@ class IntentoSena(Base, AuditMixin):
     fin: Mapped[datetime] = mapped_column(TZTimestamp(), nullable=False)
     duracion_min: Mapped[int] = mapped_column(Integer, nullable=False)
     monto_centavos: Mapped[int] = mapped_column(Integer, nullable=False)
-    moneda: Mapped[str] = mapped_column(String(3), nullable=False, default="ARS", server_default="ARS")
+    moneda: Mapped[str] = mapped_column(
+        String(3), nullable=False, default="ARS", server_default="ARS"
+    )
     sena_politica: Mapped[str] = mapped_column(
         String(20), nullable=False, default="deshabilitada", server_default="deshabilitada"
     )

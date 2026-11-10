@@ -68,11 +68,13 @@ class MPAdapter:
             "X-Idempotency-Key": external_reference,
         }
         try:
-            resp = await self._client.post(
-                "/checkout/preferences", json=payload, headers=headers
-            )
+            resp = await self._client.post("/checkout/preferences", json=payload, headers=headers)
         except (httpx.TimeoutException, httpx.TransportError) as exc:
-            raise MPAdapterError(503, {"code": "CHECKOUT_NO_VERIFICADO", "detail": str(exc)}, code="CHECKOUT_NO_VERIFICADO") from exc
+            raise MPAdapterError(
+                503,
+                {"code": "CHECKOUT_NO_VERIFICADO", "detail": str(exc)},
+                code="CHECKOUT_NO_VERIFICADO",
+            ) from exc
 
         if resp.status_code >= 400:
             raise MPAdapterError(
@@ -90,7 +92,9 @@ class MPAdapter:
                 headers={"Authorization": f"Bearer {access_token}"},
             )
         except (httpx.TimeoutException, httpx.TransportError) as exc:
-            raise MPAdapterError(503, {"code": "MP_ERROR", "detail": str(exc)}, code="MP_ERROR") from exc
+            raise MPAdapterError(
+                503, {"code": "MP_ERROR", "detail": str(exc)}, code="MP_ERROR"
+            ) from exc
 
         if resp.status_code >= 400:
             raise MPAdapterError(

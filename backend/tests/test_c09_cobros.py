@@ -24,17 +24,23 @@ from app.shared.security import create_access_token
 class _FakeRedis:
     async def get(self, *a, **k):
         return None
+
     async def set(self, *a, **k):
         return True
+
     async def lpush(self, *a, **k):
         return 0
+
     async def ping(self):
         return True
+
     async def scan_iter(self, *a, **k):
         if False:
             yield ""
+
     async def execute_command(self, *a, **k):
         return None
+
     async def close(self):
         pass
 
@@ -51,8 +57,11 @@ async def c09_cobros_client(engine, session, monkeypatch):
     sillon = Sillon(consultorio_id=consultorio.id, nombre="Sillon Cobros", is_active=True)
     session.add(sillon)
     tratamiento = Tratamiento(
-        nombre="Limpieza", duracion_min=30, precio_referencia_centavos=10000,
-        sena_politica="deshabilitada", sena_centavos=None,
+        nombre="Limpieza",
+        duracion_min=30,
+        precio_referencia_centavos=10000,
+        sena_politica="deshabilitada",
+        sena_centavos=None,
     )
     session.add(tratamiento)
     await session.flush()
@@ -78,18 +87,23 @@ async def c09_cobros_client(engine, session, monkeypatch):
     await session.commit()
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(
-        transport=transport, base_url="https://test",
+        transport=transport,
+        base_url="https://test",
         headers={"Authorization": f"Bearer {token}"},
     ) as client:
-        yield client, {
-            "turno_id": str(turno.id),
-            "usuario_id": str(usuario.id),
-            "precio_referencia_centavos": 10000,
-        }
+        yield (
+            client,
+            {
+                "turno_id": str(turno.id),
+                "usuario_id": str(usuario.id),
+                "precio_referencia_centavos": 10000,
+            },
+        )
 
 
-async def _post_cobro(client, turno_id, monto, medio="efectivo", tipo="total",
-                      override_motivo=None, idem=None):
+async def _post_cobro(
+    client, turno_id, monto, medio="efectivo", tipo="total", override_motivo=None, idem=None
+):
     payload = {
         "turno_id": turno_id,
         "monto_centavos": monto,
@@ -105,6 +119,7 @@ async def _post_cobro(client, turno_id, monto, medio="efectivo", tipo="total",
 
 
 # --- RED: endpoint /cobros no existe aún ---
+
 
 async def test_cobro_feliz_efectivo(c09_cobros_client):
     client, ctx = c09_cobros_client
@@ -147,7 +162,10 @@ async def test_cobro_monto_difiere_sin_override(c09_cobros_client):
 async def test_cobro_monto_difiere_con_override(c09_cobros_client):
     client, ctx = c09_cobros_client
     response = await _post_cobro(
-        client, ctx["turno_id"], 7000, override_motivo="Descuento por pago contado",
+        client,
+        ctx["turno_id"],
+        7000,
+        override_motivo="Descuento por pago contado",
         idem=str(uuid4()),
     )
     assert response.status_code == 201, response.text
@@ -189,7 +207,8 @@ async def test_cobro_paciente_403(c09_cobros_client, engine, session, monkeypatc
     await session.commit()
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(
-        transport=transport, base_url="https://test",
+        transport=transport,
+        base_url="https://test",
         headers={"Authorization": f"Bearer {token}"},
     ) as client:
         response = await _post_cobro(client, str(uuid4()), 1000)

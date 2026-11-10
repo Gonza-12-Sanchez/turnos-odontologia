@@ -33,5 +33,7 @@ class Tratamiento(Base, AuditMixin):
             "sena_politica IN ('deshabilitada','opcional','obligatoria')",
             name="ck_tratamiento_sena_politica",
         ),
-        CheckConstraint("sena_centavos IS NULL OR sena_centavos > 0", name="ck_tratamiento_sena_centavos_pos"),
+        CheckConstraint(
+            "sena_centavos IS NULL OR sena_centavos > 0", name="ck_tratamiento_sena_centavos_pos"
+        ),
     )

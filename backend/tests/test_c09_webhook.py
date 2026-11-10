@@ -30,17 +30,23 @@ from app.shared.security import create_access_token
 class _FakeRedis:
     async def get(self, *a, **k):
         return None
+
     async def set(self, *a, **k):
         return True
+
     async def lpush(self, *a, **k):
         return 0
+
     async def ping(self):
         return True
+
     async def scan_iter(self, *a, **k):
         if False:
             yield ""
+
     async def execute_command(self, *a, **k):
         return None
+
     async def close(self):
         pass
 
@@ -57,7 +63,10 @@ class _FakeMPAdapter:
         pago = self.pagos.get(payment_id)
         if pago is None:
             from app.services.mp_adapter import MPAdapterError
-            raise MPAdapterError(404, {"code": "MP_NOT_FOUND", "detail": "pago no encontrado"}, code="MP_NOT_FOUND")
+
+            raise MPAdapterError(
+                404, {"code": "MP_NOT_FOUND", "detail": "pago no encontrado"}, code="MP_NOT_FOUND"
+            )
         return dict(pago)
 
     async def aclose(self) -> None:
@@ -102,8 +111,11 @@ async def c09_webhook_client(engine, session, monkeypatch):
     session.add(sillon)
     await session.flush()
     tratamiento = Tratamiento(
-        nombre="Limpieza", duracion_min=30, precio_referencia_centavos=10000,
-        sena_politica="obligatoria", sena_centavos=3000,
+        nombre="Limpieza",
+        duracion_min=30,
+        precio_referencia_centavos=10000,
+        sena_politica="obligatoria",
+        sena_centavos=3000,
     )
     session.add(tratamiento)
     await session.flush()
@@ -118,20 +130,31 @@ async def c09_webhook_client(engine, session, monkeypatch):
 
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(
-        transport=transport, base_url="https://test",
+        transport=transport,
+        base_url="https://test",
         headers={"Authorization": f"Bearer {token}"},
     ) as client:
-        yield client, {
-            "sillon_id": str(sillon.id),
-            "tratamiento_id": str(tratamiento.id),
-            "paciente_id": str(paciente.id),
-            "usuario_id": str(usuario.id),
-            "token": token,
-        }
+        yield (
+            client,
+            {
+                "sillon_id": str(sillon.id),
+                "tratamiento_id": str(tratamiento.id),
+                "paciente_id": str(paciente.id),
+                "usuario_id": str(usuario.id),
+                "token": token,
+            },
+        )
 
 
-async def _crear_intento_en_db(session, paciente_id, sillon_id, tratamiento_id,
-                                preference_id="pref_test", payment_id=None, estado="pendiente"):
+async def _crear_intento_en_db(
+    session,
+    paciente_id,
+    sillon_id,
+    tratamiento_id,
+    preference_id="pref_test",
+    payment_id=None,
+    estado="pendiente",
+):
     ahora = datetime.now(UTC)
     # Alinear inicio a grilla de 30 min (10:00 UTC del día siguiente)
     base = ahora.replace(hour=10, minute=0, second=0, microsecond=0) + timedelta(days=1)
@@ -176,6 +199,7 @@ async def _crear_intento_en_db(session, paciente_id, sillon_id, tratamiento_id,
 # RED: endpoint /webhooks/mercadopago no existe -> 404
 # ============================================================
 
+
 async def test_webhook_firma_invalida_401(c09_webhook_client, session):
     client, _ctx = c09_webhook_client
     body = json.dumps(_webhook_body("pay_nuevo")).encode()
@@ -211,24 +235,31 @@ async def test_webhook_pago_aprobado_crea_turno_y_cobro(c09_webhook_client, sess
     client, ctx = c09_webhook_client
     payment_id = "pay_webhook_001"
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_webhook_001",
     )
-    fake_adapter = _FakeMPAdapter({
-        payment_id: {
-            "id": payment_id,
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
+    fake_adapter = _FakeMPAdapter(
+        {
+            payment_id: {
+                "id": payment_id,
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            }
         }
-    })
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
     body = json.dumps(_webhook_body(payment_id, "approved")).encode("utf-8")
     timestamp = int(datetime.now(UTC).timestamp())
@@ -247,6 +278,7 @@ async def test_webhook_pago_aprobado_crea_turno_y_cobro(c09_webhook_client, sess
     assert data["aplicado"] is True
     # Verificar en DB
     from sqlalchemy import select
+
     turno = (await session.scalars(select(Turno))).first()
     assert turno is not None
     assert str(turno.paciente_id) == ctx["paciente_id"]
@@ -254,7 +286,9 @@ async def test_webhook_pago_aprobado_crea_turno_y_cobro(c09_webhook_client, sess
     assert cobro is not None
     assert cobro.monto_centavos == 3000
     assert cobro.referencia_mp == payment_id
-    auditoria = (await session.scalars(select(AuditoriaCobro).where(AuditoriaCobro.cobro_id == cobro.id))).first()
+    auditoria = (
+        await session.scalars(select(AuditoriaCobro).where(AuditoriaCobro.cobro_id == cobro.id))
+    ).first()
     assert auditoria is not None
     # Intento marcado aprobado
     await session.refresh(intento)
@@ -266,24 +300,31 @@ async def test_webhook_pago_rechazado_sin_turno(c09_webhook_client, session, mon
     client, ctx = c09_webhook_client
     payment_id = "pay_rechazado_001"
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_rechazado_001",
     )
-    fake_adapter = _FakeMPAdapter({
-        payment_id: {
-            "id": payment_id,
-            "status": "rejected",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": None,
-            "live_mode": False,
+    fake_adapter = _FakeMPAdapter(
+        {
+            payment_id: {
+                "id": payment_id,
+                "status": "rejected",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": None,
+                "live_mode": False,
+            }
         }
-    })
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
     body = json.dumps(_webhook_body(payment_id, "rejected")).encode("utf-8")
     timestamp = int(datetime.now(UTC).timestamp())
@@ -303,6 +344,7 @@ async def test_webhook_pago_rechazado_sin_turno(c09_webhook_client, session, mon
     assert data["motivo"] == "pago_rechazado"
     # No turno creado
     from sqlalchemy import select
+
     turnos = (await session.scalars(select(Turno))).all()
     assert len(turnos) == 0
     cobros = (await session.scalars(select(Cobro))).all()
@@ -316,24 +358,31 @@ async def test_webhook_duplicado_idempotente(c09_webhook_client, session, monkey
     client, ctx = c09_webhook_client
     payment_id = "pay_idem_001"
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_idem_001",
     )
-    fake_adapter = _FakeMPAdapter({
-        payment_id: {
-            "id": payment_id,
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
+    fake_adapter = _FakeMPAdapter(
+        {
+            payment_id: {
+                "id": payment_id,
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            }
         }
-    })
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
     body = json.dumps(_webhook_body(payment_id, "approved")).encode("utf-8")
     timestamp = int(datetime.now(UTC).timestamp())
@@ -343,14 +392,22 @@ async def test_webhook_duplicado_idempotente(c09_webhook_client, session, monkey
     r1 = await client.post(
         "/webhooks/mercadopago",
         content=body,
-        headers={"x-signature": firma, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert r1.status_code == 200
     # Segunda notificacion duplicada -> idempotente, sin duplicar
     r2 = await client.post(
         "/webhooks/mercadopago",
         content=body,
-        headers={"x-signature": firma, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert r2.status_code == 200
     data2 = r2.json()
@@ -358,6 +415,7 @@ async def test_webhook_duplicado_idempotente(c09_webhook_client, session, monkey
     assert data2.get("duplicado") is True
     # Un solo turno y un solo cobro
     from sqlalchemy import select
+
     turnos = (await session.scalars(select(Turno))).all()
     assert len(turnos) == 1
     cobros = (await session.scalars(select(Cobro))).all()
@@ -366,29 +424,38 @@ async def test_webhook_duplicado_idempotente(c09_webhook_client, session, monkey
     assert len(pagos) == 1
 
 
-async def test_webhook_discrepancia_monto_registro_incidencia(c09_webhook_client, session, monkeypatch):
+async def test_webhook_discrepancia_monto_registro_incidencia(
+    c09_webhook_client, session, monkeypatch
+):
     client, ctx = c09_webhook_client
     payment_id = "pay_disc_001"
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_disc_001",
     )
     # MP informa monto distinto al del intento
-    fake_adapter = _FakeMPAdapter({
-        payment_id: {
-            "id": payment_id,
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 50.00,  # distinto a 30.00 (3000 centavos)
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
+    fake_adapter = _FakeMPAdapter(
+        {
+            payment_id: {
+                "id": payment_id,
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 50.00,  # distinto a 30.00 (3000 centavos)
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            }
         }
-    })
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
     body = json.dumps(_webhook_body(payment_id, "approved")).encode("utf-8")
     timestamp = int(datetime.now(UTC).timestamp())
@@ -396,7 +463,11 @@ async def test_webhook_discrepancia_monto_registro_incidencia(c09_webhook_client
     response = await client.post(
         "/webhooks/mercadopago",
         content=body,
-        headers={"x-signature": firma, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -404,6 +475,7 @@ async def test_webhook_discrepancia_monto_registro_incidencia(c09_webhook_client
     assert "monto" in data.get("motivo", "").lower() or data.get("incidencia") is True
     # No turno creado por discrepancia
     from sqlalchemy import select
+
     turnos = (await session.scalars(select(Turno))).all()
     assert len(turnos) == 0
 
@@ -412,7 +484,10 @@ async def test_webhook_discrepancia_monto_registro_incidencia(c09_webhook_client
 # Task 5.3: Pago aprobado sin cupo -> requiere_revision (EXCLUDE)
 # ============================================================
 
-async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(c09_webhook_client, session, monkeypatch):
+
+async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(
+    c09_webhook_client, session, monkeypatch
+):
     """Pago aprobado pero otro turno ya ocupa el hueco -> incidencia, sin turno nuevo."""
     client, ctx = c09_webhook_client
     payment_id = "pay_nocupo_001"
@@ -422,7 +497,10 @@ async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(c09_webhook_clie
 
     # Intento de seña (mismo hueco que el turno ocupante)
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_nocupo_001",
     )
     # Forzar el inicio del intento al mismo que el turno ocupante
@@ -443,21 +521,25 @@ async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(c09_webhook_clie
     session.add(turno_ocupante)
     await session.commit()
 
-    fake_adapter = _FakeMPAdapter({
-        payment_id: {
-            "id": payment_id,
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
+    fake_adapter = _FakeMPAdapter(
+        {
+            payment_id: {
+                "id": payment_id,
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            }
         }
-    })
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
     body = json.dumps(_webhook_body(payment_id, "approved")).encode("utf-8")
     timestamp = int(datetime.now(UTC).timestamp())
@@ -465,7 +547,11 @@ async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(c09_webhook_clie
     response = await client.post(
         "/webhooks/mercadopago",
         content=body,
-        headers={"x-signature": firma, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert response.status_code == 200, response.text
     data = response.json()
@@ -473,6 +559,7 @@ async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(c09_webhook_clie
     assert data.get("incidencia") is True or data.get("motivo") == "sin_cupo_disponible"
     # No SEGUNDO turno creado (solo el ocupante existente)
     from sqlalchemy import select
+
     turnos = (await session.scalars(select(Turno))).all()
     assert len(turnos) == 1  # solo el que ya estaba
     # Intento marcado requiere_revision
@@ -488,39 +575,47 @@ async def test_webhook_pago_aprobado_sin_cupo_requiere_revision(c09_webhook_clie
 # Task 5.4: Varios payment_id, eventos fuera de orden, refunded/charged_back
 # ============================================================
 
+
 async def test_webhook_multiple_payment_ids_un_intento(c09_webhook_client, session, monkeypatch):
     """Múltiples payment_ids para el mismo intento: solo una reserva/seña."""
     client, ctx = c09_webhook_client
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_multi_001",
     )
 
-    fake_adapter = _FakeMPAdapter({
-        "pay_multi_1": {
-            "id": "pay_multi_1",
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
-        },
-        "pay_multi_2": {
-            "id": "pay_multi_2",
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
-        },
-    })
+    fake_adapter = _FakeMPAdapter(
+        {
+            "pay_multi_1": {
+                "id": "pay_multi_1",
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            },
+            "pay_multi_2": {
+                "id": "pay_multi_2",
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            },
+        }
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
 
     # Primer pago aprobado -> crea turno
@@ -530,7 +625,11 @@ async def test_webhook_multiple_payment_ids_un_intento(c09_webhook_client, sessi
     r1 = await client.post(
         "/webhooks/mercadopago",
         content=body1,
-        headers={"x-signature": firma1, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma1,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert r1.status_code == 200
     assert r1.json()["aplicado"] is True
@@ -542,7 +641,11 @@ async def test_webhook_multiple_payment_ids_un_intento(c09_webhook_client, sessi
     r2 = await client.post(
         "/webhooks/mercadopago",
         content=body2,
-        headers={"x-signature": firma2, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma2,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert r2.status_code == 200
     data2 = r2.json()
@@ -550,6 +653,7 @@ async def test_webhook_multiple_payment_ids_un_intento(c09_webhook_client, sessi
     assert data2["payment_id"] == "pay_multi_2"
 
     from sqlalchemy import select
+
     turnos = (await session.scalars(select(Turno))).all()
     assert len(turnos) == 1  # solo un turno
     cobros = (await session.scalars(select(Cobro))).all()
@@ -563,25 +667,32 @@ async def test_webhook_pago_refunded_incidencia(c09_webhook_client, session, mon
     client, ctx = c09_webhook_client
     payment_id = "pay_refund_001"
     intento = await _crear_intento_en_db(
-        session, ctx["paciente_id"], ctx["sillon_id"], ctx["tratamiento_id"],
+        session,
+        ctx["paciente_id"],
+        ctx["sillon_id"],
+        ctx["tratamiento_id"],
         preference_id="pref_refund_001",
     )
     # Primero se aprueba
-    fake_adapter = _FakeMPAdapter({
-        payment_id: {
-            "id": payment_id,
-            "status": "approved",
-            "external_reference": str(intento.id),
-            "collector_id": "collector_test",
-            "currency_id": "ARS",
-            "transaction_amount": 30.00,
-            "date_approved": datetime.now(UTC).isoformat(),
-            "live_mode": False,
+    fake_adapter = _FakeMPAdapter(
+        {
+            payment_id: {
+                "id": payment_id,
+                "status": "approved",
+                "external_reference": str(intento.id),
+                "collector_id": "collector_test",
+                "currency_id": "ARS",
+                "transaction_amount": 30.00,
+                "date_approved": datetime.now(UTC).isoformat(),
+                "live_mode": False,
+            }
         }
-    })
+    )
     monkeypatch.setattr(
-        SenaService, "mp_adapter",
-        property(lambda self: fake_adapter), raising=False,
+        SenaService,
+        "mp_adapter",
+        property(lambda self: fake_adapter),
+        raising=False,
     )
     body = json.dumps(_webhook_body(payment_id, "approved")).encode("utf-8")
     ts = int(datetime.now(UTC).timestamp())
@@ -589,7 +700,11 @@ async def test_webhook_pago_refunded_incidencia(c09_webhook_client, session, mon
     r1 = await client.post(
         "/webhooks/mercadopago",
         content=body,
-        headers={"x-signature": firma, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert r1.status_code == 200
     assert r1.json()["aplicado"] is True
@@ -601,12 +716,17 @@ async def test_webhook_pago_refunded_incidencia(c09_webhook_client, session, mon
     r2 = await client.post(
         "/webhooks/mercadopago",
         content=body2,
-        headers={"x-signature": firma2, "x-request-id": str(uuid4()), "content-type": "application/json"},
+        headers={
+            "x-signature": firma2,
+            "x-request-id": str(uuid4()),
+            "content-type": "application/json",
+        },
     )
     assert r2.status_code == 200
     data2 = r2.json()
     assert data2["duplicado"] is True  # ya procesado, no se duplica
 
     from sqlalchemy import select
+
     turnos = (await session.scalars(select(Turno))).all()
     assert len(turnos) == 1  # turno sigue existiendo (no se borra por refund)

@@ -26,9 +26,11 @@ async def c09_seeds(session):
     sillon = Sillon(consultorio_id=consultorio.id, nombre="Sillon C09S", is_active=True)
     session.add(sillon)
     tratamiento = Tratamiento(
-        nombre="Limpieza", duracion_min=30,
+        nombre="Limpieza",
+        duracion_min=30,
         precio_referencia_centavos=10000,
-        sena_politica="obligatoria", sena_centavos=3000,
+        sena_politica="obligatoria",
+        sena_centavos=3000,
     )
     session.add(tratamiento)
     await session.flush()

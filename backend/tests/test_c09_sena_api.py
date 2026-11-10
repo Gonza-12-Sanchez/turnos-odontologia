@@ -26,24 +26,31 @@ from app.shared.security import create_access_token
 class _FakeRedis:
     async def get(self, *a, **k):
         return None
+
     async def set(self, *a, **k):
         return True
+
     async def lpush(self, *a, **k):
         return 0
+
     async def ping(self):
         return True
+
     async def scan_iter(self, *a, **k):
         if False:
             yield ""
+
     async def execute_command(self, *a, **k):
         return None
+
     async def close(self):
         pass
 
 
 class _MockMPAdapter(MPAdapter):
-    async def crear_preferencia(self, access_token, external_reference, monto_centavos,
-                                notification_url, back_urls):
+    async def crear_preferencia(
+        self, access_token, external_reference, monto_centavos, notification_url, back_urls
+    ):
         return {
             "id": f"pref_{external_reference}",
             "init_point": "https://mock.mp/checkout/pref_" + external_reference,
@@ -62,8 +69,11 @@ async def c09_sena_client(engine, session, monkeypatch):
     sillon = Sillon(consultorio_id=consultorio.id, nombre="Sillon Sena", is_active=True)
     session.add(sillon)
     tratamiento = Tratamiento(
-        nombre="Limpieza", duracion_min=30, precio_referencia_centavos=10000,
-        sena_politica="obligatoria", sena_centavos=3000,
+        nombre="Limpieza",
+        duracion_min=30,
+        precio_referencia_centavos=10000,
+        sena_politica="obligatoria",
+        sena_centavos=3000,
     )
     session.add(tratamiento)
     await session.flush()
@@ -80,16 +90,20 @@ async def c09_sena_client(engine, session, monkeypatch):
     await session.commit()
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(
-        transport=transport, base_url="https://test",
+        transport=transport,
+        base_url="https://test",
         headers={"Authorization": f"Bearer {token}"},
     ) as client:
-        yield client, {
-            "sillon_id": str(sillon.id),
-            "tratamiento_id": str(tratamiento.id),
-            "inicio": inicio.isoformat(),
-            "paciente_id": str(paciente.id),
-            "usuario_id": str(paciente_user.id),
-        }
+        yield (
+            client,
+            {
+                "sillon_id": str(sillon.id),
+                "tratamiento_id": str(tratamiento.id),
+                "inicio": inicio.isoformat(),
+                "paciente_id": str(paciente.id),
+                "usuario_id": str(paciente_user.id),
+            },
+        )
 
 
 async def _post_sena(client, sillon_id, tratamiento_id, inicio, idem=None, token=None):
@@ -107,11 +121,15 @@ async def _post_sena(client, sillon_id, tratamiento_id, inicio, idem=None, token
 
 # --- RED: endpoint /pagos/sena no existe ---
 
+
 async def test_pagos_sena_crea_checkout(c09_sena_client, monkeypatch):
     client, ctx = c09_sena_client
     from app.services.sena_service import SenaService
+
     mock_adapter = _MockMPAdapter()
-    monkeypatch.setattr(SenaService, "mp_adapter", property(lambda self: mock_adapter), raising=False)
+    monkeypatch.setattr(
+        SenaService, "mp_adapter", property(lambda self: mock_adapter), raising=False
+    )
     response = await _post_sena(
         client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=str(uuid4())
     )
@@ -129,12 +147,19 @@ async def test_pagos_sena_crea_checkout(c09_sena_client, monkeypatch):
 async def test_pagos_sena_replay_misma_clave(c09_sena_client, monkeypatch):
     client, ctx = c09_sena_client
     from app.services.sena_service import SenaService
+
     mock_adapter = _MockMPAdapter()
-    monkeypatch.setattr(SenaService, "mp_adapter", property(lambda self: mock_adapter), raising=False)
+    monkeypatch.setattr(
+        SenaService, "mp_adapter", property(lambda self: mock_adapter), raising=False
+    )
     clave = str(uuid4())
-    r1 = await _post_sena(client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=clave)
+    r1 = await _post_sena(
+        client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=clave
+    )
     assert r1.status_code == 201, r1.text
-    r2 = await _post_sena(client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=clave)
+    r2 = await _post_sena(
+        client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=clave
+    )
     assert r2.status_code == 200, r2.text
     assert r2.json()["intento_id"] == r1.json()["intento_id"]
 
@@ -142,10 +167,15 @@ async def test_pagos_sena_replay_misma_clave(c09_sena_client, monkeypatch):
 async def test_pagos_sena_clave_distinta_payload(c09_sena_client, monkeypatch):
     client, ctx = c09_sena_client
     from app.services.sena_service import SenaService
+
     mock_adapter = _MockMPAdapter()
-    monkeypatch.setattr(SenaService, "mp_adapter", property(lambda self: mock_adapter), raising=False)
+    monkeypatch.setattr(
+        SenaService, "mp_adapter", property(lambda self: mock_adapter), raising=False
+    )
     clave = str(uuid4())
-    r1 = await _post_sena(client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=clave)
+    r1 = await _post_sena(
+        client, ctx["sillon_id"], ctx["tratamiento_id"], ctx["inicio"], idem=clave
+    )
     assert r1.status_code == 201, r1.text
     inicio2 = datetime(2026, 11, 12, 11, 0, tzinfo=UTC).isoformat()
     r2 = await _post_sena(client, ctx["sillon_id"], ctx["tratamiento_id"], inicio2, idem=clave)
@@ -186,9 +216,7 @@ async def test_pagos_sena_anonimo_401(engine, session, monkeypatch):
     monkeypatch.setattr(redis_client, "get_redis", lambda: _FakeRedis())
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(transport=transport, base_url="https://test") as client:
-        response = await _post_sena(
-            client, str(uuid4()), str(uuid4()), "2026-12-01T10:00:00-03:00"
-        )
+        response = await _post_sena(client, str(uuid4()), str(uuid4()), "2026-12-01T10:00:00-03:00")
         assert response.status_code == 401, response.text
 
 
@@ -196,8 +224,11 @@ async def test_pagos_sena_tratamiento_sin_sena_422(c09_sena_client, session, mon
     client, ctx = c09_sena_client
     # Tratamiento con sena deshabilitada -> 422 si se intenta pagar
     t2 = Tratamiento(
-        nombre="Sin seña", duracion_min=15, precio_referencia_centavos=5000,
-        sena_politica="deshabilitada", sena_centavos=None,
+        nombre="Sin seña",
+        duracion_min=15,
+        precio_referencia_centavos=5000,
+        sena_politica="deshabilitada",
+        sena_centavos=None,
     )
     session.add(t2)
     await session.commit()

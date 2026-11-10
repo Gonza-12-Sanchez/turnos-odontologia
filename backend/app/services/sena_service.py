@@ -49,9 +49,7 @@ class SenaService:
     async def _tratamiento_y_politica(self, tratamiento_id: UUID) -> Tratamiento:
         tratamiento = await self.session.get(Tratamiento, tratamiento_id)
         if tratamiento is None or not tratamiento.is_active:
-            raise SenaError(
-                status.HTTP_404_NOT_FOUND, "Tratamiento inexistente o inactivo"
-            )
+            raise SenaError(status.HTTP_404_NOT_FOUND, "Tratamiento inexistente o inactivo")
         if tratamiento.sena_politica == "deshabilitada":
             raise SenaError(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -66,7 +64,9 @@ class SenaService:
             )
         return tratamiento
 
-    async def _hueco_disponible(self, sillon_id: UUID, tratamiento_id: UUID, inicio: datetime) -> None:
+    async def _hueco_disponible(
+        self, sillon_id: UUID, tratamiento_id: UUID, inicio: datetime
+    ) -> None:
         disp = DisponibilidadService(self.session)
         await self.session.get(Tratamiento, tratamiento_id)
         libres = await disp.libres(inicio.date(), tratamiento_id, sillon_id, use_cache=False)
@@ -81,7 +81,9 @@ class SenaService:
                 code="HUECO_NO_DISPONIBLE",
             )
 
-    async def _idempotencia_existe(self, paciente_id: UUID, clave: str) -> IdempotenciaSolicitud | None:
+    async def _idempotencia_existe(
+        self, paciente_id: UUID, clave: str
+    ) -> IdempotenciaSolicitud | None:
         result = await self.session.scalars(
             select(IdempotenciaSolicitud).where(
                 IdempotenciaSolicitud.usuario_id == paciente_id,
@@ -128,9 +130,7 @@ class SenaService:
 
         paciente = await self.session.get(Paciente, paciente_id)
         if paciente is None:
-            raise SenaError(
-                status.HTTP_404_NOT_FOUND, "Paciente inexistente"
-            )
+            raise SenaError(status.HTTP_404_NOT_FOUND, "Paciente inexistente")
 
         # Idempotencia: misma clave + mismo payload devuelve checkout cacheado.
         huella = self._huella(sillon_id, tratamiento_id, inicio)
@@ -217,14 +217,10 @@ class SenaService:
     # ------------------------------------------------------------------
 
     async def _pago_mp_por_payment_id(self, payment_id: str) -> PagoMP | None:
-        result = await self.session.scalars(
-            select(PagoMP).where(PagoMP.payment_id == payment_id)
-        )
+        result = await self.session.scalars(select(PagoMP).where(PagoMP.payment_id == payment_id))
         return result.first()
 
-    async def _verificar_pago_mp(
-        self, pago_mp: dict, intento_id: str
-    ) -> tuple[bool, str | None]:
+    async def _verificar_pago_mp(self, pago_mp: dict, intento_id: str) -> tuple[bool, str | None]:
         """Verifica campos financieros del pago MP contra el intento.
         Returns (valido, motivo_rechazo)."""
         # collector_id esperado
@@ -289,10 +285,11 @@ class SenaService:
 
         # Revalidar disponibilidad sin cache antes de crear turno
         disp = DisponibilidadService(self.session)
-        libres = await disp.libres(intento.inicio.date(), intento.tratamiento_id, intento.sillon_id, use_cache=False)
+        libres = await disp.libres(
+            intento.inicio.date(), intento.tratamiento_id, intento.sillon_id, use_cache=False
+        )
         if not any(
-            slot.inicio == intento.inicio and slot.sillon_id == intento.sillon_id
-            for slot in libres
+            slot.inicio == intento.inicio and slot.sillon_id == intento.sillon_id for slot in libres
         ):
             # Sin cupo: registrar incidencia, sin turno ni cobro
             await self._registrar_pago_mp(intento, pago_mp, resultado="incidencia")
@@ -378,9 +375,7 @@ class SenaService:
             "payment_id": payment_id_str,
         }
 
-    async def _rechazar_intento(
-        self, intento: IntentoSena, pago_mp: dict
-    ) -> dict[str, Any]:
+    async def _rechazar_intento(self, intento: IntentoSena, pago_mp: dict) -> dict[str, Any]:
         await self.session.execute(
             select(IntentoSena).where(IntentoSena.id == intento.id).with_for_update()
         )
@@ -391,9 +386,7 @@ class SenaService:
         await self.session.flush()
         return {"aplicado": False, "motivo": "pago_rechazado", "payment_id": str(pago_mp.get("id"))}
 
-    async def aplicar_pago_webhook(
-        self, payment_id: str, evento: dict
-    ) -> dict[str, Any]:
+    async def aplicar_pago_webhook(self, payment_id: str, evento: dict) -> dict[str, Any]:
         """Procesa un webhook de Mercado Pago: valida, consulta y aplica o registra incidencia."""
         # Idempotencia: payment_id ya procesado
         existente = await self._pago_mp_por_payment_id(payment_id)
@@ -464,7 +457,11 @@ class SenaService:
                     intento_fresh = None
                 if intento_fresh is not None:
                     return await self._registrar_incidencia_sin_cupo(intento_fresh, pago_mp)
-                return {"aplicado": False, "motivo": "conflicto_concurrente", "payment_id": payment_id}
+                return {
+                    "aplicado": False,
+                    "motivo": "conflicto_concurrente",
+                    "payment_id": payment_id,
+                }
         elif estado_proveedor == "rejected":
             return await self._rechazar_intento(intento, pago_mp)
         else:
@@ -511,10 +508,13 @@ class SenaService:
                     "payment_id": pago_existente.payment_id,
                 }
             # Re-aplicar usando la logica del webhook (idempotente)
-            return await self.aplicar_pago_webhook(pago_existente.payment_id, {
-                "type": "payment",
-                "data": {"id": pago_existente.payment_id},
-            })
+            return await self.aplicar_pago_webhook(
+                pago_existente.payment_id,
+                {
+                    "type": "payment",
+                    "data": {"id": pago_existente.payment_id},
+                },
+            )
 
         # No hay pago registrado: intentar descubrir payment_id via MP?
         # Sin external_reference valida no podemos consultar MP; dejar pendiente.

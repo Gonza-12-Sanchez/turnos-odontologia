@@ -31,14 +31,10 @@ class CobroService:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def _turno_tratamiento(
-        self, turno_id: UUID
-    ) -> tuple[Turno, Tratamiento | None]:
+    async def _turno_tratamiento(self, turno_id: UUID) -> tuple[Turno, Tratamiento | None]:
         turno = await self.session.get(Turno, turno_id)
         if turno is None or not turno.is_active:
-            raise CobroError(
-                status.HTTP_404_NOT_FOUND, "Turno inexistente o inactivo"
-            )
+            raise CobroError(status.HTTP_404_NOT_FOUND, "Turno inexistente o inactivo")
         tratamiento = await self.session.get(Tratamiento, turno.tratamiento_id)
         return turno, tratamiento
 
@@ -62,7 +58,11 @@ class CobroService:
         return sum(result.all())
 
     def _huella(
-        self, turno_id: UUID, monto_centavos: int, medio: str, tipo: str,
+        self,
+        turno_id: UUID,
+        monto_centavos: int,
+        medio: str,
+        tipo: str,
         override_motivo: str | None,
     ) -> str:
         payload = {
@@ -72,9 +72,7 @@ class CobroService:
             "tipo": tipo,
             "override_motivo": override_motivo,
         }
-        return hashlib.sha256(
-            json.dumps(payload, sort_keys=True).encode("utf-8")
-        ).hexdigest()
+        return hashlib.sha256(json.dumps(payload, sort_keys=True).encode("utf-8")).hexdigest()
 
     def _resultado_cobro(self, cobro: Cobro) -> dict[str, Any]:
         return {
@@ -100,13 +98,15 @@ class CobroService:
         # Idempotencia: misma clave + mismo payload devuelve resultado cacheado.
         huella = self._huella(turno_id, monto_centavos, medio, tipo, override_motivo)
         if idempotency_key:
-            existente = (await self.session.scalars(
-                select(IdempotenciaSolicitud).where(
-                    IdempotenciaSolicitud.usuario_id == actor_id,
-                    IdempotenciaSolicitud.operacion == "cobros:registro",
-                    IdempotenciaSolicitud.clave == idempotency_key,
+            existente = (
+                await self.session.scalars(
+                    select(IdempotenciaSolicitud).where(
+                        IdempotenciaSolicitud.usuario_id == actor_id,
+                        IdempotenciaSolicitud.operacion == "cobros:registro",
+                        IdempotenciaSolicitud.clave == idempotency_key,
+                    )
                 )
-            )).first()
+            ).first()
             if existente is not None:
                 if existente.huella != huella:
                     raise CobroError(
@@ -126,14 +126,10 @@ class CobroService:
 
         # Bloqueo de turno para serializar conciliación.
         _turno, tratamiento = await self._turno_tratamiento(turno_id)
-        await self.session.execute(
-            select(Turno).where(Turno.id == turno_id).with_for_update()
-        )
+        await self.session.execute(select(Turno).where(Turno.id == turno_id).with_for_update())
 
         sena_acumulada = await self._sena_acumulada(turno_id)
-        precio = (
-            tratamiento.precio_referencia_centavos if tratamiento else None
-        )
+        precio = tratamiento.precio_referencia_centavos if tratamiento else None
 
         # Validación de duplicación de sena por turno.
         if tipo == "sena" and sena_acumulada > 0:

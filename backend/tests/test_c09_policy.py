@@ -63,6 +63,7 @@ async def c09_client(engine, session, monkeypatch):
 
 # --- RED: estos tests fallan hasta que la política de seña esté implementada ---
 
+
 async def test_tratamiento_obligatoria_con_monto(c09_client):
     client, _ = c09_client
     response = await client.post(
