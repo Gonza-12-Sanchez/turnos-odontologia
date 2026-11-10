@@ -7,17 +7,19 @@
 
 export class ApiError extends Error {
   readonly status: number
+  readonly body: unknown
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, body?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.status = status
+    this.body = body
   }
 }
 
 export class UnauthorizedError extends ApiError {
-  constructor(message = 'No autorizado') {
-    super(401, message)
+  constructor(message = 'No autorizado', body?: unknown) {
+    super(401, message, body)
     this.name = 'UnauthorizedError'
   }
 }
@@ -28,11 +30,14 @@ export interface ApiRequestOptions {
   headers?: Record<string, string>
   query?: Record<string, string>
   signal?: AbortSignal
+  credentials?: RequestCredentials
+  expectedStatus?: number
 }
 
 export interface ApiClient {
   get<T>(path: string, options?: ApiRequestOptions): Promise<T>
   post<T>(path: string, body: unknown, options?: ApiRequestOptions): Promise<T>
+  patch<T>(path: string, body: unknown, options?: ApiRequestOptions): Promise<T>
 }
 
 function joinUrl(baseUrl: string, path: string): string {
@@ -50,7 +55,7 @@ function withQuery(url: string, query?: Record<string, string>): string {
 async function request<T>(
   baseUrl: string,
   path: string,
-  method: 'GET' | 'POST',
+  method: 'GET' | 'POST' | 'PATCH',
   body: unknown,
   options: ApiRequestOptions = {},
 ): Promise<T> {
@@ -67,22 +72,31 @@ async function request<T>(
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
     signal: options.signal,
+    credentials: options.credentials ?? 'omit',
+    cache: 'no-store',
   })
 
+  const text = await response.text()
+  let data: unknown
+  if (response.headers.get('content-type')?.includes('application/json') && text) {
+    try { data = JSON.parse(text) } catch { /* Invalid JSON is never displayed. */ }
+  }
   if (response.status === 401) {
-    throw new UnauthorizedError()
+    throw new UnauthorizedError('No autorizado', data)
   }
   if (!response.ok) {
-    throw new ApiError(response.status, `Request failed with status ${response.status}`)
+    throw new ApiError(response.status, 'Servicio no disponible. Intenta nuevamente.', data)
+  }
+  if (options.expectedStatus !== undefined && response.status !== options.expectedStatus) {
+    throw new ApiError(502, 'Resultado no verificado.')
   }
   if (response.status === 204) {
     return undefined as T
   }
-  const text = await response.text()
   if (!text) {
     return undefined as T
   }
-  const data: unknown = JSON.parse(text)
+  if (data === undefined) throw new ApiError(502, 'Respuesta no valida del servicio.')
   return data as T
 }
 
@@ -93,6 +107,9 @@ export function createApiClient(baseUrl: string): ApiClient {
     },
     post<T>(path: string, body: unknown, options?: ApiRequestOptions): Promise<T> {
       return request<T>(baseUrl, path, 'POST', body, options)
+    },
+    patch<T>(path: string, body: unknown, options?: ApiRequestOptions): Promise<T> {
+      return request<T>(baseUrl, path, 'PATCH', body, options)
     },
   }
 }

@@ -1,0 +1,1 @@
+export default () => 'configured-worker'
