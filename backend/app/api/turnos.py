@@ -6,7 +6,7 @@ from datetime import date
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,6 +54,7 @@ async def crear_turno(
     payload: TurnoCreate,
     user: Annotated[Usuario, Depends(require_role("paciente"))],
     db: AsyncSession = Depends(get_db),
+    idempotency_key: Annotated[str | None, Header()] = None,
 ):
     uow = UnitOfWork(deps.get_session_factory())
     async with uow:
@@ -64,7 +65,7 @@ async def crear_turno(
             )
         service = ReservaService(uow.session)
         try:
-            turno = await service.reservar(payload, paciente, uow)
+            turno = await service.reservar(payload, paciente, uow, idempotency_key)
         except DepositoRequerido as exc:
             return JSONResponse(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
