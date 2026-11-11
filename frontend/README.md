@@ -1,7 +1,7 @@
-# PWA Paciente (C10)
+# PWA Paciente (C10) y gestión del consultorio (C11 en progreso)
 
-React 18 / TypeScript estricto / Vite 6. Solo area publica y paciente; sin
-agenda profesional, configuracion administrativa ni facturacion.
+React 18 / TypeScript estricto / Vite 6. Área pública/paciente y avance incremental
+del consultorio. C11 no está terminado; sin facturación electrónica.
 
 ## Desarrollo Y Verificacion
 
@@ -125,3 +125,92 @@ solo configuracion y patrones estaticos controlados, no entradas de usuarios.
 No es aprobacion de release. Ver C10 verification.md para triage completo y
 evidencia RED/GREEN. C09 sigue bloqueado por falta de servicios reales; ningun
 test con HTTP simulado acredita auth/cookies/checkout integrados.
+
+## C11 — Rutas y autorización frontend
+
+| Ruta | Roles UI | Estado inicial del slice |
+|---|---|---|
+| /agenda | secretaria, odontologo | Bloqueada la consulta del día AR hasta verificar contrato temporal |
+| /config | secretaria | Configuración incremental; no implica cambiar contratos backend |
+| /cobros | secretaria para registro | No habilitado hasta verificar C09; sin escrituras monetarias |
+
+Un único SessionProvider mantiene locks/generaciones de C10. No hay peticiones
+administrativas antes de verificar rol; loading y 503 de sesión no muestran área
+privada. Anónimo (incluido refresh401) va a login; paciente/rol desconocido recibe
+denegación; odontólogo no consulta configuración. Ocultar navegación no reemplaza
+RBAC backend. La 404 continúa para rutas desconocidas, no para /agenda ya definida.
+
+Pruebas DOM/HTTP ficticio: `npm.cmd test -- src/Staff.test.tsx`. No acreditan
+cookies, CORS ni permisos del backend real. Gates y evidencia en
+`../openspec/changes/c-11-pwa-agenda-gestion/verification.md`.
+
+Login valida returnTo con allowlist exacta y con el rol autenticado: secretaria
+puede volver a /agenda, /config y /cobros; odontólogo a /agenda; paciente mantiene
+sus destinos C10. Destino externo, //, backslash, controles o ruta incompatible
+vuelven al inicio privado del rol (/agenda staff, /mis-reservas paciente). No se
+envía ninguna escritura de negocio automáticamente al completar login.
+
+Configuración consulta exclusivamente GET `/api/config/{tratamientos|sillones|bloqueos}`
+con `page`, `page_size=20` y `activo=true|false` (false significa solo inactivos).
+Valida DTOs unknown, tipos/cotas, UUIDs, política seña y coincidencia de página/filtro;
+un JSON incoherente es error, no una lista vacía. Cambiar recurso/página/filtro
+remonta la lectura, aborta y descarta respuestas tardías. Offline no conserva
+recursos visibles ni hace escrituras; no se cargan fixtures en runtime.
+
+Identidad y refresh de C10 siguen sin cambios: los tests de C11 verifican dos
+cuentas y respuestas demoradas al cerrar/volver a entrar, y refresh único compartido
+por lecturas vencidas. Esto no acredita cookies ni concurrencia multi-tab real.
+
+### C11 — Tratamientos (slice 3.2)
+
+Alta: POST `/api/config/tratamientos`, espera 201 y usa el UUID recibido. Edición:
+PATCH `/api/config/tratamientos/{id}`, espera 200 y envía únicamente nombre,
+duración y/o precio modificados. Ambos validan el DTO y los valores confirmados
+antes de anunciar éxito. Crear usa la política deshabilitada por defecto del
+backend; la UI no envía ni permite editar `sena_politica`/`sena_centavos`.
+
+Precio: texto ARS con coma o punto decimal, sin miles, máximo dos decimales;
+conversión con BigInt (entero×100 + fracción), sin parseFloat ni redondeos. Vacío
+envía null explícito; cero envía 0. Cota: 2147483647 centavos (21474836,47 ARS).
+Duración: entero 1–2147483647; nombre recortado, 1–120 caracteres. El backend
+continúa siendo la autoridad de las reglas. Los 422 se asocian a campos conocidos
+mediante aria-invalid/aria-describedby; nunca se muestra el detalle interno crudo.
+
+Escritura con límite de 15s y sin reintento automático. Un bloqueo en memoria del
+Layout de la cuenta comienza antes del envío: mientras está pendiente, impide
+otra escritura; ante transporte/5xx/DTO inesperado conserva la incertidumbre.
+Navegar, reconsultar o reconectar no lo libera. Una respuesta tardía tras desmontar
+el formulario tampoco habilita repetirlo. Solo un 422 o un éxito validado con el
+formulario aún presente termina normalmente el ciclo. No existe conciliación
+automática: consultar una lista no prueba que el comando no se aplicó.
+
+Límite importante: el bloqueo no sobrevive recarga/cierre de sesión ni coordina
+pestañas. No es idempotencia backend ni acredita seguridad de reintentos tras
+reiniciar; el resultado incierto requiere conciliación operativa antes de repetir.
+No se almacenan tokens, datos de catálogo ni comandos en storage/caché/colas.
+
+Estilos staff reflejan la base revisión1 sin importarla desde fuera del contexto
+Docker `frontend/`. Capturas HTTP ficticio y diferencias visuales pendientes:
+`../openspec/changes/c-11-pwa-agenda-gestion/mockups/verify/`.
+
+### C11 — Sillones existentes (slice 3.3)
+
+Desde Sillones → Editar se puede cambiar el nombre (1–80 caracteres). El PATCH
+solo envía `nombre` si cambió; no permite ingresar ni modificar consultorio_id.
+Desactivar/Reactivar abre una confirmación separada: solo al confirmarla envía
+`{activo:false}`/`{activo:true}`, sin incorporar cambios de nombre no guardados.
+Cancelar no envía solicitudes. No hay DELETE ni cambios/cancelaciones de turnos:
+desactivar es baja lógica, no borra históricos. El servidor sigue siendo la
+autoridad; las pruebas HTTP simuladas no acreditan persistencia de históricos.
+
+Antes de mostrar éxito valida DTO, id, sede, nombre y actividad confirmados.
+Después de baja/reactivación reconsulta la página con el filtro activo/inactivo
+vigente; el recurso deja de aparecer en el filtro anterior. No se reconstruye
+una lista ficticia ni se altera la agenda desde el cliente.
+
+422 asocia errores conocidos a Nombre y conserva el valor. 403/404 informan
+permiso/recurso no disponible, sin afirmar que fue borrado ni refrescar permisos;
+se debe volver a consultar antes de otro intento. Fallos de transporte/5xx/DTO
+inesperado mantienen el guard de incertidumbre del Layout; mismo límite de15s,
+sin retry/replay automático. El alta sigue pendiente de G-contexto: no se obtiene
+la sede desde otro sillón ni se pide un UUID manual.

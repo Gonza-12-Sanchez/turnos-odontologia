@@ -303,5 +303,12 @@
     ]
   },
   "step": "done",
-  "version": 4
+  "version": 5,
+  "visual_design": {
+    "created_by": "design-system",
+    "mode": "system-and-mockups",
+    "status": "approved",
+    "revision": 1,
+    "path": "design-system/README.md"
+  }
 }

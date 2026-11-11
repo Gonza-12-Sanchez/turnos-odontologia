@@ -5,10 +5,16 @@ import { Notice } from '../../shared/ui'
 import { errorMessage, useOnline } from '../../shared/network'
 import { useSession } from './context'
 
-function safeReturn(value: string | null) {
-  if (!value || !/^\/(horarios|mis-reservas|pagos\/retorno)(\?|$)/.test(value) || value.includes('\\')) return '/mis-reservas'
+function safeReturn(value: string | null, rol?: string) {
+  const staff = rol === 'secretaria' || rol === 'odontologo'
+  const fallback = staff ? '/agenda' : '/mis-reservas'
+  if (!value || !/^\/(horarios|mis-reservas|pagos\/retorno|agenda|config|cobros)(\?|$)/.test(value) || value.includes('\\') || [...value].some(char => char.charCodeAt(0) < 32 || char.charCodeAt(0) === 127)) return fallback
   const url = new URL(value, window.location.origin)
-  return url.origin === window.location.origin ? url.pathname + url.search : '/mis-reservas'
+  const permitted = rol === undefined
+    ? ['/horarios', '/mis-reservas', '/pagos/retorno', '/agenda', '/config', '/cobros']
+    : rol === 'secretaria' ? ['/horarios', '/agenda', '/config', '/cobros']
+      : rol === 'odontologo' ? ['/horarios', '/agenda'] : ['/horarios', '/mis-reservas', '/pagos/retorno']
+  return url.origin === window.location.origin && permitted.includes(url.pathname) ? url.pathname + url.search : fallback
 }
 export default function AuthPage({ register = false }: { register?: boolean }) {
   const { session } = useSession()
@@ -33,7 +39,9 @@ export default function AuthPage({ register = false }: { register?: boolean }) {
         form.reset(); setCreated(true)
       } else {
         await session.login(email, password)
-        form.reset(); navigate(destination, { replace: true })
+        const currentUser = session.snapshot().user
+        if (!currentUser) return
+        form.reset(); navigate(safeReturn(params.get('returnTo'), currentUser.rol), { replace: true })
       }
     } catch (e) {
       setError(e instanceof ApiError && e.status === 401 ? 'Email o contrasena incorrectos.' : e instanceof ApiError && e.status === 409 ? 'No se pudo crear la cuenta. Intenta ingresar o usa otro email.' : errorMessage(e))

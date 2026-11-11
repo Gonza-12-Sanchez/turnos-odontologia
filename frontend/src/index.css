@@ -59,6 +59,44 @@ button.slot:hover:not(:disabled) { background: #e0f2fe; }
 .skip-link { position: absolute; left: 1rem; top: -100px; padding: .5rem; background: white; z-index: 2; }
 .skip-link:focus { top: 1rem; }
 .pwa-update { position: fixed; bottom: 1rem; right: 1rem; max-width: min(420px, calc(100vw - 2rem)); padding: 1.25rem; background: white; border: 2px solid var(--action); box-shadow: 0 4px 20px #0f172a26; z-index: 3; }
+/* C11: approved design-system revision 1 / mockups.css. Scoped to staff so
+   patient C10 is unchanged. Values mirror portable tokens without importing
+   outside frontend/, which is the Docker build context. */
+.staff-header, .staff-main { max-width: 1200px; }
+.staff-header { justify-content: flex-start; gap: 1rem 2rem; padding-block: 1.5rem; }
+.staff-header .brand { display: grid; gap: .25rem; margin-right: auto; }
+.staff-brand-note { font-size: .75rem; font-weight: 400; }
+.staff-header nav { gap: .5rem; }
+.staff-header nav a { padding: .6rem .8rem; border-radius: 6px; text-decoration: none; }
+.staff-header nav a[aria-current="page"] { background: #e0f2fe; color: #075985; font-weight: 700; }
+.staff-role { border-left: 1px solid var(--line); padding-left: 1rem; color: var(--muted); font-size: .875rem; }
+.staff-main { padding-block: 2rem 3rem; }
+.staff-main h1 { margin-bottom: .5rem; }
+.staff-resource-tabs { display: flex; flex-wrap: wrap; gap: .5rem; padding-bottom: .5rem; border-bottom: 1px solid var(--line); }
+.staff-resource-tabs button { border-color: transparent; }
+.staff-resource-tabs button[aria-pressed="true"] { background: #e0f2fe; color: #075985; font-weight: 700; }
+.staff-filters { grid-template-columns: minmax(160px, 240px) auto; justify-content: start; align-items: end; padding-block: 1.5rem; border-bottom: 1px solid var(--line); }
+.staff-catalog-list { list-style: none; padding: 0; margin: 0; }
+.staff-catalog-list > li { display: flex; align-items: start; justify-content: space-between; gap: 1rem; padding-block: 1rem; border-bottom: 1px solid var(--line); }
+.staff-catalog-details { min-width: 0; overflow-wrap: anywhere; }
+.staff-catalog-details h2 { font-size: 1rem; margin-bottom: .25rem; }
+.staff-catalog-details p { font-size: .875rem; color: var(--muted); margin-block: .25rem .5rem; }
+.staff-pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin-top: 1.5rem; }
+.staff-config-split { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(300px, 1fr); gap: 2rem; align-items: start; margin-top: 1.5rem; }
+.staff-config-split > form { margin: 0; padding: 1.5rem; background: white; border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.staff-config-split input[aria-invalid="true"] { border-color: #b91c1c; }
+.staff-config-split small[id$="-error"] { color: #b91c1c; }
+.staff-config-split button.danger { background: white; color: #b91c1c; border-color: #b91c1c; }
+.staff-config-split button.danger:hover:not(:disabled) { background: #fff1f2; }
+@media (max-width: 900px) { .staff-config-split { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) {
+  .staff-header { padding: 1rem; gap: .75rem; }
+  .staff-header .brand { width: 100%; }
+  .staff-role { border: 0; padding-left: 0; margin-left: auto; }
+  .staff-main { padding-top: 1.5rem; }
+  .staff-filters { grid-template-columns: minmax(0, 1fr); gap: .75rem; justify-content: stretch; }
+  .staff-config-split > form { padding: 1rem; }
+}
 @media (max-width: 700px) {
   .site-header { padding: .8rem 1rem; }
   nav { font-size: .9rem; gap: .3rem .9rem; }

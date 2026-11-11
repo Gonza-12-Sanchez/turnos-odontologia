@@ -80,7 +80,7 @@ it('registro crea cuenta pero requiere login y descarta password', async () => {
   expect(calls.some(c => c.path === '/auth/login')).toBe(false)
   expect((screen.getByLabelText('Contrasena') as HTMLInputElement).value).toBe('')
 })
-it.each(['/desconocido', '/agenda'])('404 navegable %s no crea area administrativa', async (path) => {
+it.each(['/desconocido', '/agenda/inexistente'])('404 navegable %s no carga datos administrativos', async (path) => {
   backend(); open(path)
   expect(await screen.findByRole('heading', { name: 'Pagina no encontrada' })).toBeTruthy()
   expect(screen.getByRole('link', { name: 'Volver al inicio' })).toBeTruthy()
