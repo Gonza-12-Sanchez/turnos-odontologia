@@ -375,3 +375,17 @@ Gates backend: los seis siguen NO satisfechos (G-fecha, G-acciones, G-auditoria,
 - 6.2 E2E integrado → todos los gates no satisfechos.
 
 No se archiva C-11 ni se declara completo mientras queden tareas o criterios pendientes. No hay commit/push/imágenes Docker/pagos externos en esta sesión.
+
+## Revisión del clon e implementación — 2026-11-12
+
+- El código de agenda citado en las notas previas no estaba en ninguna referencia local. Se implementó y conectó la vista privada, con filtros y límites de día argentino en el servidor. Las operaciones de agenda usan permisos proyectados por la API y la ventana configurada.
+- La migración 005 incorpora eventos de gestión. La asistencia admite el motivo y origen del formulario, conservando el contrato anterior de estado para los clientes existentes. El historial muestra únicamente eventos persistidos desde la migración.
+- Configuración incorpora alta de sillón con contexto autorizado, edición conjunta de política e importe de seña y formularios de bloqueos. Se invalidan los resultados de disponibilidad al confirmar los cambios de catálogo y al cancelar, reprogramar o marcar ausencia por la API.
+- La pantalla de cobros se abre desde un turno autorizado y conserva la selección en memoria. El servidor exige clave, guarda el resultado, serializa el cierre y expone un resumen y una consulta de conciliación. La PWA usa esta última tras un resultado incierto.
+- Pruebas HTTP con PostgreSQL descartable y Redis simulado, y pruebas de interfaz con API interceptada. Continúan pendientes la matriz visual completa, Redis real, E2E de navegador integrado y el sandbox de Mercado Pago de C-10. C-11 sigue abierto.
+
+### Resultado de la regresión
+
+- Backend completo: 324 pruebas aprobadas con PostgreSQL 18 descartable y Redis simulado por TCP. Alembic aplicó la migración 005 en ese clúster, que se detuvo al finalizar. Ruff y comprobación de formato aprobados.
+- Frontend: 205 pruebas aprobadas, lint sin hallazgos y build de la PWA correcto.
+- Chrome, 360/390/1440 px con API interceptada: recorrido de agenda a cobros y configuración, activación por teclado, pérdida y recuperación de conexión, cambio de secretaria a odontólogo, ausencia de overflow horizontal, storage vacío y sin excepciones JavaScript. Queda pendiente la comparación visual de todos los estados y el E2E con servicios reales.

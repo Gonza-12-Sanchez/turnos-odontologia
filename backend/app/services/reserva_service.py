@@ -23,6 +23,7 @@ from app.models import (
 from app.schemas.turnos import HorarioLibreOut, TurnoCreate
 from app.services.disponibilidad_service import DisponibilidadService
 from app.services.mp_adapter import MPAdapter, MPAdapterError
+from app.shared.agenda_time import fecha_argentina
 
 
 class DepositoRequerido(Exception):
@@ -171,9 +172,13 @@ class ReservaService:
         fin = inicio + timedelta(minutes=tratamiento.duracion_min)
         tratamiento_id = tratamiento.id
 
-        libres = await self.disp.libres(inicio.date(), tratamiento_id, sillon.id, use_cache=False)
+        libres = await self.disp.libres(
+            fecha_argentina(inicio), tratamiento_id, sillon.id, use_cache=False
+        )
         if not any(slot.inicio == inicio and slot.sillon_id == sillon.id for slot in libres):
-            alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
+            alts = (
+                await self.disp.libres(fecha_argentina(inicio), tratamiento_id, use_cache=False)
+            )[:3]
             raise ReservaConflicto(alts)
 
         turno = Turno(
@@ -193,17 +198,21 @@ class ReservaService:
             await uow.commit()
         except IntegrityError:
             await uow.rollback()
-            alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
+            alts = (
+                await self.disp.libres(fecha_argentina(inicio), tratamiento_id, use_cache=False)
+            )[:3]
             raise ReservaConflicto(alts)
         except Exception as exc:  # noqa: BLE001
             await uow.rollback()
             import logging
 
             logging.getLogger(__name__).warning("Error inesperado al reservar: %s", exc)
-            alts = (await self.disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
+            alts = (
+                await self.disp.libres(fecha_argentina(inicio), tratamiento_id, use_cache=False)
+            )[:3]
             raise ReservaConflicto(alts)
 
-        await self.disp.invalidar(inicio.date())
+        await self.disp.invalidar(fecha_argentina(inicio))
 
         try:
             redis = redis_client.get_redis()

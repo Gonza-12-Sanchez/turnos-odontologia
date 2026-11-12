@@ -1,6 +1,6 @@
 # turnos-odontologia — Instrucciones para Agentes
 
-> Este archivo (y su copia `CLAUDE.md`) es lo PRIMERO que todo agente lee al entrar al repo.
+> Leé este archivo al entrar al repo.
 > Generado a partir de `knowledge-base/` y `CHANGES.md`. No editar a mano sin re-sincronizar ambos archivos.
 
 ---
@@ -36,7 +36,7 @@ La fuente de verdad del dominio vive en `knowledge-base/`. **Leé el archivo rel
 | [08_arquitectura_propuesta.md](knowledge-base/08_arquitectura_propuesta.md) | Patrones, estructura, env vars |
 | [10_preguntas_abiertas.md](knowledge-base/10_preguntas_abiertas.md) | ⚠️ Inconsistencias a resolver ANTES de codear |
 
-> ⚠️ Alta pendientes antes del primer change: password-vs-OTP paciente (IN-10-03) y proveedor WhatsApp + quién paga (IN-10-02/04).
+> C-03 definió contraseña para pacientes en v1. La elección del proveedor de WhatsApp y quién cubre el costo siguen pendientes para el piloto (IN-10-02/04).
 
 ---
 
@@ -58,7 +58,7 @@ Cargá la skill correspondiente al contexto ANTES de escribir código.
 - **Qué necesita:** archivos de modelos (`backend/app/models/*.py`), migraciones (`backend/alembic/versions/*.py`), seeds o artefactos de diseño del change.
 - **Cómo revisar el resultado:** el agente emite `Veredicto Guardian: OK / BLOQUEADO` con detalle por categoría (EXCLUDE, invariantes, seeds). Si es `BLOQUEADO`, corregir antes de avanzar. Las reglas duras de este archivo prevalecen ante cualquier contradicción.
 
-> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry`; no versionado — no está en el repo). Esta tabla solo mapea skill→rol.
+> Los compact rules de cada skill los resuelve el orquestador desde `.atl/skill-registry.md` (generado por `skill-registry` y versionado en este repositorio). Esta tabla solo mapea skill→rol.
 
 ---
 

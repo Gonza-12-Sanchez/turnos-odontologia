@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.repositories.agenda_lectura_repository import AgendaLecturaRepository
 from app.schemas.turnos import (
     AccionesOut,
+    AccionesStaffOut,
     AgendaSillonOut,
     AgendaTurnoOut,
     MisReservaOut,
@@ -28,6 +29,8 @@ class AgendaLecturaService:
         fecha: Any,
         sillon_id: UUID | None = None,
         estado: str | None = None,
+        *,
+        role: str | None = None,
     ) -> list[AgendaSillonOut]:
         turnos = await self.repo.list_for_agenda(fecha, sillon_id, estado)
         groups: dict[Any, dict] = {}
@@ -40,12 +43,24 @@ class AgendaLecturaService:
                     "sillon": {"id": turno.sillon.id, "nombre": turno.sillon.nombre},
                     "turnos": [],
                 }
-            groups[key]["turnos"].append(self._agenda_turno(turno))
+            groups[key]["turnos"].append(self._agenda_turno(turno, role))
         ordered = sorted(groups.values(), key=lambda g: g["sillon_nombre"])
         return [AgendaSillonOut(**g) for g in ordered]
 
-    def _agenda_turno(self, turno: Any) -> AgendaTurnoOut:
+    def _agenda_turno(self, turno: Any, role: str | None) -> AgendaTurnoOut:
+        secretaria = role == "secretaria"
+        vigente = turno.estado in ("reservado", "confirmado")
+        ventana = (
+            turno.inicio - datetime.now(UTC)
+        ).total_seconds() >= settings.appointment_cancel_minutes * 60
         return AgendaTurnoOut(
+            acciones=AccionesStaffOut(
+                confirmar=secretaria and turno.estado == "reservado",
+                cancelar=secretaria and vigente and ventana,
+                reprogramar=secretaria and vigente and ventana,
+                asistencia=role in ("secretaria", "odontologo") and vigente,
+                sobreturno=secretaria and vigente,
+            ),
             id=turno.id,
             sillon_id=turno.sillon_id,
             sillon_nombre=turno.sillon.nombre,

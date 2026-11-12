@@ -22,6 +22,8 @@ function backend(user: StaffUser | null = null, handler?: (path: string, init: R
     if (response) return response
     if (path === '/auth/refresh') return user ? Response.json({ access_token: 'ficticio-memoria' }) : Response.json({}, { status: 401 })
     if (path === '/auth/me' && user) return Response.json(user)
+    if (path === '/agenda') return Response.json([])
+    if (path === '/catalogo-publico') return Response.json({ sillones: [], tratamientos: [] })
     if (path.startsWith('/api/config/') && init.method === 'GET') return Response.json({ items: [], total: 0, page: 1, page_size: 20 })
     throw new Error(`HTTP no previsto ${path}`)
   }))
@@ -68,6 +70,92 @@ it.each([
   open(path)
   expect((await screen.findByRole('alert')).textContent).toMatch(/no tiene acceso/i)
   expect(requests.every(request => request.path.startsWith('/auth/'))).toBe(true)
+})
+
+it('consulta la agenda y muestra los turnos en horario argentino', async () => {
+  backend({ id: 's1', rol: 'secretaria' }, path => path === '/agenda' ? Response.json([{
+    sillon_id: 'sillon1', sillon_nombre: 'Sillón uno', turnos: [{
+      id: 'turno1', inicio: '2026-12-02T01:00:00Z', fin: '2026-12-02T01:30:00Z',
+      estado: 'reservado', paciente_nombre: 'Paciente ficticio', tratamiento_nombre: 'Control',
+      tolerancia_min: 5, es_sobreturno: true, motivo_sobreturno: 'Motivo ficticio',
+    }],
+  }]) : undefined)
+  open('/agenda')
+  expect(await screen.findByRole('heading', { name: 'Paciente ficticio' })).toBeTruthy()
+  expect(screen.getByText('22:00')).toBeTruthy()
+  expect(screen.getByText('Sobreturno')).toBeTruthy()
+  const user = userEvent.setup()
+  await user.selectOptions(screen.getByLabelText('Estado'), 'reservado')
+  await user.click(screen.getByRole('button', { name: 'Consultar agenda' }))
+  expect(new URL(requests.filter(request => request.path === '/agenda').at(-1)!.url).searchParams.get('estado')).toBe('reservado')
+})
+
+it('permite asistencia según la proyección del servidor y envía motivo', async () => {
+  const turnId = '55555555-5555-4555-8555-555555555555'
+  let status = 'confirmado'
+  backend({ id: 'o1', rol: 'odontologo' }, (path, init) => {
+    if (path === '/agenda') return Response.json([{
+      sillon_id: 'sillon1', sillon_nombre: 'Sillón uno', turnos: [{
+        id: turnId, inicio: '2026-12-02T01:00:00Z', fin: '2026-12-02T01:30:00Z',
+        estado: status, paciente_nombre: 'Paciente ficticio', tratamiento_nombre: 'Control',
+        tratamiento_id: turnId, tolerancia_min: 5, es_sobreturno: false, motivo_sobreturno: null,
+        acciones: { confirmar: false, cancelar: false, reprogramar: false, asistencia: status === 'confirmado', sobreturno: false },
+      }],
+    }])
+    if (path === '/turnos/' + turnId + '/marcar-asistencia' && init.method === 'PATCH') {
+      status = 'asistido'
+      return Response.json({ id: turnId, estado: status })
+    }
+  })
+  open('/agenda')
+  const user = userEvent.setup()
+  await user.click(await screen.findByRole('button', { name: 'Marcar asistido' }))
+  expect(screen.queryByRole('button', { name: 'Cancelar turno' })).toBeNull()
+  await user.type(screen.getByLabelText('Motivo'), 'Atención realizada')
+  await user.click(screen.getByRole('button', { name: 'Aplicar cambio' }))
+  expect(await within(screen.getByRole('list')).findByText('asistido')).toBeTruthy()
+  const request = requests.find(row => row.init.method === 'PATCH')
+  expect(request?.init.body).toBe(JSON.stringify({ estado: 'asistido', motivo: 'Atención realizada', origen: 'mostrador' }))
+})
+
+it('recupera un cobro incierto sin reenviar la escritura', async () => {
+  const turnId = '55555555-5555-4555-8555-555555555555'
+  const result = { cobro: { id: 'cobro-ficticio', turno_id: turnId, monto_centavos: 7000 } }
+  let attempted = false
+  backend({ id: 's1', rol: 'secretaria' }, (path, init) => {
+    if (path === '/agenda') return Response.json([{
+      sillon_id: 'sillon1', sillon_nombre: 'Sillón uno', turnos: [{
+        id: turnId, inicio: '2026-12-02T01:00:00Z', fin: '2026-12-02T01:30:00Z',
+        estado: 'confirmado', paciente_nombre: 'Paciente ficticio', tratamiento_nombre: 'Control',
+        tolerancia_min: 5, es_sobreturno: false, motivo_sobreturno: null,
+      }],
+    }])
+    if (path === '/cobros/resumen/' + turnId) return Response.json({
+      precio_referencia_centavos: 10000, sena_acumulada_centavos: 3000,
+      total_cobrado_centavos: attempted ? 10000 : 3000,
+      saldo_referencia_centavos: attempted ? 0 : 7000, cerrado: attempted,
+    })
+    if (path === '/cobros' && init.method === 'POST') {
+      attempted = true
+      throw new TypeError('Fallo de transporte')
+    }
+    if (path === '/cobros/operacion') return Response.json(result)
+  })
+  open('/agenda')
+  const user = userEvent.setup()
+  await user.click(await screen.findByRole('button', { name: 'Ver cobros del turno' }))
+  expect(window.location.pathname).toBe('/cobros')
+  expect(window.location.search).toBe('')
+  await user.type(await screen.findByLabelText('Importe en ARS'), '70,00')
+  await user.click(screen.getByRole('button', { name: 'Registrar cobro' }))
+  expect(await screen.findByText(/resultado quedó sin verificar/)).toBeTruthy()
+  await user.click(screen.getByRole('button', { name: 'Consultar resultado del cobro' }))
+  expect(await screen.findByText('Cobro cerrado.')).toBeTruthy()
+  const writes = requests.filter(request => request.path === '/cobros' && request.init.method === 'POST')
+  expect(writes).toHaveLength(1)
+  const read = requests.find(request => request.path === '/cobros/operacion')
+  expect(new Headers(read?.init.headers).get('Idempotency-Key'))
+    .toBe(new Headers(writes[0].init.headers).get('Idempotency-Key'))
 })
 
 it('espera la restauración sin mostrar contenido privado', async () => {
@@ -588,15 +676,61 @@ it.each([
   expect(requests.filter(request => request.init.method === 'PATCH')).toHaveLength(0)
 })
 
-it('no escribe sin cambios ni permite modificar la política de seña', async () => {
+it('no escribe sin cambios en el tratamiento', async () => {
   backend({ id: 's1', rol: 'secretaria' }, path => path === '/api/config/tratamientos' ? Response.json(pageOf([treatment])) : undefined)
   open('/config')
   const user = userEvent.setup()
   await user.click(await screen.findByRole('button', { name: `Editar ${treatment.nombre}` }))
   await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
   expect(await screen.findByText('No hay cambios para guardar.')).toBeTruthy()
-  expect(screen.queryByLabelText(/Política de seña/)).toBeNull()
   expect(requests.filter(request => request.init.method === 'PATCH')).toHaveLength(0)
+})
+
+it('guarda política y seña en centavos en el mismo PATCH', async () => {
+  backend({ id: 's1', rol: 'secretaria' }, (path, init) => {
+    if (path === '/api/config/tratamientos') return Response.json(pageOf([treatment]))
+    if (path === `/api/config/tratamientos/${treatmentId}` && init.method === 'PATCH') {
+      return Response.json({ ...treatment, sena_politica: 'obligatoria', sena_centavos: 3005 })
+    }
+  })
+  open('/config')
+  const user = userEvent.setup()
+  await user.click(await screen.findByRole('button', { name: `Editar ${treatment.nombre}` }))
+  await user.selectOptions(screen.getByLabelText('Política de seña'), 'obligatoria')
+  await user.type(screen.getByLabelText('Seña en ARS'), '30,05')
+  await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+  expect(await screen.findByText('Tratamiento actualizado.')).toBeTruthy()
+  expect(requests.find(request => request.init.method === 'PATCH')?.init.body)
+    .toBe(JSON.stringify({ sena_politica: 'obligatoria', sena_centavos: 3005 }))
+})
+
+it.each([true, false])('solo permite alta de sillón con sede autorizada (%s)', async available => {
+  let created = false
+  backend({ id: 's1', rol: 'secretaria' }, (path, init) => {
+    if (path === '/api/config/contexto-consultorio') {
+      return Response.json({ consultorio: available ? { id: officeId, nombre: 'Sede ficticia' } : null })
+    }
+    if (path === '/api/config/sillones' && init.method === 'POST') {
+      created = true
+      return Response.json(chair, { status: 201 })
+    }
+    if (path === '/api/config/sillones') return Response.json(pageOf(created ? [chair] : []))
+  })
+  open('/config')
+  const user = userEvent.setup()
+  await user.click(await screen.findByRole('button', { name: 'Sillones' }))
+  await user.click(await screen.findByRole('button', { name: 'Agregar sillón' }))
+  if (available) {
+    await user.type(await screen.findByLabelText('Nombre'), chair.nombre)
+    await user.click(screen.getByRole('button', { name: 'Crear sillón' }))
+    expect(await screen.findByText('Sillón creado.')).toBeTruthy()
+    const post = requests.find(request => request.path === '/api/config/sillones' && request.init.method === 'POST')
+    expect(post?.init.body).toBe(JSON.stringify({ consultorio_id: officeId, nombre: chair.nombre, activo: true }))
+  } else {
+    expect(await screen.findByText(/único consultorio activo/)).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Crear sillón' })).toBeNull()
+    expect(requests.some(request => request.path === '/api/config/sillones' && request.init.method === 'POST')).toBe(false)
+  }
 })
 
 it.each(['json', 'identidad', 'importe', 'red'])('respuesta %s no acreditada nunca muestra éxito ni habilita replay', async mode => {

@@ -5,15 +5,17 @@ from __future__ import annotations
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, status
+from fastapi import APIRouter, Depends, Header, Response, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_db, require_admin
 from app.models import Usuario
 from app.schemas.cobros import (
+    CobroConciliacionOut,
     CobroCreate,
     CobroListOut,
+    CobroResumenOut,
 )
 from app.services.cobro_service import CobroError, CobroService
 
@@ -34,8 +36,8 @@ async def registrar_cobro(
     payload: CobroCreate,
     actor: Admin,
     service: Service,
+    idempotency_key: Annotated[str, Header(min_length=1, max_length=120, pattern=r"^\S+$")],
     db: AsyncSession = Depends(get_db),
-    idempotency_key: Annotated[str | None, Header()] = None,
 ):
     try:
         result, is_replay = await service.registrar(
@@ -53,6 +55,23 @@ async def registrar_cobro(
     except CobroError:
         await db.rollback()
         raise
+
+
+@router.get("/cobros/resumen/{turno_id}", response_model=CobroResumenOut)
+async def resumen_cobros(turno_id: UUID, service: Service, response: Response):
+    response.headers["Cache-Control"] = "no-store"
+    return await service.resumen(turno_id)
+
+
+@router.get("/cobros/operacion", response_model=CobroConciliacionOut | None)
+async def consultar_operacion(
+    actor: Admin,
+    service: Service,
+    response: Response,
+    idempotency_key: Annotated[str, Header(min_length=1, max_length=120, pattern=r"^\S+$")],
+):
+    response.headers["Cache-Control"] = "no-store"
+    return await service.operacion(actor.id, idempotency_key)
 
 
 @router.get("/cobros", response_model=list[CobroListOut])

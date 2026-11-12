@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 from uuid import UUID
 
-import redis.asyncio as aioredis
 from fastapi import HTTPException
 from redis.exceptions import RedisError
 from sqlalchemy import select
@@ -16,16 +15,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import redis as redis_client
 from app.models import Bloqueo, Sillon, Tratamiento, Turno
 from app.schemas.turnos import HorarioLibreOut
-
-DAY_START_HOUR = 0
-DAY_END_HOUR = 24
+from app.shared.agenda_time import fecha_argentina, limites_dia_argentino
 
 
 def _to_date(value: Any) -> date:
     if isinstance(value, date) and not isinstance(value, datetime):
         return value
     if isinstance(value, datetime):
-        return value.date()
+        return fecha_argentina(value)
     return date.fromisoformat(str(value)[:10])
 
 
@@ -53,8 +50,7 @@ class DisponibilidadService:
         return list(result.all())
 
     async def _turnos_activos(self, fecha: date, sillon_ids: list[UUID]) -> list[Turno]:
-        start = datetime.combine(fecha, time.min, tzinfo=UTC)
-        end = start + timedelta(days=1)
+        start, end = limites_dia_argentino(fecha)
         result = await self.session.scalars(
             select(Turno).where(
                 Turno.is_active.is_(True),
@@ -67,8 +63,7 @@ class DisponibilidadService:
         return list(result.all())
 
     async def _bloqueos_activos(self, fecha: date) -> list[Bloqueo]:
-        start = datetime.combine(fecha, time.min, tzinfo=UTC)
-        end = start + timedelta(days=1)
+        start, end = limites_dia_argentino(fecha)
         result = await self.session.scalars(
             select(Bloqueo).where(
                 Bloqueo.is_active.is_(True),
@@ -79,7 +74,7 @@ class DisponibilidadService:
         return list(result.all())
 
     def _cache_key(self, fecha: date, tratamiento_id: UUID, sillon_id: UUID | None) -> str:
-        return f"avail:{fecha.isoformat()}:{tratamiento_id}:{sillon_id or 'all'}"
+        return f"avail:ar:{fecha.isoformat()}:{tratamiento_id}:{sillon_id or 'all'}"
 
     async def libres(
         self,
@@ -108,8 +103,7 @@ class DisponibilidadService:
         bloqueos = await self._bloqueos_activos(fecha_date)
 
         duration = timedelta(minutes=tratamiento.duracion_min)
-        day_start = datetime.combine(fecha_date, time.min, tzinfo=UTC)
-        day_end = day_start + timedelta(days=1)
+        day_start, day_end = limites_dia_argentino(fecha_date)
 
         slots: list[HorarioLibreOut] = []
         current = day_start
@@ -132,30 +126,23 @@ class DisponibilidadService:
 
         slots.sort(key=lambda s: (str(s.sillon_id), s.inicio))
 
-        try:
-            payload = json.dumps([s.model_dump(mode="json") for s in slots], default=str)
-            await redis.set(cache_key, payload, ex=60)
-        except (RedisError, OSError):
-            pass
+        if use_cache:
+            try:
+                payload = json.dumps([s.model_dump(mode="json") for s in slots], default=str)
+                await redis.set(cache_key, payload, ex=60)
+            except (RedisError, OSError):
+                pass
 
         return slots
 
-    async def invalidar(self, fecha: Any) -> None:
-        fecha_date = _to_date(fecha)
+    async def invalidar(self, fecha: date | datetime | str | None = None) -> None:
+        scope = f"{_to_date(fecha).isoformat()}:*" if fecha is not None else "*"
         redis = redis_client.get_redis()
         prefix = getattr(redis, "prefix", "") or ""
-        pattern = f"{prefix}avail:{fecha_date.isoformat()}:*"
+        pattern = f"{prefix}avail:ar:{scope}"
         try:
-            cursor: Any = 0
-            keys: list[str] = []
-            while True:
-                cursor, batch = await aioredis.Redis.execute_command(
-                    redis, "SCAN", cursor, "MATCH", pattern, "COUNT", 100
-                )
-                keys.extend(batch or [])
-                if str(cursor) == "0":
-                    break
+            keys = [key.removeprefix(prefix) async for key in redis.scan_iter(match=pattern)]
             if keys:
-                await aioredis.Redis.execute_command(redis, "DEL", *keys)
+                await redis.execute_command("DEL", *keys)
         except (RedisError, OSError, RuntimeError):
             pass

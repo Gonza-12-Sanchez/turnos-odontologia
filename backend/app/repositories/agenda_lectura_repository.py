@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.turno import Turno
+from app.shared.agenda_time import limites_dia_argentino
 
 
 def _day_start(value: date | datetime) -> datetime:
@@ -35,8 +36,10 @@ class AgendaLecturaRepository:
         sillon_id: UUID | None = None,
         estado: str | None = None,
     ) -> list[Turno]:
-        start = _day_start(fecha)
-        end = _next_day_start(fecha)
+        if isinstance(fecha, datetime):
+            start, end = _day_start(fecha), _next_day_start(fecha)
+        else:
+            start, end = limites_dia_argentino(fecha)
         stmt = select(Turno).where(
             Turno.is_active.is_(True),
             Turno.inicio >= start,

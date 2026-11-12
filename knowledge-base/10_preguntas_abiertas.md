@@ -18,10 +18,10 @@
 **Impacto**: RN-NT-* no implementable sin proveedor + credenciales + costos.
 **Resolución propuesta**: elegir proveedor (o mock para Etapa 6) y registrar costo/mensaje.
 
-### IN-10-03 — Esquema de credential sin decidir
+### IN-10-03 — Autenticación de pacientes (resuelto en C-03)
 **Discovery dice**: "paciente con login" pero "re-evaluar password vs OTP-WhatsApp para no frenar reserva".
 **Impacto**: RN-AU-02 y Flujo 1 cambian según la decisión.
-**Resolución propuesta**: decidir antes del primer change (recomendación: password simple v1, OTP como mejora).
+**Decisión**: contraseña en v1. OTP queda como mejora posterior.
 
 ### IN-10-04 — Quién paga los mensajes de WhatsApp
 **Discovery dice**: supuesto "costo mensajes sin presupuesto techo — quién lo paga debe definirse".

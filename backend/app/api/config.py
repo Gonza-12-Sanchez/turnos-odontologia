@@ -12,6 +12,7 @@ from app.schemas.config import (
     BloqueoCreate,
     BloqueoOut,
     BloqueoPatch,
+    ContextoConsultorioOut,
     Page,
     SillonCreate,
     SillonOut,
@@ -44,6 +45,12 @@ class Pagination:
 
 
 Paging = Annotated[Pagination, Depends()]
+
+
+@router.get("/contexto-consultorio", response_model=ContextoConsultorioOut)
+async def contexto_consultorio(response: Response, service: Service):
+    response.headers["Cache-Control"] = "no-store"
+    return await service.contexto_consultorio()
 
 
 @router.post("/sillones", response_model=SillonOut, status_code=201)

@@ -7,13 +7,15 @@ from typing import Any
 
 from fastapi import HTTPException
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models import Bloqueo, Sillon, Tratamiento, Turno
+from app.models import Bloqueo, Sillon, Tratamiento, Turno, TurnoEvento
 from app.repositories.paciente_repository import PacienteRepository
 from app.services.disponibilidad_service import DisponibilidadService
 from app.services.reserva_service import ReservaConflicto
+from app.shared.agenda_time import fecha_argentina
 
 
 class GestionTurnosService:
@@ -22,10 +24,26 @@ class GestionTurnosService:
         self.disp = DisponibilidadService(session)
 
     async def _turno(self, turno_id: Any) -> Turno:
-        turno = await self.session.get(Turno, turno_id)
+        turno = await self.session.scalar(
+            select(Turno).where(Turno.id == turno_id).with_for_update()
+        )
         if turno is None or not turno.is_active:
             raise HTTPException(status_code=404, detail="Turno inexistente")
         return turno
+
+    def _evento(self, turno: Turno, actor, accion: str, origin=None, motivo=None) -> None:
+        origen = origin or (
+            "whatsapp" if actor is None else "online" if actor.rol == "paciente" else "mostrador"
+        )
+        self.session.add(
+            TurnoEvento(
+                turno_id=turno.id,
+                actor_id=actor.id if actor is not None else None,
+                accion=accion,
+                origen=origen,
+                motivo=motivo,
+            )
+        )
 
     async def _check_owner(self, turno: Turno, actor) -> None:
         if actor.rol == "paciente":
@@ -46,6 +64,7 @@ class GestionTurnosService:
         if turno.estado != "reservado":
             raise HTTPException(status_code=422, detail="Transición inválida")
         turno.estado = "confirmado"
+        self._evento(turno, actor, "confirmar", origin)
         effective_origin = origin or (
             "whatsapp" if actor is None else (turno.origen or "mostrador")
         )
@@ -65,6 +84,7 @@ class GestionTurnosService:
         if not self._window_ok(turno):
             raise HTTPException(status_code=422, detail="Fuera de la ventana de cancelación")
         turno.estado = "cancelado"
+        self._evento(turno, actor, "cancelar", origin)
         effective_origin = origin or (
             "whatsapp" if actor is None else (turno.origen or "mostrador")
         )
@@ -117,22 +137,35 @@ class GestionTurnosService:
         if conflict is not None or blocked:
             alts = (
                 await self.disp.libres(
-                    inicio.date(), tratamiento.id, new_sillon_id, use_cache=False
+                    fecha_argentina(inicio), tratamiento.id, new_sillon_id, use_cache=False
                 )
             )[:3]
             raise ReservaConflicto(alts)
 
-        turno.sillon_id = new_sillon_id
-        turno.inicio = inicio
-        turno.fin = new_fin
-        turno.estado = "reservado"
-        turno.origen = origin or turno.origen or "mostrador"
-        await self.session.flush()
+        tratamiento_id = tratamiento.id
+        try:
+            async with self.session.begin_nested():
+                turno.sillon_id = new_sillon_id
+                turno.inicio = inicio
+                turno.fin = new_fin
+                turno.estado = "reservado"
+                self._evento(turno, actor, "reprogramar", origin)
+                turno.origen = origin or turno.origen or "mostrador"
+                await self.session.flush()
+        except IntegrityError as exc:
+            if getattr(exc.orig, "sqlstate", None) != "23P01":
+                raise
+            alts = (
+                await self.disp.libres(
+                    fecha_argentina(inicio), tratamiento_id, new_sillon_id, use_cache=False
+                )
+            )[:3]
+            raise ReservaConflicto(alts) from exc
         await self.session.refresh(turno)
         return turno
 
     async def marcar_asistencia(
-        self, turno_id, estado: str, actor, origin: str | None = None
+        self, turno_id, estado: str, actor, origin: str | None = None, motivo: str | None = None
     ) -> Turno:
         await self._check_permission(actor, ("secretaria", "odontologo"))
         if estado not in ("asistido", "ausente"):
@@ -140,7 +173,10 @@ class GestionTurnosService:
         turno = await self._turno(turno_id)
         if turno.estado not in ("reservado", "confirmado"):
             raise HTTPException(status_code=422, detail="Transición inválida")
+        if motivo is not None and not motivo.strip():
+            raise HTTPException(status_code=422, detail="Motivo requerido")
         turno.estado = estado
+        self._evento(turno, actor, estado, origin, motivo.strip() if motivo else None)
         turno.origen = origin or turno.origen or "mostrador"
         await self.session.flush()
         await self.session.refresh(turno)
@@ -154,6 +190,7 @@ class GestionTurnosService:
         turno = await self._turno(turno_id)
         turno.es_sobreturno = True
         turno.motivo_sobreturno = motivo.strip()
+        self._evento(turno, actor, "sobreturno", origin, motivo.strip())
         turno.origen = origin or turno.origen or "mostrador"
         await self.session.flush()
         await self.session.refresh(turno)
@@ -163,6 +200,7 @@ class GestionTurnosService:
         self, turno_id, *, es_sobreturno=None, motivo_sobreturno=None, origen=None, actor
     ) -> Turno:
         turno = await self._turno(turno_id)
+        await self._check_owner(turno, actor)
         # permission for sobreturno changes
         if (es_sobreturno is True or motivo_sobreturno is not None) and actor.rol != "secretaria":
             raise HTTPException(status_code=403, detail="Acceso denegado")
@@ -171,8 +209,10 @@ class GestionTurnosService:
                 raise HTTPException(status_code=422, detail="Motivo requerido")
             turno.es_sobreturno = True
             turno.motivo_sobreturno = motivo_sobreturno.strip()
-        if origen is not None:
+            self._evento(turno, actor, "sobreturno", motivo=motivo_sobreturno.strip())
+        if origen is not None and origen != turno.origen:
             turno.origen = origen
+            self._evento(turno, actor, "cambiar_origen")
         await self.session.flush()
         await self.session.refresh(turno)
         return turno

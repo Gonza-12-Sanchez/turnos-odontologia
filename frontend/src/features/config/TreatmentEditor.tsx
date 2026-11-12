@@ -25,6 +25,8 @@ export default function TreatmentEditor({ item, onSaved, onCancel, writes }: { i
   const { session } = useSession()
   const [name, setName] = useState(item?.nombre ?? '')
   const [price, setPrice] = useState(() => priceText(item?.precio_referencia_centavos ?? null))
+  const [policy, setPolicy] = useState<Treatment['sena_politica']>(item?.sena_politica ?? 'deshabilitada')
+  const [deposit, setDeposit] = useState(() => priceText(item?.sena_centavos ?? null))
   const [duration, setDuration] = useState(item ? String(item.duracion_min) : '')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -40,7 +42,16 @@ export default function TreatmentEditor({ item, onSaved, onCancel, writes }: { i
     let cents: number | null
     try { cents = parsePrice(price) } catch (cause) { setError(cause instanceof Error ? cause.message : 'Revisa el precio.'); return }
     if (!/^\d{1,10}$/.test(duration) || BigInt(duration) < 1n || BigInt(duration) > 2147483647n) { setError('La duración debe ser un entero entre 1 y 2147483647 minutos.'); return }
-    const patch: { nombre?: string; duracion_min?: number; precio_referencia_centavos?: number | null } = {}
+    let depositCents: number | null = null
+    if (policy !== 'deshabilitada') {
+      try { depositCents = parsePrice(deposit) } catch { setError('Ingresa una seña válida en ARS, con hasta dos decimales.'); return }
+      if (depositCents === null || depositCents <= 0) { setError('La seña habilitada requiere un importe positivo.'); return }
+    }
+    const patch: Partial<Pick<Treatment, 'nombre' | 'duracion_min' | 'precio_referencia_centavos' | 'sena_politica' | 'sena_centavos'>> = {}
+    if (policy !== (item?.sena_politica ?? 'deshabilitada') || depositCents !== (item?.sena_centavos ?? null)) {
+      patch.sena_politica = policy
+      patch.sena_centavos = depositCents
+    }
     if (trimmedName !== item?.nombre) patch.nombre = trimmedName
     if (!item || cents !== item.precio_referencia_centavos) patch.precio_referencia_centavos = cents
     if (Number(duration) !== item?.duracion_min) patch.duracion_min = Number(duration)
@@ -52,7 +63,7 @@ export default function TreatmentEditor({ item, onSaved, onCancel, writes }: { i
       const value = item
         ? await session.patch<unknown>(`/api/config/tratamientos/${item.id}`, patch, { expectedStatus: 200, signal })
         : await session.post<unknown>('/api/config/tratamientos', patch, { expectedStatus: 201, signal })
-      if (!isTreatment(value) || (item && value.id !== item.id) || (!item && (!value.activo || value.sena_politica !== 'deshabilitada')) || (patch.nombre !== undefined && value.nombre !== patch.nombre) || (patch.precio_referencia_centavos !== undefined && value.precio_referencia_centavos !== cents) || (patch.duracion_min !== undefined && value.duracion_min !== patch.duracion_min)) throw new Error('Respuesta no verificada')
+      if (!isTreatment(value) || (item && value.id !== item.id) || (!item && !value.activo) || value.sena_politica !== policy || value.sena_centavos !== depositCents || (patch.nombre !== undefined && value.nombre !== patch.nombre) || (patch.precio_referencia_centavos !== undefined && value.precio_referencia_centavos !== cents) || (patch.duracion_min !== undefined && value.duracion_min !== patch.duracion_min)) throw new Error('Respuesta no verificada')
       // If the form disappeared, retain the lock: its new reader may be stale.
       writes.finish(!mounted.current)
       if (!mounted.current) return
@@ -83,7 +94,14 @@ export default function TreatmentEditor({ item, onSaved, onCancel, writes }: { i
     {fields.duracion_min ? <small id="duration-error">Revisa la duración indicada.</small> : null}
     <label>Precio de referencia en ARS<input inputMode="decimal" value={price} onChange={event => setPrice(event.target.value)} disabled={busy || locked} maxLength={11} aria-invalid={fields.precio_referencia_centavos || undefined} aria-describedby={fields.precio_referencia_centavos ? 'price-error' : undefined} /></label>
     {fields.precio_referencia_centavos ? <small id="price-error">Revisa el precio indicado.</small> : null}
-    <p>Vacío significa sin precio de referencia. La política de seña no se puede editar hasta verificar G-sena-config.</p>
+    <p>Vacío significa sin precio de referencia.</p>
+    <label>Política de seña<select value={policy} disabled={busy || locked} onChange={event => {
+      const value = event.target.value
+      if (value === 'deshabilitada' || value === 'opcional' || value === 'obligatoria') setPolicy(value)
+    }}>
+      <option value="deshabilitada">Deshabilitada</option><option value="opcional">Opcional</option><option value="obligatoria">Obligatoria</option>
+    </select></label>
+    {policy !== 'deshabilitada' ? <label>Seña en ARS<input inputMode="decimal" value={deposit} onChange={event => setDeposit(event.target.value)} maxLength={11} disabled={busy || locked} required /></label> : null}
     {error ? <Notice>{error}</Notice> : null}
     <div className="actions"><button disabled={busy || locked}>{busy ? 'Guardando…' : item ? 'Guardar cambios' : 'Crear tratamiento'}</button><button type="button" className="secondary" disabled={busy} onClick={onCancel}>Volver a la lista</button></div>
   </form>

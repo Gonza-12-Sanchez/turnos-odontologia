@@ -184,7 +184,7 @@ Pre-digested rules per skill. Delegators copy matching blocks into sub-agent pro
 
 | File | Path | Notes |
 |------|------|-------|
-| *(none yet)* | — | Project CLAUDE.md/AGENTS.md not generated yet (later phase); conventions section intentionally empty |
+| *(none yet)* | — | Project conventions are documented in AGENTS.md |
 
 ## Warnings
 

@@ -6,9 +6,11 @@ import { useOnline } from '../../shared/network'
 import { dateTime } from '../../shared/time'
 import { readPage } from './contracts'
 import type { Entry, Page, Resource } from './contracts'
-import type { Chair, Treatment } from './contracts'
+import type { Block, Chair, Treatment } from './contracts'
 import TreatmentEditor from './TreatmentEditor'
 import ChairEditor from './ChairEditor'
+import ChairCreate from './ChairCreate'
+import BlockEditor from './BlockEditor'
 import type { ConfigWriteGuard } from './writeGuard'
 
 const labels: Record<Resource, string> = { tratamientos: 'Tratamientos', sillones: 'Sillones', bloqueos: 'Bloqueos' }
@@ -18,6 +20,8 @@ function ConfigList({ resource, page, active, onPage, retry, writes }: { resourc
   const [error, setError] = useState(false)
   const [editing, setEditing] = useState<Treatment | 'new' | null>(null)
   const [editingChair, setEditingChair] = useState<Chair | null>(null)
+  const [addingChair, setAddingChair] = useState(false)
+  const [editingBlock, setEditingBlock] = useState<Block | 'new' | null>(null)
   const [saved, setSaved] = useState('')
   const [readRevision, setReadRevision] = useState(0)
   useEffect(() => {
@@ -31,7 +35,11 @@ function ConfigList({ resource, page, active, onPage, retry, writes }: { resourc
   }, [session, resource, page, active, readRevision])
   if (error) return <><Notice>No se pudo consultar la configuración. No se puede afirmar que esté vacía.</Notice><button className="secondary" onClick={retry}>Reintentar consulta</button></>
   if (!result) return <p role="status">Consultando recursos…</p>
-  const editor = editing ? <TreatmentEditor key={editing === 'new' ? 'new' : editing.id} item={editing === 'new' ? null : editing} writes={writes} onCancel={() => setEditing(null)} onSaved={item => {
+  const editor = editingBlock ? <BlockEditor key={editingBlock === 'new' ? 'new' : editingBlock.id} item={editingBlock === 'new' ? null : editingBlock} writes={writes} onCancel={() => setEditingBlock(null)} onSaved={warning => {
+    setEditingBlock(null); setSaved(warning || 'Bloqueo guardado.'); setResult(null); setReadRevision(value => value + 1)
+  }} /> : addingChair ? <ChairCreate writes={writes} onCancel={() => setAddingChair(false)} onSaved={() => {
+    setAddingChair(false); setSaved('Sillón creado.'); setResult(null); setReadRevision(value => value + 1)
+  }} /> : editing ? <TreatmentEditor key={editing === 'new' ? 'new' : editing.id} item={editing === 'new' ? null : editing} writes={writes} onCancel={() => setEditing(null)} onSaved={item => {
     if (editing === 'new') {
       setEditing(null); setSaved('Tratamiento creado.'); setResult(null); setReadRevision(value => value + 1); return
     }
@@ -47,6 +55,8 @@ function ConfigList({ resource, page, active, onPage, retry, writes }: { resourc
   return <>
     {saved ? <p role="status">{saved}</p> : null}
     {resource === 'tratamientos' ? <button disabled={writes.state !== 'idle'} onClick={() => { setSaved(''); setEditing('new') }}>Agregar tratamiento</button> : null}
+    {resource === 'sillones' && active && !editor ? <button disabled={writes.state !== 'idle'} onClick={() => { setSaved(''); setAddingChair(true) }}>Agregar sillón</button> : null}
+    {resource === 'bloqueos' && active && !editor ? <button disabled={writes.state !== 'idle'} onClick={() => { setSaved(''); setEditingBlock('new') }}>Agregar bloqueo</button> : null}
     <div className={editor ? 'staff-config-split' : undefined}><div>
     <ul className="staff-catalog-list">{result.items.map(entry => <li key={entry.item.id}>
       <div className="staff-catalog-details">
@@ -55,7 +65,8 @@ function ConfigList({ resource, page, active, onPage, retry, writes }: { resourc
       <span className="state">{entry.item.activo ? 'Activo' : 'Inactivo'}</span>
       </div>
       {entry.resource === 'tratamientos' ? <button className="secondary" disabled={writes.state !== 'idle'} aria-label={`Editar ${entry.item.nombre}`} onClick={() => { setSaved(''); setEditing(entry.item) }}>Editar</button> : null}
-      {entry.resource === 'sillones' ? <button className="secondary" disabled={writes.state !== 'idle'} aria-label={`Editar ${entry.item.nombre}`} onClick={() => { setSaved(''); setEditingChair(entry.item) }}>Editar</button> : null}
+      {entry.resource === 'sillones' ? <button className="secondary" disabled={writes.state !== 'idle'} aria-label={`Editar ${entry.item.nombre}`} onClick={() => { setSaved(''); setAddingChair(false); setEditingChair(entry.item) }}>Editar</button> : null}
+      {entry.resource === 'bloqueos' ? <button className="secondary" disabled={writes.state !== 'idle'} aria-label={`Editar ${entry.item.motivo}`} onClick={() => { setSaved(''); setEditingBlock(entry.item) }}>Editar</button> : null}
     </li>)}</ul>
     {!result.items.length ? <p>No hay {resource} {active ? 'activos' : 'inactivos'} para esta consulta.</p> : null}
     <div className="staff-pagination"><small>Página {page} · {result.total} registros</small><div className="actions"><button className="secondary" disabled={page <= 1} onClick={() => onPage(page - 1)}>Anterior</button><button className="secondary" disabled={page * result.page_size >= result.total} onClick={() => onPage(page + 1)}>Siguiente</button></div></div>

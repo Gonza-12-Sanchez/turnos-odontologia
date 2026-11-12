@@ -1,5 +1,6 @@
 """C-09: cobros locales (tareas 3.1-3.4)."""
 
+from asyncio import gather
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -269,11 +270,43 @@ async def test_cobro_idempotencia_replay(c09_cobros_client):
     r2 = await _post_cobro(client, ctx["turno_id"], 10000, idem=clave)
     assert r2.status_code == 200, r2.text
     data = r2.json()
-    assert data["cobro"]["monto_centavos"] == 10000
+    assert data == r1.json()
+    resultado = await client.get("/cobros/operacion", headers={"Idempotency-Key": clave})
+    assert resultado.status_code == 200
+    assert resultado.json() == data
+    ausente = await client.get("/cobros/operacion", headers={"Idempotency-Key": str(uuid4())})
+    assert ausente.json() is None
     # No hay segundo cobro en el turno
     rows = await client.get(f"/cobros?turno_id={ctx['turno_id']}")
     assert rows.status_code == 200
     assert len(rows.json()) == 1
+
+
+async def test_cobro_requiere_clave(c09_cobros_client):
+    client, ctx = c09_cobros_client
+    response = await _post_cobro(client, ctx["turno_id"], 10000)
+    assert response.status_code == 422
+    assert (await client.get(f"/cobros?turno_id={ctx['turno_id']}")).json() == []
+
+
+@pytest.mark.parametrize("misma_clave,esperado", [(True, [200, 201]), (False, [201, 409])])
+async def test_cierre_concurrente(c09_cobros_client, misma_clave, esperado):
+    client, ctx = c09_cobros_client
+    turno = ctx["turno_id"]
+    primera = str(uuid4())
+    segunda = primera if misma_clave else str(uuid4())
+    respuestas = await gather(
+        _post_cobro(client, turno, 10000, idem=primera),
+        _post_cobro(client, turno, 10000, idem=segunda),
+    )
+    assert sorted(response.status_code for response in respuestas) == esperado
+    if misma_clave:
+        assert respuestas[0].json() == respuestas[1].json()
+    assert len((await client.get(f"/cobros?turno_id={turno}")).json()) == 1
+    resumen = (await client.get(f"/cobros/resumen/{turno}")).json()
+    assert resumen["cerrado"] is True
+    assert resumen["total_cobrado_centavos"] == 10000
+    assert resumen["saldo_referencia_centavos"] == 0
 
 
 async def test_cobro_idempotencia_clave_diferente_payload(c09_cobros_client):

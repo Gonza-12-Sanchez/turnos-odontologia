@@ -14,6 +14,7 @@ from app.models.recordatorio_wa import RecordatorioWA
 from app.models.sillon import Sillon
 from app.models.tratamiento import Tratamiento
 from app.models.turno import Turno
+from app.models.turno_evento import TurnoEvento
 from app.models.usuario import Usuario
 
 __all__ = [
@@ -31,5 +32,6 @@ __all__ = [
     "Sillon",
     "Tratamiento",
     "Turno",
+    "TurnoEvento",
     "Usuario",
 ]

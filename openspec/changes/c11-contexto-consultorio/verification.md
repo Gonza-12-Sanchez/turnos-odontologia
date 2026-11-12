@@ -21,3 +21,9 @@ No se ejecutaron pruebas backend, no se alteraron bases ni se modificó código.
 La tarea1.1 exige TDD HTTP sobre PostgreSQL descartable y el plan exige Redis
 descartable para RBAC real. No se marca ninguna tarea completa ni G-contexto
 satisfecho. Se necesita disponer de un entorno aislado para continuar.
+
+## Implementación y pruebas — 2026-11-12
+
+- El endpoint devuelve el único consultorio activo con id y nombre, o null si el contexto es ambiguo. La respuesta tiene Cache-Control: no-store. La PWA obtiene el contexto de esa ruta antes de enviar el alta.
+- Se ejecutaron cuatro pruebas HTTP de contexto, permisos y alta contra un clúster descartable de PostgreSQL 18. Los casos cubren sede única, cero y dos activas, sede inactiva, alta del primer sillón con auditoría y rechazo tras desactivar el consultorio. Se simuló Redis por TCP en un puerto efímero.
+- La UI tiene pruebas DOM/HTTP de sede válida y contexto ausente. Ambos changes pasaron la validación estricta de OpenSpec. Sigue pendiente la aceptación con Redis real y navegador integrado.

@@ -133,6 +133,15 @@ class CatalogOut(BaseModel):
     deleted_at: AwareDatetime | None
 
 
+class ConsultorioResumen(BaseModel):
+    id: UUID
+    nombre: str
+
+
+class ContextoConsultorioOut(BaseModel):
+    consultorio: ConsultorioResumen | None
+
+
 class SillonOut(CatalogOut):
     consultorio_id: UUID
     nombre: str

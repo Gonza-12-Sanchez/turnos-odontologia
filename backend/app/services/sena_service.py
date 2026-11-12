@@ -27,6 +27,7 @@ from app.models import (
 )
 from app.services.disponibilidad_service import DisponibilidadService
 from app.services.mp_adapter import MPAdapter, MPAdapterError
+from app.shared.agenda_time import fecha_argentina
 
 
 class SenaError(HTTPException):
@@ -69,9 +70,11 @@ class SenaService:
     ) -> None:
         disp = DisponibilidadService(self.session)
         await self.session.get(Tratamiento, tratamiento_id)
-        libres = await disp.libres(inicio.date(), tratamiento_id, sillon_id, use_cache=False)
+        libres = await disp.libres(
+            fecha_argentina(inicio), tratamiento_id, sillon_id, use_cache=False
+        )
         if not any(slot.inicio == inicio and slot.sillon_id == sillon_id for slot in libres):
-            alts = (await disp.libres(inicio.date(), tratamiento_id, use_cache=False))[:3]
+            alts = (await disp.libres(fecha_argentina(inicio), tratamiento_id, use_cache=False))[:3]
             raise SenaError(
                 status.HTTP_409_CONFLICT,
                 {
@@ -286,7 +289,10 @@ class SenaService:
         # Revalidar disponibilidad sin cache antes de crear turno
         disp = DisponibilidadService(self.session)
         libres = await disp.libres(
-            intento.inicio.date(), intento.tratamiento_id, intento.sillon_id, use_cache=False
+            fecha_argentina(intento.inicio),
+            intento.tratamiento_id,
+            intento.sillon_id,
+            use_cache=False,
         )
         if not any(
             slot.inicio == intento.inicio and slot.sillon_id == intento.sillon_id for slot in libres

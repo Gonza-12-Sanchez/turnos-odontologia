@@ -54,6 +54,8 @@ class MarcarAsistenciaIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     estado: Literal["asistido", "ausente"]
+    motivo: str | None = Field(default=None, min_length=1, max_length=200)
+    origen: Literal["mostrador"] | None = None
 
 
 class SobreturnoIn(BaseModel):
@@ -78,6 +80,22 @@ class AccionesOut(BaseModel):
     reprogramar: bool = False
 
 
+class TurnoEventoOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    actor_id: UUID | None
+    accion: str
+    origen: str
+    motivo: str | None
+    fecha: AwareDatetime
+
+
+class AccionesStaffOut(AccionesOut):
+    asistencia: bool = False
+    sobreturno: bool = False
+
+
 class AgendaTurnoOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -96,6 +114,7 @@ class AgendaTurnoOut(BaseModel):
     es_sobreturno: bool = False
     motivo_sobreturno: str | None = None
     tolerancia_min: int = 5
+    acciones: AccionesStaffOut = Field(default_factory=AccionesStaffOut)
 
 
 class AgendaSillonOut(BaseModel):

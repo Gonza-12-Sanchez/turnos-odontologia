@@ -12,13 +12,13 @@ Tipo = Literal["sena", "total"]
 
 
 class CobroCreate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
 
     turno_id: UUID
     monto_centavos: StrictInt = Field(gt=0, le=2147483647)
     medio: Medio
     tipo: Tipo
-    override_motivo: str | None = Field(default=None, max_length=300)
+    override_motivo: str | None = Field(default=None, min_length=1, max_length=300)
 
 
 class CobroOut(BaseModel):
@@ -42,6 +42,14 @@ class CobroConciliacionOut(BaseModel):
     saldo_referencia_centavos: int | None = None
     warnings: list[dict] = Field(default_factory=list)
     facturacion_electronica: bool = False
+
+
+class CobroResumenOut(BaseModel):
+    precio_referencia_centavos: int | None
+    sena_acumulada_centavos: int
+    total_cobrado_centavos: int
+    saldo_referencia_centavos: int | None
+    cerrado: bool
 
 
 class CobroListOut(BaseModel):

@@ -79,6 +79,40 @@ async def gestion_client(engine, session, real_redis, monkeypatch):
         )
 
 
+async def test_asistencia_proyectada_y_auditada(gestion_client):
+    client, ctx = gestion_client
+    turno = ctx["turno"]
+    actor = ctx["actors"]["odontologo"]
+    client.headers["Authorization"] = f"Bearer {actor['token']}"
+    agenda = await client.get("/agenda", params={"fecha": turno.inicio.date().isoformat()})
+    assert agenda.status_code == 200
+    acciones = agenda.json()[0]["turnos"][0]["acciones"]
+    assert acciones["asistencia"] is True
+    assert acciones["confirmar"] is False
+    assert acciones["cancelar"] is False
+
+    base = f"/turnos/{turno.id}"
+    response = await client.patch(
+        f"{base}/marcar-asistencia",
+        json={"estado": "asistido", "motivo": "Atención realizada", "origen": "mostrador"},
+    )
+    assert response.status_code == 200, response.text
+    assert (await client.get(f"{base}/gestion")).json()["estado"] == "asistido"
+
+    history = await client.get(f"{base}/historial")
+    assert history.status_code == 200
+    assert history.headers["cache-control"] == "no-store"
+    (event,) = history.json()
+    assert event["actor_id"] == str(actor["id"])
+    assert event["origen"] == "mostrador"
+    assert event["accion"] == "asistido"
+    assert event["motivo"] == "Atención realizada"
+    assert datetime.fromisoformat(event["fecha"]).tzinfo is not None
+
+    client.headers["Authorization"] = f"Bearer {ctx['actors']['paciente']['token']}"
+    assert (await client.get(f"{base}/historial")).status_code == 403
+
+
 @pytest.mark.asyncio
 async def test_confirmar_turno(gestion_client):
     client, ctx = gestion_client

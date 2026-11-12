@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.api import deps
 from app.db import redis as redis_client
 from app.main import app
-from app.models import Consultorio, Paciente, Sillon, Tratamiento, Turno, Usuario
+from app.models import Bloqueo, Consultorio, Paciente, Sillon, Tratamiento, Turno, Usuario
 from app.shared.security import create_access_token
 
 
@@ -90,6 +90,44 @@ async def _seed_turno(session, context, *, sillon_index=0, start=None):
     session.add(turno)
     await session.commit()
     return turno, sil
+
+
+async def test_agenda_y_disponibilidad_respetan_medianoche_argentina(turnos_client, session):
+    client, context = turnos_client
+    turno, sillon = await _seed_turno(
+        session, context, start=datetime(2026, 12, 2, 1, 0, tzinfo=UTC)
+    )
+    session.add(
+        Bloqueo(
+            sillon_id=sillon.id,
+            desde=datetime(2026, 12, 2, 2, 0, tzinfo=UTC),
+            hasta=datetime(2026, 12, 2, 3, 0, tzinfo=UTC),
+            motivo="Bloqueo ficticio",
+        )
+    )
+    await session.commit()
+    client.headers["Authorization"] = f"Bearer {context['actors']['secretaria']['token']}"
+
+    hoy = await client.get("/agenda", params={"fecha": "2026-12-01"})
+    assert hoy.status_code == 200
+    assert [row["id"] for group in hoy.json() for row in group["turnos"]] == [str(turno.id)]
+    manana = await client.get("/agenda", params={"fecha": "2026-12-02"})
+    assert manana.json() == []
+
+    response = await client.get(
+        "/horarios-libres",
+        params={
+            "tratamiento": str(context["tratamiento"].id),
+            "fecha": "2026-12-01",
+            "sillon": str(sillon.id),
+        },
+    )
+    assert response.status_code == 200, response.text
+    horarios = {datetime.fromisoformat(row["inicio"]) for row in response.json()}
+    assert datetime(2026, 12, 2, 0, 30, tzinfo=UTC) in horarios
+    assert turno.inicio not in horarios
+    assert datetime(2026, 12, 2, 2, 30, tzinfo=UTC) not in horarios
+    assert min(horarios) == datetime(2026, 12, 1, 3, 0, tzinfo=UTC)
 
 
 @pytest.mark.asyncio

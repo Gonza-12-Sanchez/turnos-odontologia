@@ -9,7 +9,7 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import (
@@ -57,6 +57,27 @@ class CobroService:
         )
         return sum(result.all())
 
+    async def _cerrado(self, turno_id: UUID) -> bool:
+        return bool(
+            await self.session.scalar(
+                select(Cobro.id)
+                .where(Cobro.turno_id == turno_id, Cobro.tipo == "total", Cobro.is_active.is_(True))
+                .limit(1)
+            )
+        )
+
+    async def resumen(self, turno_id: UUID) -> dict[str, Any]:
+        _, tratamiento = await self._turno_tratamiento(turno_id)
+        precio = tratamiento.precio_referencia_centavos if tratamiento else None
+        total = await self._total_cobrado(turno_id)
+        return {
+            "precio_referencia_centavos": precio,
+            "sena_acumulada_centavos": await self._sena_acumulada(turno_id),
+            "total_cobrado_centavos": total,
+            "saldo_referencia_centavos": None if precio is None else max(precio - total, 0),
+            "cerrado": await self._cerrado(turno_id),
+        }
+
     def _huella(
         self,
         turno_id: UUID,
@@ -85,6 +106,18 @@ class CobroService:
             "referencia_mp": cobro.referencia_mp,
         }
 
+    async def operacion(self, actor_id: UUID, clave: str) -> dict[str, Any] | None:
+        registro = await self.session.scalar(
+            select(IdempotenciaSolicitud).where(
+                IdempotenciaSolicitud.usuario_id == actor_id,
+                IdempotenciaSolicitud.operacion == "cobros:registro",
+                IdempotenciaSolicitud.clave == clave,
+            )
+        )
+        if registro is not None and registro.resultado and "cobro" in registro.resultado:
+            return registro.resultado
+        return None
+
     async def registrar(
         self,
         turno_id: UUID,
@@ -92,41 +125,43 @@ class CobroService:
         medio: str,
         tipo: str,
         actor_id: UUID,
-        idempotency_key: str | None,
+        idempotency_key: str,
         override_motivo: str | None,
     ) -> tuple[dict[str, Any], bool]:
-        # Idempotencia: misma clave + mismo payload devuelve resultado cacheado.
         huella = self._huella(turno_id, monto_centavos, medio, tipo, override_motivo)
-        if idempotency_key:
-            existente = (
-                await self.session.scalars(
-                    select(IdempotenciaSolicitud).where(
-                        IdempotenciaSolicitud.usuario_id == actor_id,
-                        IdempotenciaSolicitud.operacion == "cobros:registro",
-                        IdempotenciaSolicitud.clave == idempotency_key,
-                    )
+        lock_key = f"cobros:registro:{actor_id}:{idempotency_key}"
+        await self.session.execute(
+            select(func.pg_advisory_xact_lock(func.hashtextextended(lock_key, 0)))
+        )
+        existente = await self.session.scalar(
+            select(IdempotenciaSolicitud).where(
+                IdempotenciaSolicitud.usuario_id == actor_id,
+                IdempotenciaSolicitud.operacion == "cobros:registro",
+                IdempotenciaSolicitud.clave == idempotency_key,
+            )
+        )
+        if existente is not None:
+            if existente.huella != huella:
+                raise CobroError(
+                    status.HTTP_409_CONFLICT,
+                    {"code": "IDEMPOTENCIA_CLAVE_DIFERENTE"},
                 )
-            ).first()
-            if existente is not None:
-                if existente.huella != huella:
-                    raise CobroError(
-                        status.HTTP_409_CONFLICT,
-                        {"code": "IDEMPOTENCIA_CLAVE_DIFERENTE", "clave": idempotency_key},
-                        code="IDEMPOTENCIA_CLAVE_DIFERENTE",
-                    )
-                if existente.resultado:
-                    return {
-                        "cobro": existente.resultado,
-                        "sena_acumulada_centavos": 0,
-                        "total_cobrado_centavos": 0,
-                        "saldo_referencia_centavos": None,
-                        "warnings": [{"code": "IDEMPOTENCIA_REPLAY"}],
-                        "facturacion_electronica": False,
-                    }, True
+            if existente.resultado and "cobro" in existente.resultado:
+                return existente.resultado, True
+            if existente.resultado:
+                return {
+                    **await self.resumen(turno_id),
+                    "cobro": existente.resultado,
+                    "warnings": [{"code": "IDEMPOTENCIA_REPLAY"}],
+                    "facturacion_electronica": False,
+                }, True
 
-        # Bloqueo de turno para serializar conciliación.
-        _turno, tratamiento = await self._turno_tratamiento(turno_id)
-        await self.session.execute(select(Turno).where(Turno.id == turno_id).with_for_update())
+        # Serializa cierres distintos sobre el mismo turno.
+        await self.session.execute(select(Turno.id).where(Turno.id == turno_id).with_for_update())
+        _, tratamiento = await self._turno_tratamiento(turno_id)
+        cerrado = await self._cerrado(turno_id)
+        if cerrado:
+            raise CobroError(status.HTTP_409_CONFLICT, {"code": "TURNO_CERRADO"})
 
         sena_acumulada = await self._sena_acumulada(turno_id)
         precio = tratamiento.precio_referencia_centavos if tratamiento else None
@@ -190,7 +225,11 @@ class CobroService:
         await self.session.flush()
         await self.session.refresh(cobro)
 
-        total_cobrado = sena_acumulada + monto_centavos
+        total_cobrado = await self._total_cobrado(turno_id)
+        if tipo == "sena":
+            sena_acumulada += monto_centavos
+            if precio is not None:
+                saldo_referencia = max(precio - total_cobrado, 0)
 
         # Auditoria del cobro.
         self.session.add(
@@ -204,24 +243,21 @@ class CobroService:
             )
         )
 
-        # Persistir registro de idempotencia con el resultado del cobro.
-        if idempotency_key:
-            resultado_cobro = self._resultado_cobro(cobro)
-            self.session.add(
-                IdempotenciaSolicitud(
-                    usuario_id=actor_id,
-                    operacion="cobros:registro",
-                    clave=idempotency_key,
-                    huella=huella,
-                    resultado=resultado_cobro,
-                )
-            )
-
-        return {
+        resultado = {
             "cobro": self._resultado_cobro(cobro),
             "sena_acumulada_centavos": sena_acumulada,
             "total_cobrado_centavos": total_cobrado,
             "saldo_referencia_centavos": saldo_referencia,
             "warnings": warnings,
             "facturacion_electronica": False,
-        }, False
+        }
+        self.session.add(
+            IdempotenciaSolicitud(
+                usuario_id=actor_id,
+                operacion="cobros:registro",
+                clave=idempotency_key,
+                huella=huella,
+                resultado=resultado,
+            )
+        )
+        return resultado, False

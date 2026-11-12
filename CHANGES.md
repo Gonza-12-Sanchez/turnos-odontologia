@@ -292,7 +292,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 > C-10 y C-11 pueden proponerse en paralelo cuando sus dependencias backend están archivadas. Backend antes que frontend acoplado.
 
 ### [C-10] `pwa-reserva-publica`
-- **Estado**: `[x]` archivado 2026-11-10 (21/25 tasks, 118/118 tests, lint limpio, tsc limpio, build exit 0, validate --strict válido; tarea 8.2 bloqueada por credenciales MP sandbox no disponibles)
+- **Estado**: `[x]` archivado 2026-11-10 (24/25 tasks en el checklist archivado, 118/118 tests, lint limpio, tsc limpio, build exit 0, validate --strict válido; tarea 8.2 bloqueada por credenciales MP sandbox no disponibles)
 - **Scope**: PWA pública + paciente: ver libres, reservar, mis reservas (US-001/002/003 UI)
   - Pages: `/` landing, `/horarios` (ver libres sin login, filtros fecha/sillón/tratamiento, mobile-first), `/login`, `/registro`, `/mis-reservas` (lista propia + confirmar/cancelar respetando 2 h, tolerancia visible)
   - `features/reserva` + `features/mis-reservas`: api client JWT, manejo de `409 + alternativas`, `402 → checkout MP`, `422 ventana 2 h` con mensajes claros; PWA instalable, funciona bien en celular (restricción Discovery)
@@ -309,7 +309,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-11] `pwa-agenda-gestion`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[ ]` en curso, con el [correctivo de contexto del consultorio](openspec/changes/c11-contexto-consultorio/tasks.md) abierto.
 - **Scope**: PWA consultorio: agenda del día, gestión de turnos, cobros, config (US-004/005/007 UI)
   - Pages: `/agenda` (vista día por sillón con paciente/tratamiento/estado/tolerancia, aviso de sobreturnos y solapamientos intentados), `/cobros` (registrar cobro + conciliar seña, override auditado, aviso "sin factura electrónica en v1"), `/config` (sillones, tratamientos, bloqueos — solo secretaria)
   - `features/agenda` + `features/cobros`: acciones confirmar/cancelar/reprogramar/marcar asistencia con bloqueo < 2 h también para secretaria; reprogramar revalida disponibilidad

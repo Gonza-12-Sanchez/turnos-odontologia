@@ -41,6 +41,56 @@ async def config_client(engine, session, real_redis, monkeypatch):
         yield client, {"consultorio_id": str(consultorio.id), "actors": actors}
 
 
+async def test_contexto_consultorio_y_primer_sillon(config_client, session):
+    client, context = config_client
+    url = "/api/config/contexto-consultorio"
+
+    response = await client.get(url)
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    assert response.json() == {
+        "consultorio": {"id": context["consultorio_id"], "nombre": "Consultorio ficticio"}
+    }
+    assert (await client.get("/api/config/sillones")).json()["total"] == 0
+    creado = await client.post(
+        "/api/config/sillones",
+        json={"consultorio_id": response.json()["consultorio"]["id"], "nombre": "Primer sillón"},
+    )
+    assert creado.status_code == 201, creado.text
+    assert await session.scalar(select(ConfigAudit.id)) is not None
+
+    extra = Consultorio(nombre="Otra sede")
+    session.add(extra)
+    await session.commit()
+    assert (await client.get(url)).json() == {"consultorio": None}
+
+    extra.is_active = False
+    await session.commit()
+    assert (await client.get(url)).json() == response.json()
+
+    consultorio = await session.scalar(select(Consultorio).where(Consultorio.id != extra.id))
+    consultorio.is_active = False
+    await session.commit()
+    assert (await client.get(url)).json() == {"consultorio": None}
+    rechazado = await client.post(
+        "/api/config/sillones",
+        json={"consultorio_id": context["consultorio_id"], "nombre": "Otro sillón"},
+    )
+    assert rechazado.status_code == 422
+
+
+@pytest.mark.parametrize("role,expected", [(None, 401), ("paciente", 403), ("odontologo", 403)])
+async def test_contexto_consultorio_rbac(config_client, role, expected):
+    client, context = config_client
+    if role is None:
+        del client.headers["Authorization"]
+    else:
+        client.headers["Authorization"] = f"Bearer {context['actors'][role]['token']}"
+    response = await client.get("/api/config/contexto-consultorio")
+    assert response.status_code == expected
+    assert "consultorio" not in response.json()
+
+
 async def test_crud_sillon(config_client):
     client, context = config_client
     response = await client.post(

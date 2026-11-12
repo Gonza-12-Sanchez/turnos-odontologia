@@ -6,13 +6,14 @@ from datetime import date
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from fastapi.responses import JSONResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
 from app.api.deps import get_db, require_role
-from app.models import Usuario
+from app.models import Turno, TurnoEvento, Usuario
 from app.repositories.paciente_repository import PacienteRepository
 from app.repositories.unit_of_work import UnitOfWork
 from app.schemas.turnos import (
@@ -24,6 +25,7 @@ from app.schemas.turnos import (
     ReprogramarIn,
     SobreturnoIn,
     TurnoCreate,
+    TurnoEventoOut,
     TurnoOut,
 )
 from app.services.agenda_lectura_service import AgendaLecturaService
@@ -105,6 +107,8 @@ async def cancelar_turno(
     async with uow:
         service = GestionTurnosService(uow.session)
         turno = await service.cancelar(turno_id, user)
+        await uow.commit()
+        await service.disp.invalidar(turno.inicio)
         return TurnoOut.model_validate(turno)
 
 
@@ -128,6 +132,8 @@ async def reprogramar_turno(
                     "alternativas": [a.model_dump(mode="json") for a in exc.alternativas],
                 },
             )
+        await uow.commit()
+        await service.disp.invalidar()
         return TurnoOut.model_validate(turno)
 
 
@@ -141,7 +147,12 @@ async def marcar_asistencia(
     uow = UnitOfWork(deps.get_session_factory())
     async with uow:
         service = GestionTurnosService(uow.session)
-        turno = await service.marcar_asistencia(turno_id, payload.estado, user)
+        turno = await service.marcar_asistencia(
+            turno_id, payload.estado, user, origin=payload.origen, motivo=payload.motivo
+        )
+        await uow.commit()
+        if turno.estado == "ausente":
+            await service.disp.invalidar(turno.inicio)
         return TurnoOut.model_validate(turno)
 
 
@@ -190,7 +201,40 @@ async def agenda(
 ):
     sid = sillon if sillon is not None else sillon_id
     service = AgendaLecturaService(db)
-    return await service.agenda(fecha, sid, estado)
+    return await service.agenda(fecha, sid, estado, role=user.rol)
+
+
+@router.get("/turnos/{turno_id}/gestion", response_model=TurnoOut)
+async def consultar_turno_staff(
+    turno_id: UUID,
+    response: Response,
+    user: Annotated[Usuario, Depends(require_role("odontologo", "secretaria"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    turno = await db.get(Turno, turno_id)
+    if turno is None or not turno.is_active:
+        raise HTTPException(status_code=404, detail="Turno inexistente")
+    response.headers["Cache-Control"] = "no-store"
+    return turno
+
+
+@router.get("/turnos/{turno_id}/historial", response_model=list[TurnoEventoOut])
+async def historial_turno(
+    turno_id: UUID,
+    response: Response,
+    user: Annotated[Usuario, Depends(require_role("odontologo", "secretaria"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    turno = await db.get(Turno, turno_id)
+    if turno is None or not turno.is_active:
+        raise HTTPException(status_code=404, detail="Turno inexistente")
+    rows = await db.scalars(
+        select(TurnoEvento)
+        .where(TurnoEvento.turno_id == turno_id)
+        .order_by(TurnoEvento.fecha.desc(), TurnoEvento.id.desc())
+    )
+    response.headers["Cache-Control"] = "no-store"
+    return list(rows.all())
 
 
 @router.get("/mis-reservas", response_model=list[MisReservaOut])

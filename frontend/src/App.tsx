@@ -1,4 +1,4 @@
-import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Link, NavLink, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useSession } from './features/auth/context'
 import { SessionProvider } from './features/auth/SessionProvider'
@@ -12,6 +12,10 @@ import { Notice } from './shared/ui'
 import { useOnline } from './shared/network'
 import RoleGuard from './features/auth/RoleGuard'
 import ConfigPage from './features/config/ConfigPage'
+import AgendaPage from './features/agenda/AgendaPage'
+import type { ExpectedTurn } from './features/agenda/TurnActions'
+import CollectionsPage from './features/cobros/CollectionsPage'
+import type { CollectionSelection, PendingCollection } from './features/cobros/CollectionsPage'
 import { useConfigWriteGuard } from './features/config/writeGuard'
 
 function PatientOnly({ children }: { children: React.ReactNode }) {
@@ -29,6 +33,22 @@ function Layout() {
   const isStaff = user?.rol === 'secretaria' || user?.rol === 'odontologo'
   const [recovery, setRecovery] = useState<UnverifiedBooking | null>(null)
   const configWrites = useConfigWriteGuard()
+  const navigate = useNavigate()
+  const [uncertainTurns, setUncertainTurns] = useState<Record<string, ExpectedTurn>>({})
+  function setUncertainTurn(id: string, expected?: ExpectedTurn) {
+    setUncertainTurns(current => {
+      const next = { ...current }
+      if (expected) next[id] = expected
+      else delete next[id]
+      return next
+    })
+  }
+  const [collection, setCollection] = useState<CollectionSelection | null>(null)
+  const [pendingCollection, setPendingCollection] = useState<PendingCollection | null>(null)
+  function selectCollection(selection: CollectionSelection) {
+    if (!pendingCollection) setCollection(selection)
+    navigate('/cobros')
+  }
   return <>
     <a className="skip-link" href="#contenido">Saltar al contenido</a>
     <header className={`site-header${isStaff ? ' staff-header' : ''}`}><Link className="brand" to="/">Turnos odontologia{isStaff ? <small className="staff-brand-note">Identidad comercial provisional (TBD)</small> : null}</Link><nav aria-label="Principal">
@@ -45,9 +65,9 @@ function Layout() {
         <Route path="/horarios" element={<Schedule recovery={recovery} onRecoveryChange={setRecovery} />} />
         <Route path="/mis-reservas" element={<PatientOnly><MyReservations key={user?.id} /></PatientOnly>} />
         <Route path="/pagos/retorno" element={<PatientOnly><PaymentReturn key={user?.id} /></PatientOnly>} />
-        <Route path="/agenda" element={<RoleGuard roles={['secretaria', 'odontologo']}><section><h1>Agenda del día</h1><Notice>La consulta del día argentino está pendiente de verificación. No se habilitan acciones sobre horarios no verificados.</Notice></section></RoleGuard>} />
+        <Route path="/agenda" element={<RoleGuard roles={['secretaria', 'odontologo']}><AgendaPage onCollect={user?.rol === 'secretaria' ? selectCollection : undefined} uncertain={uncertainTurns} onUncertain={setUncertainTurn} /></RoleGuard>} />
         <Route path="/config" element={<RoleGuard roles={['secretaria']}><ConfigPage writes={configWrites} /></RoleGuard>} />
-        <Route path="/cobros" element={<RoleGuard roles={['secretaria']}><section><h1>Cobros</h1><Notice>Registro de cobros no habilitado. Falta verificar conciliación y prevención de doble cierre en C-09.</Notice><p>Sin factura electrónica en v1.</p></section></RoleGuard>} />
+        <Route path="/cobros" element={<RoleGuard roles={['secretaria']}><CollectionsPage key={collection?.id} selection={collection} pending={pendingCollection} onPending={setPendingCollection} /></RoleGuard>} />
         <Route path="*" element={<section><h1>Pagina no encontrada</h1><Link to="/">Volver al inicio</Link></section>} />
       </Routes>
     </main><footer>Horarios en Argentina. Las reservas y sus cambios se verifican en el servidor.</footer><PwaUpdate />

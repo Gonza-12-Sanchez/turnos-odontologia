@@ -5,6 +5,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 from pydantic import ValidationError
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from app.models import Bloqueo, ConfigAudit, Consultorio, Sillon, Tratamiento
@@ -15,12 +16,15 @@ from app.schemas.config import (
     BloqueoCreate,
     BloqueoOut,
     ConfigWarning,
+    ConsultorioResumen,
+    ContextoConsultorioOut,
     Page,
     SillonCreate,
     SillonOut,
     TratamientoCreate,
     TratamientoOut,
 )
+from app.services.disponibilidad_service import DisponibilidadService
 
 CATALOG = {
     "sillon": (Sillon, SillonCreate, SillonOut),
@@ -33,6 +37,20 @@ class ConfigService:
     def __init__(self, uow: UnitOfWork):
         self.uow = uow
         self.session = uow.session
+
+    async def contexto_consultorio(self) -> ContextoConsultorioOut:
+        result = await self.session.execute(
+            select(Consultorio.id, Consultorio.nombre)
+            .where(Consultorio.is_active.is_(True))
+            .limit(2)
+        )
+        activos = result.all()
+        if len(activos) != 1:
+            return ContextoConsultorioOut(consultorio=None)
+        consultorio_id, nombre = activos[0]
+        return ContextoConsultorioOut(
+            consultorio=ConsultorioResumen(id=consultorio_id, nombre=nombre)
+        )
 
     def repository(self, resource: str):
         return CatalogRepository(self.session, CATALOG[resource][0])
@@ -141,4 +159,5 @@ class ConfigService:
         except IntegrityError as exc:
             await self.uow.rollback()
             raise HTTPException(409, "Conflicto al guardar configuración") from exc
+        await DisponibilidadService(self.session).invalidar()
         return result

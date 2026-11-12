@@ -11,6 +11,16 @@ export interface Treatment {
 }
 export interface Page<T> { items: T[]; total: number; page: number; page_size: number }
 export type Resource = 'tratamientos' | 'sillones' | 'bloqueos'
+export interface Clinic { id: string; nombre: string }
+export function readClinicContext(value: unknown): Clinic | null {
+  if (!isRecord(value)) throw new Error("Contexto de consultorio inválido")
+  const clinic = value.consultorio
+  if (clinic === null) return null
+  if (!isRecord(clinic) || !uuid(clinic.id) || typeof clinic.nombre !== "string" || !clinic.nombre.trim()) {
+    throw new Error("Contexto de consultorio inválido")
+  }
+  return { id: clinic.id, nombre: clinic.nombre }
+}
 export interface Chair { id: string; nombre: string; activo: boolean; consultorio_id: string }
 export interface Block { id: string; motivo: string; activo: boolean; sillon_id: string | null; desde: string; hasta: string }
 export type Entry = { resource: 'tratamientos'; item: Treatment } | { resource: 'sillones'; item: Chair } | { resource: 'bloqueos'; item: Block }
@@ -25,7 +35,7 @@ export function isTreatment(value: unknown): value is Treatment {
 export function isChair(value: unknown): value is Chair {
   return isRecord(value) && uuid(value.id) && uuid(value.consultorio_id) && typeof value.activo === 'boolean' && typeof value.nombre === 'string' && !!value.nombre.trim() && value.nombre.length <= 80
 }
-function isBlock(value: unknown): value is Block {
+export function isBlock(value: unknown): value is Block {
   return isRecord(value) && uuid(value.id) && typeof value.activo === 'boolean' && (value.sillon_id === null || uuid(value.sillon_id)) && typeof value.motivo === 'string' && !!value.motivo.trim() && value.motivo.length <= 120 && isAwareDate(value.desde) && isAwareDate(value.hasta) && Date.parse(value.hasta) > Date.parse(value.desde)
 }
 export function readPage(value: unknown, resource: Resource, page: number, active: boolean): Page<Entry> {
