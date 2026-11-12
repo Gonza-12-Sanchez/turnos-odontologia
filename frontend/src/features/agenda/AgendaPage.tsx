@@ -61,12 +61,15 @@ interface AgendaActions {
   onUncertain: (id: string, expected?: ExpectedTurn) => void
 }
 
-function DailyAgenda({ day, status, chair, onCollect, uncertain, onUncertain }: AgendaActions & { day: string; status: string; chair: string }) {
+function DailyAgenda({ day, status, chair, chairs, onCollect, uncertain, onUncertain }: AgendaActions & { day: string; status: string; chair: string; chairs: { id: string; nombre: string }[] }) {
   const { session } = useSession()
   const [result, setResult] = useState<ChairAgenda[] | null>(null)
   const [error, setError] = useState(false)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [revision, setRevision] = useState(0)
-  function refresh() {
+  const [actionNotice, setActionNotice] = useState('')
+  function refresh(message = '') {
+    setActionNotice(message)
     setError(false)
     setResult(null)
     setRevision(value => value + 1)
@@ -86,19 +89,40 @@ function DailyAgenda({ day, status, chair, onCollect, uncertain, onUncertain }: 
 
   if (error) return <Notice>No se pudo consultar la agenda. Volvé a pulsar Consultar agenda para reintentar.</Notice>
   if (!result) return <p role="status">Consultando turnos…</p>
-  if (!result.some(group => group.turnos.length)) return <p>No hay turnos para los filtros elegidos.</p>
+  if (!result.some(group => group.turnos.length)) return <>{actionNotice ? <Notice>{actionNotice}</Notice> : null}<p>No hay turnos para los filtros elegidos.</p></>
 
-  return <>{result.filter(group => group.turnos.length > 0).map(group => <section key={group.sillon_id}>
-    <h2>{group.sillon_nombre}</h2>
-    <ol className="reservations">{group.turnos.toSorted((a, b) => Date.parse(a.inicio) - Date.parse(b.inicio)).map(turno => <li key={turno.id}>
-      <div className="reservation-heading"><h3>{turno.paciente_nombre}</h3><span className="state">{turno.estado}</span></div>
-      <p><time dateTime={turno.inicio}>{hour(turno.inicio)}</time>–<time dateTime={turno.fin}>{hour(turno.fin)}</time> · {turno.tratamiento_nombre}</p>
-      <p className="muted">Tolerancia de llegada: {turno.tolerancia_min} min.</p>
-      {turno.es_sobreturno ? <p><strong>Sobreturno</strong>{turno.motivo_sobreturno ? `: ${turno.motivo_sobreturno}` : null}</p> : null}
-      {onCollect && isUuid(turno.id) ? <button className="secondary" onClick={() => onCollect({ id: turno.id, treatment: turno.tratamiento_nombre })}>Ver cobros del turno</button> : null}
-      {isUuid(turno.id) && turno.tratamiento_id && turno.acciones ? <TurnActions id={turno.id} treatmentId={turno.tratamiento_id} actions={turno.acciones} uncertain={uncertain[turno.id]} onUncertain={onUncertain} onChanged={refresh} /> : null}
-    </li>)}</ol>
-  </section>)}</>
+  const selectedGroup = result.find(group => group.turnos.some(turn => turn.id === selectedId))
+  const selected = selectedGroup?.turnos.find(turn => turn.id === selectedId)
+
+  return <>
+    {actionNotice ? <Notice>{actionNotice}</Notice> : null}
+    <div className="staff-detail-layout">
+      <div>{result.filter(group => group.turnos.length > 0).map(group => <section key={group.sillon_id}>
+        <h2>{group.sillon_nombre}</h2>
+        <ol className="reservations">{group.turnos.toSorted((a, b) => Date.parse(a.inicio) - Date.parse(b.inicio)).map(turno => <li key={turno.id}>
+          <div className="reservation-heading"><h3>{turno.paciente_nombre}</h3><span className="state">{turno.estado}</span></div>
+          <p><time dateTime={turno.inicio}>{hour(turno.inicio)}</time>–<time dateTime={turno.fin}>{hour(turno.fin)}</time> · {turno.tratamiento_nombre}</p>
+          {turno.es_sobreturno ? <p><strong>Sobreturno</strong>{turno.motivo_sobreturno ? `: ${turno.motivo_sobreturno}` : null}</p> : null}
+          <button type="button" className="secondary" aria-pressed={selectedId === turno.id} aria-controls="detalle-turno" onClick={() => setSelectedId(turno.id)}>Ver turno<span className="sr-only"> de {turno.paciente_nombre} a las {hour(turno.inicio)}</span></button>
+        </li>)}</ol>
+      </section>)}</div>
+      <section id="detalle-turno" className="staff-detail-panel" aria-label="Detalle del turno">
+        <h2>Detalle del turno</h2>
+        {selected ? <>
+          <dl className="staff-summary">
+            <dt>Paciente</dt><dd>{selected.paciente_nombre}</dd>
+            <dt>Tratamiento</dt><dd>{selected.tratamiento_nombre}</dd>
+            <dt>Hora Argentina</dt><dd>{hour(selected.inicio)}–{hour(selected.fin)}</dd>
+            <dt>Sillón</dt><dd>{selectedGroup?.sillon_nombre}</dd>
+            <dt>Estado</dt><dd>{selected.estado}</dd>
+            <dt>Tolerancia de llegada</dt><dd>{selected.tolerancia_min} min.</dd>
+          </dl>
+          {isUuid(selected.id) && selected.tratamiento_id && selected.acciones ? <TurnActions key={selected.id} id={selected.id} treatmentId={selected.tratamiento_id} chairs={chairs} actions={selected.acciones} uncertain={uncertain[selected.id]} onUncertain={onUncertain} onChanged={refresh} /> : <Notice>Acciones no disponibles. No se pudieron verificar los permisos del turno.</Notice>}
+          {onCollect && isUuid(selected.id) ? <button className="secondary" onClick={() => onCollect({ id: selected.id, treatment: selected.tratamiento_nombre })}>Ver cobros del turno</button> : null}
+        </> : <p>Elegí un turno de la agenda para ver su detalle.</p>}
+      </section>
+    </div>
+  </>
 }
 
 export default function AgendaPage(actions: AgendaActions) {
@@ -124,7 +148,7 @@ export default function AgendaPage(actions: AgendaActions) {
 
   return <section>
     <h1>Agenda del día</h1>
-    <form className="staff-filters" onSubmit={event => {
+    <form noValidate className="staff-filters" onSubmit={event => {
       event.preventDefault()
       if (day && online) setQuery(previous => ({ day, status, chair, revision: previous.revision + 1 }))
     }}>
@@ -135,9 +159,9 @@ export default function AgendaPage(actions: AgendaActions) {
       {chairs.length > 0 ? <label>Sillón<select value={chair} onChange={event => setChair(event.target.value)}>
         <option value="">Todos</option>{chairs.map(value => <option key={value.id} value={value.id}>{value.nombre}</option>)}
       </select></label> : null}
-      <button className="secondary" disabled={!online}>Consultar agenda</button>
+      <button className="secondary" disabled={!online || !day}>Consultar agenda</button>
     </form>
-    {online ? <DailyAgenda key={query.revision} day={query.day} status={query.status} chair={query.chair} {...actions} />
+    {online ? <DailyAgenda key={query.revision} day={query.day} status={query.status} chair={query.chair} chairs={chairs} {...actions} />
       : <Notice>Sin conexión. La agenda no se guarda en este dispositivo.</Notice>}
   </section>
 }

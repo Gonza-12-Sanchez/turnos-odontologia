@@ -200,7 +200,54 @@ async def test_reprogramar_conflicto(gestion_client, session):
         json={"inicio": "2026-12-01T16:00:00+00:00"},
     )
     assert response.status_code == 409, response.text
-    assert "alternativas" in response.json()
+    alternativas = response.json()["alternativas"]
+    assert alternativas
+    assert all(datetime.fromisoformat(a["inicio"]) != start for a in alternativas)
+    original = (await client.get(f"/turnos/{turno.id}/gestion")).json()
+    assert datetime.fromisoformat(original["inicio"]) == turno.inicio
+    assert original["sillon_id"] == str(turno.sillon_id)
+
+
+@pytest.mark.parametrize("accion", ["cancelar", "reprogramar"])
+@pytest.mark.parametrize("seconds,expected", [(7199, 422), (7200, 200)])
+async def test_ventana_staff_y_conservacion_del_turno(
+    gestion_client, monkeypatch, accion, seconds, expected
+):
+    from app.services import gestion_turnos_service as service
+
+    client, ctx = gestion_client
+    turno = ctx["turno"]
+    original = turno.inicio
+    frozen = original - timedelta(seconds=seconds)
+
+    class FixedDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return frozen.astimezone(tz) if tz is not None else frozen.replace(tzinfo=None)
+
+    monkeypatch.setattr(service, "datetime", FixedDatetime)
+    monkeypatch.setattr(service.settings, "appointment_cancel_minutes", 120)
+    path = f"/turnos/{turno.id}"
+    destination = original + timedelta(hours=2)
+    body = {"inicio": destination.isoformat(), "sillon_id": str(ctx["sillones"][1].id)}
+    response = await client.patch(
+        f"{path}/{accion}", json=body if accion == "reprogramar" else None
+    )
+    assert response.status_code == expected, response.text
+    stored = (await client.get(f"{path}/gestion")).json()
+    if expected == 422:
+        assert "ventana" in response.json()["detail"]
+        assert stored["estado"] == "reservado"
+        assert datetime.fromisoformat(stored["inicio"]) == original
+        assert stored["sillon_id"] == str(turno.sillon_id)
+        assert (await client.get(f"{path}/historial")).json() == []
+    elif accion == "cancelar":
+        assert stored["estado"] == "cancelado"
+        assert (await client.patch(f"{path}/cancelar")).status_code == 422
+    else:
+        assert datetime.fromisoformat(stored["inicio"]) == destination
+        assert datetime.fromisoformat(stored["fin"]) == destination + timedelta(minutes=30)
+        assert stored["sillon_id"] == str(ctx["sillones"][1].id)
 
 
 @pytest.mark.asyncio
@@ -267,3 +314,29 @@ async def test_patch_turno_sobreturno(gestion_client):
     )
     assert response.status_code == 200, response.text
     assert response.json()["es_sobreturno"] is True
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "payload", "action"),
+    [
+        ("confirmar", None, "confirmar"),
+        ("cancelar", None, "cancelar"),
+        ("reprogramar", {"inicio": "2026-12-01T15:00:00Z"}, "reprogramar"),
+        ("marcar-asistencia", {"estado": "ausente"}, "ausente"),
+        ("sobreturno", {"motivo": "Urgencia"}, "sobreturno"),
+        ("", {"origen": "mostrador"}, "cambiar_origen"),
+    ],
+)
+async def test_transicion_staff_persiste_evento(gestion_client, endpoint, payload, action):
+    client, ctx = gestion_client
+    base = f"/turnos/{ctx['turno'].id}"
+    response = await client.patch(f"{base}/{endpoint}" if endpoint else base, json=payload)
+    assert response.status_code == 200, response.text
+
+    history = await client.get(f"{base}/historial")
+    assert history.status_code == 200
+    (event,) = history.json()
+    assert event["accion"] == action
+    assert event["actor_id"] == str(ctx["actors"]["secretaria"]["id"])
+    assert datetime.fromisoformat(event["fecha"]).utcoffset() is not None
+    assert event["origen"] in {"online", "mostrador"}

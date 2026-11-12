@@ -136,15 +136,21 @@ async def test_cobro_feliz_efectivo(c09_cobros_client):
     assert data["facturacion_electronica"] is False
 
 
-async def test_cobro_conciliacion_sena(c09_cobros_client):
+@pytest.mark.parametrize("medio", ["efectivo", "transferencia", "mercadopago"])
+async def test_cobro_conciliacion_sena(c09_cobros_client, medio):
     client, ctx = c09_cobros_client
     # Primero seña de 3000 (tipo sena no tiene cheque MONTO_DIFIERE)
     r1 = await _post_cobro(client, ctx["turno_id"], 3000, tipo="sena", idem=str(uuid4()))
     assert r1.status_code == 201, r1.text
     # Luego cierre de 7000 -> total 10000, saldo 0
-    r2 = await _post_cobro(client, ctx["turno_id"], 7000, tipo="total", idem=str(uuid4()))
+    clave = str(uuid4())
+    r2 = await _post_cobro(client, ctx["turno_id"], 7000, medio=medio, idem=clave)
     assert r2.status_code == 201, r2.text
     data = r2.json()
+    assert data["cobro"]["medio"] == medio
+    replay = await _post_cobro(client, ctx["turno_id"], 7000, medio=medio, idem=clave)
+    assert replay.status_code == 200
+    assert replay.json() == data
     assert data["sena_acumulada_centavos"] == 3000
     assert data["total_cobrado_centavos"] == 10000
     assert data["saldo_referencia_centavos"] == 0

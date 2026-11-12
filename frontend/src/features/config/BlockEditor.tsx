@@ -83,7 +83,7 @@ export default function BlockEditor({ item, writes, onSaved, onCancel }: {
     }
   }
 
-  return <form aria-label={item ? 'Editar bloqueo' : 'Agregar bloqueo'} onSubmit={event => void save(event)}>
+  return <form noValidate aria-label={item ? 'Editar bloqueo' : 'Agregar bloqueo'} onSubmit={event => void save(event)}>
     <h2>{item ? 'Editar bloqueo' : 'Agregar bloqueo'}</h2>
     <fieldset disabled={writes.state !== 'idle'}>
       <legend>Horario argentino</legend>

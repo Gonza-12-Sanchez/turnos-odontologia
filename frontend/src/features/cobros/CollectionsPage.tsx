@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { useSession } from '../auth/context'
 import { ars } from '../reserva/payments'
 import { ApiError } from '../../shared/api/client'
-import { isRecord } from '../../shared/api/contracts'
+import { isAwareDate, isRecord } from '../../shared/api/contracts'
 import { useOnline } from '../../shared/network'
+import { dateTime } from '../../shared/time'
 import { Notice } from '../../shared/ui'
 
 export interface CollectionSelection { id: string; treatment: string }
@@ -29,6 +30,26 @@ function isSummary(value: unknown): value is Summary {
     && (value.saldo_referencia_centavos === null || cents(value.saldo_referencia_centavos))
 }
 
+interface Movement {
+  id: string
+  turno_id: string
+  monto_centavos: number
+  medio: 'efectivo' | 'transferencia' | 'mercadopago'
+  tipo: 'sena' | 'total'
+  estado_mp: string | null
+  created_at: string
+}
+
+const media = { efectivo: 'Efectivo', transferencia: 'Transferencia', mercadopago: 'Mercado Pago' }
+
+function isMovement(value: unknown): value is Movement {
+  return isRecord(value) && typeof value.id === 'string' && typeof value.turno_id === 'string'
+    && cents(value.monto_centavos) && isAwareDate(value.created_at)
+    && (value.medio === 'efectivo' || value.medio === 'transferencia' || value.medio === 'mercadopago')
+    && (value.tipo === 'sena' || value.tipo === 'total')
+    && (value.estado_mp === null || typeof value.estado_mp === 'string')
+}
+
 function amountInCents(input: string) {
   const value = input.trim()
   if (!/^\d{1,8}(?:[,.]\d{1,2})?$/.test(value)) return null
@@ -50,6 +71,8 @@ export default function CollectionsPage({ selection, pending, onPending }: {
   const { session } = useSession()
   const online = useOnline()
   const [summary, setSummary] = useState<Summary | null>(null)
+  const [movements, setMovements] = useState<Movement[] | null>(null)
+  const [movementError, setMovementError] = useState(false)
   const [amount, setAmount] = useState('')
   const [type, setType] = useState<'sena' | 'total'>('total')
   const [medium, setMedium] = useState('efectivo')
@@ -69,12 +92,18 @@ export default function CollectionsPage({ selection, pending, onPending }: {
       if (!isSummary(value)) throw new Error('Resumen inválido')
       if (!controller.signal.aborted) setSummary(value)
     }).catch(() => { if (!controller.signal.aborted) setReadError(true) })
+    void session.get<unknown>('/cobros', { query: { turno_id: id }, signal: controller.signal }).then(value => {
+      if (!Array.isArray(value) || !value.every(item => isMovement(item) && item.turno_id === id)) throw new Error('Movimientos inválidos')
+      if (!controller.signal.aborted) setMovements(value)
+    }).catch(() => { if (!controller.signal.aborted) setMovementError(true) })
     return () => controller.abort()
   }, [id, online, revision, session])
 
   function reload() {
     setReadError(false)
     setSummary(null)
+    setMovementError(false)
+    setMovements(null)
     setRevision(value => value + 1)
   }
 
@@ -147,9 +176,13 @@ export default function CollectionsPage({ selection, pending, onPending }: {
     }
   }
 
+  const closure = movements?.find(movement => movement.tipo === 'total')
+
   return <section>
     <h1>Cobros</h1>
-    <p>Sin factura electrónica en v1.</p>
+    <p>Sin factura electrónica en v1. Mercado Pago manual registra dinero recibido en mostrador, no verifica un pago online.</p>
+    {selection ? <Link to="/agenda">Volver a la agenda</Link> : null}
+    {!online ? <Notice>Sin conexión. Los cobros no se guardan en este dispositivo.</Notice> : null}
     {!selection ? <p>Elegí un turno desde la <Link to="/agenda">agenda</Link> para ver su saldo.</p> : null}
     {message ? <Notice>{message}</Notice> : null}
     {pending ? <button type="button" className="secondary" disabled={busy || !online} onClick={() => void reconcile()}>Consultar resultado del cobro</button> : null}
@@ -157,14 +190,35 @@ export default function CollectionsPage({ selection, pending, onPending }: {
       <h2>{selection.treatment}</h2>
       {readError ? <><Notice>No se pudo consultar el resumen de cobros.</Notice><button onClick={reload}>Reintentar consulta</button></> : null}
       {!summary && !readError ? <p role="status">Consultando saldo…</p> : null}
-      {summary ? <>
-        <dl>
+      {summary ? <div className="staff-detail-layout">
+        <section aria-label="Resumen y movimientos">
+        <dl className="staff-summary">
           <dt>Precio de referencia</dt><dd>{summary.precio_referencia_centavos === null ? 'Sin referencia' : ars(summary.precio_referencia_centavos)}</dd>
           <dt>Seña registrada</dt><dd>{ars(summary.sena_acumulada_centavos)}</dd>
           <dt>Total cobrado</dt><dd>{ars(summary.total_cobrado_centavos)}</dd>
           <dt>Saldo de referencia</dt><dd>{summary.saldo_referencia_centavos === null ? 'Sin referencia' : ars(summary.saldo_referencia_centavos)}</dd>
         </dl>
-        {summary.cerrado ? <p>Cobro cerrado.</p> : <form onSubmit={event => { event.preventDefault(); void register() }}>
+        <h3>Movimientos</h3>
+        {movementError ? <p>No se pudieron consultar los movimientos. <button type="button" className="secondary" onClick={reload}>Reintentar movimientos</button></p>
+          : movements === null ? <p role="status">Consultando movimientos…</p>
+          : movements.length === 0 ? <p>Todavía no hay movimientos.</p>
+          : <ul className="staff-movements">{movements.map(movement => <li key={movement.id}>
+            <strong>{movement.tipo === 'sena' ? 'Seña' : 'Cierre'} · {ars(movement.monto_centavos)}</strong>
+            <span>{dateTime(movement.created_at)} · {media[movement.medio]}{movement.estado_mp ? ` · ${movement.estado_mp}` : null}</span>
+          </li>)}</ul>}
+        </section>
+        {summary.cerrado ? <section className="staff-detail-panel" aria-label="Cierre registrado">
+          <h3>Cierre registrado</h3><p>Cobro cerrado.</p>
+          {closure ? <dl className="staff-summary">
+            <dt>Operación</dt><dd>{closure.id}</dd>
+            <dt>Dinero nuevo recibido</dt><dd>{ars(closure.monto_centavos)}</dd>
+            <dt>Medio</dt><dd>{media[closure.medio]}</dd>
+            <dt>Fecha</dt><dd>{dateTime(closure.created_at)}</dd>
+          </dl> : <p>El cierre está confirmado. Sus detalles dependen de la consulta de movimientos.</p>}
+          {summary.saldo_referencia_centavos !== null && summary.saldo_referencia_centavos > 0 ? <Notice>El cierre tiene una diferencia respecto del precio de referencia de {ars(summary.saldo_referencia_centavos)}.</Notice> : null}
+          <p>La seña previa ya está incluida en el total cobrado. No se registra otra vez.</p>
+          <Link to="/agenda">Volver a agenda</Link>
+        </section> : <form noValidate className="staff-detail-panel" onSubmit={event => { event.preventDefault(); void register() }}>
           <fieldset disabled={busy || pending !== null}>
             <legend>Registrar cobro</legend>
             <label>Tipo<select value={type} onChange={event => { setType(event.target.value === 'sena' ? 'sena' : 'total'); setOverride(null); setReason('') }}>
@@ -173,6 +227,7 @@ export default function CollectionsPage({ selection, pending, onPending }: {
             <label>Medio<select value={medium} onChange={event => { setMedium(event.target.value); setOverride(null); setReason('') }}>
               <option value="efectivo">Efectivo</option><option value="transferencia">Transferencia</option><option value="mercadopago">Mercado Pago manual</option>
             </select></label>
+            <p>Ingresá solo el dinero recibido ahora, sin volver a sumar la seña.</p>
             <label>Importe en ARS<input value={amount} inputMode="decimal" onChange={event => { setAmount(event.target.value); setOverride(null); setReason('') }} required /></label>
             {override !== null ? <>
               <p>Importe esperado: {ars(override)}</p>
@@ -181,7 +236,7 @@ export default function CollectionsPage({ selection, pending, onPending }: {
             <button>{override === null ? 'Registrar cobro' : 'Confirmar cobro con diferencia'}</button>
           </fieldset>
         </form>}
-      </> : null}
+      </div> : null}
     </> : null}
   </section>
 }

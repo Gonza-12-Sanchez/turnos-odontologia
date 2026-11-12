@@ -115,3 +115,16 @@ body {
   font-family: system-ui, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+.staff-detail-layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 1.5rem; align-items: start; margin-top: 1.5rem; }
+.staff-detail-panel { min-width: 0; margin: 0; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; background: white; overflow-wrap: anywhere; }
+.staff-detail-layout button[aria-pressed="true"] { background: #e0f2fe; color: #075985; }
+.staff-summary { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .5rem 1rem; overflow-wrap: anywhere; }
+.staff-summary dd { margin: 0; text-align: end; }
+.staff-movements { list-style: none; padding: 0; }
+.staff-movements li { display: grid; gap: .25rem; border-top: 1px solid var(--line); padding-block: .75rem; }
+@media (max-width: 900px) { .staff-detail-layout { grid-template-columns: minmax(0, 1fr); } }
+
+.staff-cancel-warning { padding: .75rem; border-left: 3px solid #92400e; background: #fffbeb; color: #78350f; }
+.staff-detail-panel button.staff-cancel-button { color: #991b1b; border-color: #b91c1c; background: white; }
+.staff-detail-panel button.staff-cancel-button:hover:not(:disabled) { background: #fff1f2; }

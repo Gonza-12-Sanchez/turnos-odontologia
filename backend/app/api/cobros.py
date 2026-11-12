@@ -76,6 +76,7 @@ async def consultar_operacion(
 
 @router.get("/cobros", response_model=list[CobroListOut])
 async def listar_cobros(
+    response: Response,
     turno_id: UUID | None = None,
     db: AsyncSession = Depends(get_db),
 ):
@@ -84,10 +85,11 @@ async def listar_cobros(
 
     from app.models import Cobro
 
+    response.headers["Cache-Control"] = "no-store"
     stmt = select(Cobro).where(Cobro.is_active.is_(True))
     if turno_id is not None:
         stmt = stmt.where(Cobro.turno_id == turno_id)
-    stmt = stmt.order_by(Cobro.created_at)
+    stmt = stmt.order_by(Cobro.created_at, Cobro.id)
     rows = (await db.scalars(stmt)).all()
     return [
         CobroListOut(

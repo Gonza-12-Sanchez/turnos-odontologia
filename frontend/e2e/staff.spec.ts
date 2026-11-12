@@ -37,7 +37,10 @@ for (const width of [360, 1440]) {
           }],
         }))
           : path === '/catalogo-publico' ? { sillones: [], tratamientos: [] }
-            : path.startsWith('/cobros/resumen/') ? {
+            : path === '/cobros' ? [{
+              id: chairId, turno_id: turnId, monto_centavos: 3000, medio: 'efectivo', tipo: 'sena',
+              estado_mp: null, created_at: '2026-12-02T01:00:00Z',
+            }] : path.startsWith('/cobros/resumen/') ? {
               precio_referencia_centavos: 10000, sena_acumulada_centavos: 3000,
               total_cobrado_centavos: 3000, saldo_referencia_centavos: 7000, cerrado: false,
             } : {}
@@ -47,21 +50,24 @@ for (const width of [360, 1440]) {
     await page.goto('/agenda')
     await expect(page.getByRole('heading', { name: 'Sillón 1' })).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Sillón 2' })).toBeVisible()
-    await expect(page.getByText('22:00')).toHaveCount(2)
+    await expect(page.locator('time').getByText('22:00', { exact: true })).toHaveCount(2)
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
 
-    await page.getByRole('button', { name: 'Ver cobros del turno' }).first().focus()
+    await page.getByRole('button', { name: /^Ver turno/ }).first().click()
+    await page.getByRole('button', { name: 'Ver cobros del turno' }).focus()
     await page.keyboard.press('Enter')
     await expect(page.getByText('Saldo de referencia')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Movimientos' })).toBeVisible()
+    await expect(page.getByText(/Seña ·/)).toBeVisible()
     expect(new URL(page.url()).search).toBe('')
-    await page.getByRole('link', { name: 'Agenda' }).click()
+    await page.getByRole('link', { name: 'Volver a la agenda', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Sillón 1' })).toBeVisible()
 
     await context.setOffline(true)
     await expect(page.getByText('La agenda no se guarda', { exact: false })).toBeVisible()
-    await expect(page.getByText('Paciente ficticio 1')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: 'Paciente ficticio 1', exact: true })).toHaveCount(0)
     await context.setOffline(false)
-    await expect(page.getByText('Paciente ficticio 1')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Paciente ficticio 1', exact: true })).toBeVisible()
     expect(await page.evaluate(() => [localStorage.length, sessionStorage.length])).toEqual([0, 0])
 
     const logout = page.waitForResponse(response => new URL(response.url()).pathname === '/auth/logout')
@@ -72,7 +78,8 @@ for (const width of [360, 1440]) {
     await page.getByLabel('Email').fill('odontologo@example.test')
     await page.getByLabel('Contrasena').fill('Ficticia123')
     await page.getByRole('button', { name: 'Ingresar' }).click()
-    await expect(page.getByText('Paciente ficticio 1')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Paciente ficticio 1', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: /^Ver turno/ }).first().click()
     await expect(page.getByRole('button', { name: 'Ver cobros del turno' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Confirmar turno' })).toHaveCount(0)
     await page.goto('/cobros')

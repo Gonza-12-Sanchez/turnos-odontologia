@@ -86,7 +86,7 @@ export default function TreatmentEditor({ item, onSaved, onCancel, writes }: { i
       setError('Resultado no verificado. No repitas la escritura; consulta el recurso y solicita conciliación antes de volver a modificarlo.')
     } finally { if (mounted.current) setBusy(false) }
   }
-  return <form onSubmit={event => void save(event)} aria-label={item ? `Editar ${item.nombre}` : 'Agregar tratamiento'}>
+  return <form noValidate onSubmit={event => void save(event)} aria-label={item ? `Editar ${item.nombre}` : 'Agregar tratamiento'}>
     <h2>{item ? 'Editar tratamiento' : 'Agregar tratamiento'}</h2>
     <label>Nombre<input value={name} onChange={event => setName(event.target.value)} disabled={busy || locked} maxLength={120} aria-invalid={fields.nombre || undefined} aria-describedby={fields.nombre ? 'name-error' : undefined} /></label>
     {fields.nombre ? <small id="name-error">Revisa el nombre indicado.</small> : null}

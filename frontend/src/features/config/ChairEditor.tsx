@@ -52,13 +52,13 @@ export default function ChairEditor({ item, writes, onSaved, onCancel }: { item:
       if (mounted.current) setError('Resultado no verificado. No repitas la escritura; consulta el recurso y solicita conciliación.')
     } finally { if (mounted.current) setBusy(false) }
   }
-  if (confirmActivity) return <form aria-label={`${item.activo ? 'Desactivar' : 'Reactivar'} ${item.nombre}`} onSubmit={event => { event.preventDefault(); void update({ activo: !item.activo }) }}>
+  if (confirmActivity) return <form noValidate aria-label={`${item.activo ? 'Desactivar' : 'Reactivar'} ${item.nombre}`} onSubmit={event => { event.preventDefault(); void update({ activo: !item.activo }) }}>
     <h2>{item.activo ? 'Desactivar sillón' : 'Reactivar sillón'}</h2><p>{item.nombre}</p>
     {item.activo ? <Notice>Los históricos se conservan. Se dejará de ofrecer disponibilidad para este sillón. Los turnos existentes no se borran ni se cancelan automáticamente.</Notice> : <p>Volverá a estar activo y podrá participar en las consultas de disponibilidad. Se conservan sus turnos históricos.</p>}
     {error ? <Notice>{error}</Notice> : null}
     <div className="actions"><button className={item.activo ? 'danger' : undefined} disabled={busy || locked}>{busy ? 'Guardando…' : item.activo ? 'Desactivar sillón' : 'Reactivar sillón'}</button><button type="button" className="secondary" autoFocus disabled={busy} onClick={() => { setConfirmActivity(false); setError('') }}>{item.activo ? 'Conservar activo' : 'Volver'}</button></div>
   </form>
-  return <form aria-label={`Editar ${item.nombre}`} onSubmit={event => void save(event)}>
+  return <form noValidate aria-label={`Editar ${item.nombre}`} onSubmit={event => void save(event)}>
     <h2>Editar sillón</h2>
     <label>Nombre<input value={name} onChange={event => setName(event.target.value)} maxLength={80} disabled={busy || locked} aria-invalid={nameInvalid || undefined} aria-describedby={nameInvalid ? 'chair-name-error' : undefined} /></label>
     {nameInvalid ? <small id="chair-name-error">Revisa el nombre indicado.</small> : null}

@@ -64,7 +64,7 @@ export default function ChairCreate({ writes, onSaved, onCancel }: {
     }
   }
 
-  return <form aria-label="Agregar sillón" onSubmit={event => void save(event)}>
+  return <form noValidate aria-label="Agregar sillón" onSubmit={event => void save(event)}>
     <h2>Agregar sillón</h2>
     {error ? <Notice>{error}</Notice> : null}
     {clinic === undefined ? <p role="status">Consultando el consultorio…</p> : null}

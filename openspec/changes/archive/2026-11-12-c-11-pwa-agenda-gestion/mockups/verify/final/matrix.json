@@ -1,0 +1,1930 @@
+{
+  "date": "2026-11-12T21:01:30.734Z",
+  "mode": "React real, HTTP simulado; no acredita backend",
+  "scenes": 47,
+  "checks": [
+    {
+      "scene": "agenda-secretaria",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-secretaria",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-secretaria",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-odontologo",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-odontologo",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-odontologo",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-carga",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-carga",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-carga",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-vacia",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-vacia",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-vacia",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-error",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/agenda",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-error",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/agenda",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-error",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/agenda",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-offline",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-offline",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-offline",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-fecha-bloqueada",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-fecha satisfecho. Se captura agenda con día AR verificado."
+    },
+    {
+      "scene": "agenda-fecha-bloqueada",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-fecha satisfecho. Se captura agenda con día AR verificado."
+    },
+    {
+      "scene": "agenda-fecha-bloqueada",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-fecha satisfecho. Se captura agenda con día AR verificado."
+    },
+    {
+      "scene": "agenda-acciones-bloqueadas",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-acciones-bloqueadas",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-acciones-bloqueadas",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "acceso-denegado",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "acceso-denegado",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "acceso-denegado",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-historial",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-historial",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-historial",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-historial-no-disponible",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/turnos/55555555-5555-4555-8555-555555555555/historial",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-historial-no-disponible",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/turnos/55555555-5555-4555-8555-555555555555/historial",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-historial-no-disponible",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/turnos/55555555-5555-4555-8555-555555555555/historial",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-confirmar",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-confirmar",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-confirmar",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-cancelar",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-cancelar",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-cancelar",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-ventana",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-ventana",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-ventana",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-reprogramar",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-reprogramar",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-reprogramar",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-conflicto",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/turnos/55555555-5555-4555-8555-555555555555/reprogramar",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-conflicto",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/turnos/55555555-5555-4555-8555-555555555555/reprogramar",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-conflicto",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/turnos/55555555-5555-4555-8555-555555555555/reprogramar",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-asistencia",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-asistencia",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-asistencia",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-asistencia-odontologo",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-asistencia-odontologo",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-asistencia-odontologo",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-sobreturno",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-sobreturno",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-sobreturno",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-incierta",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-incierta",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-incierta",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamientos",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamientos",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamientos",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamiento-alta",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamiento-alta",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamiento-alta",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamiento-formulario",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamiento-formulario",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-tratamiento-formulario",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-validacion",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-validacion",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-validacion",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-sena-bloqueada",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-sena-config satisfecho. Se captura edición de política habilitada."
+    },
+    {
+      "scene": "config-sena-bloqueada",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-sena-config satisfecho. Se captura edición de política habilitada."
+    },
+    {
+      "scene": "config-sena-bloqueada",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-sena-config satisfecho. Se captura edición de política habilitada."
+    },
+    {
+      "scene": "config-sillones",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-sillones",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-sillones",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-sillon-formulario",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-sillon-formulario",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-sillon-formulario",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-contexto-faltante",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-contexto-faltante",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-contexto-faltante",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueos",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueos",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueos",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueo-formulario",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueo-formulario",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueo-formulario",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueo-invalido",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueo-invalido",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-bloqueo-invalido",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-advertencia",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-advertencia",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-advertencia",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-desactivar",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-desactivar",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-desactivar",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-reactivar",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-reactivar",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-reactivar",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-carga",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-carga",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-carga",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-vacia",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-vacia",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-vacia",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-error",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/api/config/tratamientos",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-error",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/api/config/tratamientos",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "config-error",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/api/config/tratamientos",
+          "status": 503
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-bloqueados",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-cobros satisfecho. Se captura bloqueo seguro ante resumen inválido, no un gate artificial."
+    },
+    {
+      "scene": "cobros-bloqueados",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-cobros satisfecho. Se captura bloqueo seguro ante resumen inválido, no un gate artificial."
+    },
+    {
+      "scene": "cobros-bloqueados",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "G-cobros satisfecho. Se captura bloqueo seguro ante resumen inválido, no un gate artificial."
+    },
+    {
+      "scene": "cobros-seleccion",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-seleccion",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-seleccion",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-resumen",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-resumen",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-resumen",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-diferencia",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/cobros",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-diferencia",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/cobros",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-diferencia",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/cobros",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-exito",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-exito",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-exito",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-replay",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-replay",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-replay",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-inciertos",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-inciertos",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-inciertos",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-sin-precio",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-sin-precio",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-sin-precio",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-reprogramar-confirmacion",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-reprogramar-confirmacion",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "agenda-reprogramar-confirmacion",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-exito-diferencia",
+      "width": 360,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/cobros",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-exito-diferencia",
+      "width": 390,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/cobros",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    },
+    {
+      "scene": "cobros-exito-diferencia",
+      "width": 1440,
+      "passed": true,
+      "focus": {
+        "tag": "A",
+        "outline": "solid",
+        "width": "3px",
+        "visible": true
+      },
+      "network": [
+        {
+          "path": "/cobros",
+          "status": 409
+        }
+      ],
+      "comparison": "Estado vigente; comparar con mockup revisión 1."
+    }
+  ]
+}
