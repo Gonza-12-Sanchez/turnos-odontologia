@@ -176,7 +176,7 @@ con escrituras: no ejecutarlo contra el localhost existente por rutina.
 - Mockups: [mockups/README.md](mockups/README.md), [catálogo HTML](mockups/catalogo.html).
 - Approval: approved (2026-11-10, by user; «continúa» tras presentación de mockups revisión1).
 - Preview: rendered (2026-11-10, `mockups/previews/<scene>-390.png` y `<scene>-1440.png`; 47 estados, 94 capturas).
-- Visual verify: differences (2026-11-10, parcial: tratamientos lista/alta/edición/422 y sillones lista/edición/422/baja/reactivación a390×844 y1440×900, teclado sillones360 en `mockups/verify/`; diferencias y pantallas no inspeccionadas en `verification.md`). No es aceptación de C11 ni de todos los estados.
+- Visual verify: differences (2026-11-10, parcial: tratamientos lista/alta/edición/422 y sillones lista/edición/422/baja/reactivación a390×844 y1440×900, teclado sillones360 en `mockups/verify/`; diferencias y pantallas no inspeccionadas en `verification.md`). Sesión 2026-11-11: componentes nuevos de agenda (`SobreturnoSignal`, `Conflict409`, `TurnoActions`) comparados a nivel de código contra mockups rev1 (agenda/detalle, cobros, config) usando tokens rev1 y clases de `index.css` sección C11; sin diferencias blocker a nivel de código. Pendiente: capturas browser 390×844/1440×900 y 360px/teclado/foco/consola/red para cada pantalla/estado de agenda/cobros, y registro de diferencias blocker/major/minor. No es aceptación de C11 ni de todos los estados.
 
 Brief: personal de consultorio chico; tareas repetidas de consulta y gestión.
 Conservar paleta slate/celeste, system-ui y controles 46px de la UI existente.

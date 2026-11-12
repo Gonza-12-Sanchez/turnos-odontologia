@@ -319,3 +319,59 @@ corregida expectativa de locale, no se cuenta como RED de producto.
 Regresión `npm.cmd test -- --reporter=dot` exit0:199/199; lint y tsc -b exit0.
 Es un avance parcial de lectura; no implementa formulario ni modifica el gate
 temporal. Task3.5 sigue pendiente y no se reclama verificación visual browser.
+
+## Sesión de apply — tareas procedentes (sin gate bloqueante)
+
+Fecha: 2026-11-11. Alcance: solo frontend (`frontend/src/features/agenda/`), sin modificar backend, migraciones, pagos ni auth. Se instaló `node_modules` desde `package-lock.json` (`npm.cmd ci --ignore-scripts`, 453 paquetes, lockfile sin modificar) para ejecutar suites.
+
+### Tarea 4.3 — Señales de sobreturnos y conflictos [x]
+Módulos: `features/agenda/SobreturnoSignal.tsx`, `features/agenda/Conflict409.tsx`.
+- SobreturnoSignal muestra "Sobreturno" + motivo como TEXTO (independiente del color); no renderiza cuando no es sobreturno.
+- Conflict409 explica el conflicto, lista alternativas como botones, no selecciona ninguna automáticamente, sin sobreturno automático ni bypass de EXCLUDE.
+- Pruebas (Agenda.test.tsx): 5 casos, RED (módulo inexistente) → GREEN → triangulación (con/sin sobreturno, con/sin alternativas, elección notifica `onSelect`).
+- Comando: `npm.cmd test -- src/features/agenda/Agenda.test.tsx --reporter=dot`, exit0, 5/5.
+
+### Tarea 4.6 — Asistencia y sobreturno explícito [x]
+Módulo: `features/agenda/TurnoActions.tsx`.
+- Marcar asistido/ausente: secretaria y odontólogo; motivo obligatorio; PATCH `/turnos/{id}/marcar-asistencia {estado, motivo, origen: 'mostrador'}`; 403/422/404 con mensaje autoritativo, sin éxito falso.
+- Marcar sobreturno existente: solo secretaria + motivo; odontólogo/paciente no ven la acción.
+- Pruebas: 9 casos (roles, motivo obligatorio, 403/422/404, éxito, sobreturno solo secretaria).
+- RED/GREEN confirmado; refactor (canal `escribir` compartido) mantiene 14/14.
+
+### Tarea 4.8 — Recuperación de escrituras inciertas [x]
+Integrado en TurnoActions: estado `incierto` bloquea repetición tras transporte perdido/respuesta ambigua; no reenvía POST/PATCH solo; se desbloquea únicamente con consulta explícita ("Consultar el turno y limpiar resultado incierto"). No se crean ausencias automáticas ni turnos solapados.
+- Pruebas: 2 casos (transporte caída bloquea repetición y requiere recuperación explícita; navegación no reenvía ni desbloquea).
+
+### Tarea 6.1 — PWA SW/privacidad (parcial; matriz de browser pendiente)
+- Verificado por pruebas: las acciones de agenda no escriben turnos, cobros ni tokens en `localStorage`/`sessionStorage` (longitud 0 tras uso).
+- Revisión estática de `vite.config.ts` (workbox): `runtimeCaching: []` (ninguna API cached) y `navigateFallbackAllowlist` excluye `/agenda`, `/config`, `/cobros` (solo rutas públicas/paciente), por lo que el SW no sirve fallback privado ni cachea APIs de gestión.
+- Pendiente: recorrer matriz de browser (offline/reconexión, dos cuentas, capturas 390×844/1440×900) con Playwright.
+
+### Tarea 6.3 — Comparar con mockups aprobados (parcial; visual verify real pendiente)
+- Los componentes nuevos usan los tokens de design-system rev1 (`success`, `notice`, `actions`, `muted`) y las clases de `index.css` sección C11, sin fuentes remotas ni activos externos.
+- Comparación de código contra mockups rev1 (agenda/detalle, cobros, config) realizada; no se detectaron diferencias blocker a nivel de código.
+- Pendiente: capturas browser 390×844/1440×900 y 360px/teclado/foco/consola/red para cada pantalla/estado, y registro de diferencias blocker/major/minor en design.md. Las diferencias previas de rev1 (config: posición "Agregar tratamiento", checkbox Sin precio/política de seña deshabilitada, shell nav) permanecen abiertas.
+
+### Regresión y estado de gates
+| Comando | Exit | Resultado |
+|---|---|---|
+| `npm.cmd test -- --reporter=dot` | 0 | 216/216 en 7 archivos (199 baseline C-10 + 17 nuevos agenda) |
+| `npm.cmd run lint` | 0 | Sin findings |
+| `npx.cmd --no-install tsc -b` | 0 | Typecheck correcto |
+| `openspec validate c-11-pwa-agenda-gestion --strict` | — | pendiente al cerrar la sesión |
+
+Gates backend: los seis siguen NO satisfechos (G-fecha, G-acciones, G-auditoria, G-contexto, G-cobros, G-sena-config); sin correctivo aprobado en esta sesión. No se marca aceptación de agenda diaria, reprogramar, acciones de ventana, historial, cobros ni alta integrada de sillón.
+
+### Tareas documentadas como BLOQUEADAS (no forzadas)
+- 3.4 Alta primer sillón → G-contexto no satisfecho: no hay fuente autorizada de `consultorio_id`; no se hardcodea UUID ni se elige un registro arbitrario.
+- 3.5 Bloqueos (aceptación temporal) → G-fecha no satisfecho: día AR/disponibilidad aún delimitan UTC; falta API/navegador real en medianoche AR.
+- 3.6 Política de seña → G-sena-config no satisfecho: falta aceptación de política combinada/auditoría C-09.
+- 4.1 DTO/vista GET /agenda → G-fecha no satisfecho (aceptación de agenda diaria).
+- 4.2 Satisfacer G-fecha → falta correctivo backend aprobado (medianoche AR, franjas 21:00–24:00, bloqueos/cache).
+- 4.4 Confirmar/cancelar → G-acciones no satisfecho (proyección/contrato de acciones y ventana para staff).
+- 4.5 Reprogramación → G-fecha + G-acciones no satisfechos.
+- 4.7 Historial → G-auditoria no satisfecho (falta persistencia/lectura actor-fecha-origen; no se fabrica historial).
+- 5.1 a 5.4 Escrituras de cobros → G-cobros no satisfecho (totales, clave requerida, replay, cierre concurrente, resolución de timeout).
+- 6.2 E2E integrado → todos los gates no satisfechos.
+
+No se archiva C-11 ni se declara completo mientras queden tareas o criterios pendientes. No hay commit/push/imágenes Docker/pagos externos en esta sesión.

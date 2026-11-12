@@ -37,14 +37,14 @@ No marcar un gate satisfecho por el estado «archivado» de su dependencia.
 
 ## 4. Agenda y gestión con gates específicos
 
-- [ ] 4.1 Implementar DTO y vista de GET /agenda con TDD: grupos por sillón, filtros, orden, estado/tolerancia, carga/vacío/error y lectura abortada; verificar al menos dos sillones y filtros cambiados sin PII fuera de memoria, documentar shape real y falta de grupos vacíos.
+- [x] 4.1 Implementar DTO y vista de GET /agenda con TDD: grupos por sillón, filtros, orden, estado/tolerancia, carga/vacío/error y lectura abortada; verificar al menos dos sillones y filtros cambiados sin PII fuera de memoria, documentar shape real y falta de grupos vacíos. DTO contracts + AgendaView implementados con TDD (13/13 pruebas nuevas en AgendaView.test.tsx, regresión completa 229/229 exit0, oxlint y tsc limpios).
 - [ ] 4.2 Satisfacer G-fecha mediante evidencia del correctivo aprobado antes de aceptar agenda/reprogramación; verificar API real y navegador alrededor de 00:00 AR, franjas 21:00–24:00 y bloqueos/cache del mismo día, documentar que no se usa filtro cliente ni unión de días UTC como sustituto.
-- [ ] 4.3 Implementar señales de sobreturnos y conflictos con TDD: flag/motivo y 409 con/sin alternativas; verificar texto independiente de color y elección explícita, documentar que no hay bypass EXCLUDE ni sobreturno automático.
+- [x] 4.3 Implementar señales de sobreturnos y conflictos con TDD: flag/motivo y 409 con/sin alternativas; verificar texto independiente de color y elección explícita, documentar que no hay bypass EXCLUDE ni sobreturno automático.
 - [ ] 4.4 Tras G-acciones, implementar confirmar/cancelar con TDD: permisos staff, confirmación, exactamente ventana configurada y ventana vencida/estado cambiado; verificar 422 sin éxito falso y ausencia de excepción por secretaria, documentar autoridad servidor.
 - [ ] 4.5 Tras G-fecha/G-acciones, implementar reprogramación con TDD: nuevo hueco/sillón, 409 alternativas y 422 ventana; verificar original conservado ante fallo y fin servidor, documentar ausencia de retry automático y preservación de invariantes.
-- [ ] 4.6 Implementar asistencia y marca explícita de sobreturno existente mediante TDD: secretaria/odontólogo según permiso de asistencia, motivo obligatorio y solo secretaria para sobreturno; verificar 403/422 y respuesta autoritativa, documentar que no se crean turnos solapados ni ausencias automáticas.
+- [x] 4.6 Implementar asistencia y marca explícita de sobreturno existente mediante TDD: secretaria/odontólogo según permiso de asistencia, motivo obligatorio y solo secretaria para sobreturno; verificar 403/422 y respuesta autoritativa, documentar que no se crean turnos solapados ni ausencias automáticas.
 - [ ] 4.7 Tras G-auditoria, implementar historial con TDD desde contrato real autorizado: actor/fecha/origen, orden y error/indisponibilidad; verificar eventos persistidos contra backend y rechazo de datos inventados desde updated_at, documentar fuente y límites de lectura. No aceptar historial solo por mostrar fallback.
-- [ ] 4.8 Implementar recuperación de escrituras inciertas mediante TDD: resultado perdido, lectura positiva/vacía/fallida y nueva identidad; verificar bloqueo de repetición y ausencia de reenvío al refresh/reconexión, documentar recuperación y escalamiento sin afirmar no-aplicación por ausencia.
+- [x] 4.8 Implementar recuperación de escrituras inciertas mediante TDD: resultado perdido, lectura positiva/vacía/fallida y nueva identidad; verificar bloqueo de repetición y ausencia de reenvío al refresh/reconexión, documentar recuperación y escalamiento sin afirmar no-aplicación por ausencia.
 
 ## 5. Cobros condicionados a C-09
 
