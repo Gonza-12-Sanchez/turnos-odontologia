@@ -51,6 +51,7 @@ class _MockMPAdapter(MPAdapter):
     async def crear_preferencia(
         self, access_token, external_reference, monto_centavos, notification_url, back_urls
     ):
+        self.back_urls = back_urls
         return {
             "id": f"pref_{external_reference}",
             "init_point": "https://mock.mp/checkout/pref_" + external_reference,
@@ -122,7 +123,7 @@ async def _post_sena(client, sillon_id, tratamiento_id, inicio, idem=None, token
 # --- RED: endpoint /pagos/sena no existe ---
 
 
-async def test_pagos_sena_crea_checkout(c09_sena_client, monkeypatch):
+async def test_pagos_sena_crea_checkout(c09_sena_client, monkeypatch, session):
     client, ctx = c09_sena_client
     from app.services.sena_service import SenaService
 
@@ -142,6 +143,23 @@ async def test_pagos_sena_crea_checkout(c09_sena_client, monkeypatch):
     assert data["monto_centavos"] == 3000
     assert data["moneda"] == "ARS"
     assert data["modo"] == "mock"
+
+    for url in mock_adapter.back_urls.values():
+        assert url.endswith(f"/pagos/retorno?intento_id={data['intento_id']}")
+
+    status_url = f"/pagos/sena/{data['intento_id']}"
+    owner = await client.get(status_url)
+    assert owner.status_code == 200, owner.text
+    assert owner.json()["estado"] == "pendiente"
+
+    other_user = Usuario(email="otro@example.com", rol="paciente", password_hash="ficticio")
+    session.add(other_user)
+    await session.flush()
+    session.add(Paciente(usuario_id=other_user.id, nombre="Otro paciente", telefono="1112345679"))
+    await session.commit()
+    other_token = create_access_token(other_user.id, ["paciente"], other_user.email)[0]
+    other = await client.get(status_url, headers={"Authorization": f"Bearer {other_token}"})
+    assert other.status_code == 404
 
 
 async def test_pagos_sena_replay_misma_clave(c09_sena_client, monkeypatch):

@@ -79,6 +79,24 @@ async def test_contexto_consultorio_y_primer_sillon(config_client, session):
     assert rechazado.status_code == 422
 
 
+async def test_contexto_consultorio_error_de_lectura(config_client, monkeypatch):
+    from sqlalchemy.exc import OperationalError
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    client, _ = config_client
+    original_execute = AsyncSession.execute
+
+    async def fail_context_read(self, statement, *args, **kwargs):
+        if "SELECT consultorio.id, consultorio.nombre" in str(statement):
+            raise OperationalError(str(statement), None, RuntimeError("Fallo ficticio de lectura"))
+        return await original_execute(self, statement, *args, **kwargs)
+
+    monkeypatch.setattr(AsyncSession, "execute", fail_context_read)
+    response = await client.get("/api/config/contexto-consultorio")
+    assert response.status_code == 500
+    assert "consultorio" not in response.text
+
+
 @pytest.mark.parametrize("role,expected", [(None, 401), ("paciente", 403), ("odontologo", 403)])
 async def test_contexto_consultorio_rbac(config_client, role, expected):
     client, context = config_client

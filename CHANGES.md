@@ -328,7 +328,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ## FASE 5 — Cierre MVP
 
 ### [C-12] `hardening-e2e`
-- **Estado**: `[ ]` pendiente
+- **Estado**: `[ ]` en curso. [Evidencia y pendientes](openspec/changes/c-12-hardening-e2e/verification.md).
 - **Scope**: Endurecimiento y cierre del MVP v1 (listo para piloto con 1 consultorio)
   - Tests E2E felices + errores de negocio + borde (Etapa 6): doble reserva concurrente, ventana 2 h, webhook duplicado, pago rechazado, proveedor WA caído, día completo multi-sillón
   - `docker-compose.yml` final (api + db + redis + frontend) con un solo comando de levante; CI verde; variables sensibles auditadas (ninguna en repo); seeds ficticios verificados (RN-GL-02)

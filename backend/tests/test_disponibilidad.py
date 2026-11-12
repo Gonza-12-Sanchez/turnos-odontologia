@@ -167,7 +167,7 @@ async def test_horarios_libres_filtro_sillon(turnos_client):
 
 
 @pytest.mark.asyncio
-async def test_reserva_feliz_calcula_fin(turnos_client):
+async def test_reserva_feliz_calcula_fin(turnos_client, session):
     client, context = turnos_client
     tratamiento = context["tratamiento"]
     sillon = context["sillones"][0]
@@ -184,6 +184,14 @@ async def test_reserva_feliz_calcula_fin(turnos_client):
     data = response.json()
     assert data["fin"] == "2026-12-01T14:30:00Z"
     assert data["estado"] == "reservado"
+    from sqlalchemy import select
+
+    from app.models import TurnoEvento
+
+    evento = await session.scalar(select(TurnoEvento))
+    assert evento is not None
+    assert (evento.accion, evento.origen) == ("reservar", "online")
+    assert evento.actor_id == context["actors"]["paciente"]["id"]
 
 
 @pytest.mark.asyncio

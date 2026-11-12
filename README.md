@@ -41,7 +41,7 @@ cd frontend
 npm ci
 cd ..
 
-# Variables de entorno (prerequisite antes del primer `up`)
+# Variables de entorno opcionales para configurar integraciones locales
 cp backend/.env.example backend/.env
 ```
 
@@ -56,10 +56,10 @@ cd frontend
 npm test -- --run
 cd ..
 
-# Levantar todo + health check en vivo (requiere Docker + backend/.env)
-docker compose up --build -d
+# Levantar todo con migraciones y checks de salud (Docker Compose 2.24+)
+docker compose up --build --wait
 curl http://localhost:8000/api/health   # {"status":"ok","checks":{"db":"up","redis":"up"}}
-docker compose down -v                   # apaga y limpia al terminar
+docker compose down                      # detiene y conserva los volúmenes
 ```
 
 ## Tests

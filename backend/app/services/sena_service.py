@@ -24,6 +24,7 @@ from app.models import (
     PagoMP,
     Tratamiento,
     Turno,
+    TurnoEvento,
 )
 from app.services.disponibilidad_service import DisponibilidadService
 from app.services.mp_adapter import MPAdapter, MPAdapterError
@@ -173,6 +174,7 @@ class SenaService:
         await self.session.flush()
         await self.session.refresh(intento)
 
+        return_url = f"{settings.frontend_url.rstrip('/')}/pagos/retorno?intento_id={intento.id}"
         try:
             pref = await self.mp_adapter.crear_preferencia(
                 access_token=settings.mp_access_token,
@@ -181,9 +183,9 @@ class SenaService:
                 notification_url=settings.mp_notification_url
                 or "https://turnos.local/webhooks/mercadopago",
                 back_urls={
-                    "success": f"{settings.frontend_url}/pagos/retorno",
-                    "failure": f"{settings.frontend_url}/pagos/retorno",
-                    "pending": f"{settings.frontend_url}/pagos/retorno",
+                    "success": return_url,
+                    "failure": return_url,
+                    "pending": return_url,
                 },
             )
         except MPAdapterError as exc:
@@ -322,6 +324,11 @@ class SenaService:
         self.session.add(turno)
         await self.session.flush()
         await self.session.refresh(turno)
+        self.session.add(
+            TurnoEvento(
+                turno_id=turno.id, accion="reservar", origen="online", motivo="Seña aprobada"
+            )
+        )
 
         # Cobro sena aprobado (referencia_mp = payment_id)
         cobro = Cobro(

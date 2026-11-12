@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type APIRequestContext } from '@playwright/test';
 
 /**
  * E2E contra el backend REAL en http://localhost:8000 (Docker).
@@ -25,10 +25,10 @@ function pacienteEmail() {
 function pacienteTelefono() {
   // Telefono AR valido (+54 9 <area> <linea>) unico por registro para evitar
   // el unicidad de telefono en el backend.
-  return `+54911${String(Date.now() % 100000000).padStart(7, '0')}`;
+  return `+54911${String(Date.now() % 100000000).padStart(8, '0')}`;
 }
 
-async function registrarPaciente(request: Parameters<Parameters<typeof test>[0]>[0], email: string) {
+async function registrarPaciente(request: APIRequestContext, email: string) {
   return request.post(`${API}/auth/registro`, {
     data: {
       email,
@@ -92,7 +92,7 @@ test('login y acceso autenticado a Mis reservas (backend real)', async ({ reques
   expect(Array.isArray(await reservas.json())).toBe(true);
 });
 
-test.skip('reserva sin sena contra backend real', async ({ _request }) => {
+test.skip('reserva sin sena contra backend real', async () => {
   // BLOQUEADO POR ENTORNO: la DB de desarrollo no tiene tratamientos ni sillones
   // siembrados (GET /catalogo-publico devuelve listas vacias). POST /turnos requiere
   // un tratamiento valido, un sillón y un paciente autenticado; sin datos de siembra
@@ -100,9 +100,30 @@ test.skip('reserva sin sena contra backend real', async ({ _request }) => {
   expect(true).toBe(true);
 });
 
-test.skip('conflicto 409 y cancelar 422 contra backend real', async ({ _request }) => {
+test.skip('conflicto 409 y cancelar 422 contra backend real', async () => {
   // BLOQUEADO POR ENTORNO: no existen reservas previas en la DB de desarrollo, por lo
   // que no se puede provocar un conflicto 409 ni una cancelacion fuera de ventana 422.
   // Requieren siembra de datos o un entorno con turnos existentes.
   expect(true).toBe(true);
+});
+
+
+test('paciente inicia sesión, recarga y cierra sesión en la PWA real', async ({ page, request }) => {
+  const email = pacienteEmail();
+  expect((await registrarPaciente(request, email)).status()).toBe(201);
+
+  await page.goto('/mis-reservas');
+  await expect(page.getByRole('heading', { name: 'Ingresar' })).toBeVisible();
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Contrasena').fill('Ficticia123');
+  await page.getByRole('button', { name: 'Ingresar' }).click();
+  await expect(page.getByRole('heading', { name: 'Mis reservas' })).toBeVisible();
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Mis reservas' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Cerrar sesion' })).toBeVisible();
+  await page.getByRole('button', { name: 'Cerrar sesion' }).click();
+  await expect(page.getByRole('heading', { name: 'Ingresar' })).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Ingresar' })).toBeVisible();
 });

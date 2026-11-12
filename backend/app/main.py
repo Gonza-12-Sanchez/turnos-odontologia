@@ -1,6 +1,8 @@
 """Turnos Odontología API — application factory (routers por change)."""
 
+import json
 from contextlib import asynccontextmanager
+from time import perf_counter
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -63,9 +65,26 @@ async def lifespan(app: FastAPI):
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        response = await call_next(request)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        return response
+        start = perf_counter()
+        status_code = 500
+        try:
+            response = await call_next(request)
+            status_code = response.status_code
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            return response
+        finally:
+            route = getattr(request.scope.get("route"), "path", None)
+            logger.info(
+                json.dumps(
+                    {
+                        "event": "http_request",
+                        "method": request.method,
+                        "route": route,
+                        "status": status_code,
+                        "duration_ms": round((perf_counter() - start) * 1000, 2),
+                    }
+                )
+            )
 
 
 def create_app() -> FastAPI:

@@ -94,6 +94,30 @@ async def agenda_client(engine, session, real_redis, monkeypatch):
         )
 
 
+async def test_higiene_agenda_agrega_estados_sin_datos_personales(agenda_client):
+    client, ctx = agenda_client
+    ruta = "/agenda/higiene?fecha=2026-12-01"
+    assert (await client.get(ruta)).status_code == 401
+    for role, status in (("paciente", 403), ("secretaria", 200), ("odontologo", 200)):
+        client.headers["Authorization"] = f"Bearer {ctx['actors'][role]['token']}"
+        response = await client.get(ruta)
+        assert response.status_code == status
+        if status == 200:
+            assert response.headers["cache-control"] == "no-store"
+            assert response.json() == {
+                "fecha": "2026-12-01",
+                "por_estado": {"reservado": 1, "confirmado": 1},
+                "total": 2,
+                "sin_confirmar": 1,
+                "porcentaje_confirmados": 50.0,
+                "alerta": True,
+            }
+    vacio = (await client.get("/agenda/higiene?fecha=2026-12-02")).json()
+    assert vacio["total"] == 0
+    assert vacio["porcentaje_confirmados"] is None
+    assert vacio["alerta"] is False
+
+
 @pytest.mark.asyncio
 async def test_agenda_requires_fecha(agenda_client):
     client, ctx = agenda_client

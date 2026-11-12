@@ -329,3 +329,7 @@ OpenSpec validation were not rerun in this pass; earlier evidence remains
 historical. C09 stays2/26 and C10 stays16/25 with all integration gates open.
 Commit remains pending during staging preparation; no push, PR, archive, final
 image build, production action or C11/C12 work.
+
+## Regresión local del retorno de pago
+
+Se corrigieron las tres URL de retorno para incluir `intento_id` y se ajustó la autorización de la consulta del intento para verificar el ID de paciente asociado al usuario autenticado. La prueba de integración reproduce el checkout simulado, confirma el estado pendiente para el titular y recibe 404 para otro paciente. Tarea 8.2 sigue pendiente de ejecutar el sandbox con credenciales autorizadas.

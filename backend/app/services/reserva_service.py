@@ -19,6 +19,7 @@ from app.models import (
     Sillon,
     Tratamiento,
     Turno,
+    TurnoEvento,
 )
 from app.schemas.turnos import HorarioLibreOut, TurnoCreate
 from app.services.disponibilidad_service import DisponibilidadService
@@ -195,6 +196,14 @@ class ReservaService:
         try:
             await self.session.flush()
             await self.session.refresh(turno)
+            self.session.add(
+                TurnoEvento(
+                    turno_id=turno.id,
+                    actor_id=paciente.usuario_id,
+                    accion="reservar",
+                    origen="online",
+                )
+            )
             await uow.commit()
         except IntegrityError:
             await uow.rollback()

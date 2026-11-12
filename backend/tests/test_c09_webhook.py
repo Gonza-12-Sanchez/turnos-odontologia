@@ -22,6 +22,7 @@ from app.models import (
     IntentoSena,
     PagoMP,
     Turno,
+    TurnoEvento,
 )
 from app.services.sena_service import SenaService
 from app.shared.security import create_access_token
@@ -282,6 +283,9 @@ async def test_webhook_pago_aprobado_crea_turno_y_cobro(c09_webhook_client, sess
     turno = (await session.scalars(select(Turno))).first()
     assert turno is not None
     assert str(turno.paciente_id) == ctx["paciente_id"]
+    evento = await session.scalar(select(TurnoEvento).where(TurnoEvento.turno_id == turno.id))
+    assert evento is not None
+    assert (evento.accion, evento.origen, evento.actor_id) == ("reservar", "online", None)
     cobro = (await session.scalars(select(Cobro))).first()
     assert cobro is not None
     assert cobro.monto_centavos == 3000

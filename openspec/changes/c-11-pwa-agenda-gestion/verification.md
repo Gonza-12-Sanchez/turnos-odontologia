@@ -389,3 +389,28 @@ No se archiva C-11 ni se declara completo mientras queden tareas o criterios pen
 - Backend completo: 324 pruebas aprobadas con PostgreSQL 18 descartable y Redis simulado por TCP. Alembic aplicó la migración 005 en ese clúster, que se detuvo al finalizar. Ruff y comprobación de formato aprobados.
 - Frontend: 205 pruebas aprobadas, lint sin hallazgos y build de la PWA correcto.
 - Chrome, 360/390/1440 px con API interceptada: recorrido de agenda a cobros y configuración, activación por teclado, pérdida y recuperación de conexión, cambio de secretaria a odontólogo, ausencia de overflow horizontal, storage vacío y sin excepciones JavaScript. Queda pendiente la comparación visual de todos los estados y el E2E con servicios reales.
+
+## Verificación local con Docker Compose (2026-11-12)
+
+Entorno `odonto-c12` con PostgreSQL y Redis reales y migración 005. Se usaron tres cuentas ficticias y turnos de Control en dos sillones. Pruebas exploratorias en Chrome sobre la PWA publicada por Compose, sin interceptar la API, y comprobaciones HTTP contra esa misma instancia.
+
+| Superficie | Resultado observado |
+| --- | --- |
+| Agenda | Chrome mostró turnos de los dos sillones a las 22:00 y 22:30 de Argentina. Se comprobó ausencia de desborde horizontal a 390 y 1440 px. |
+| Gestión e historial | Secretaría confirmó un turno desde Chrome. Odontología marcó asistencia con motivo desde Chrome. La API devolvió los eventos persistidos con acción, actor, origen mostrador y fecha. |
+| Permisos y privacidad | La API rechazó agenda a paciente y cobros a odontología con 403. La PWA ocultó la agenda tras desconectar la red, recuperó los datos al reconectar y denegó la agenda al cambiar a la cuenta de paciente. localStorage y sessionStorage estaban vacíos durante la comprobación. |
+| Reprogramación y cancelación | Por HTTP, intentar mover un turno a un hueco ocupado devolvió 409. Moverlo a un hueco libre en el otro sillón y luego cancelarlo devolvió 200. |
+| Cobros | La PWA registró una seña ficticia de ARS 100. Por HTTP, el cierre por ARS 2.400 dejó el saldo en cero. Repetir el cierre con la misma clave devolvió 200 y el mismo recibo, con total de ARS 2.500. |
+| Configuración | Chrome guardó una política de seña opcional y un bloqueo general a las 23:00 de Argentina. El servidor devolvió la fecha con el instante UTC esperado y sillón nulo. El contexto de consultorio respondió 200 para secretaría y 403 para odontología. |
+
+Sigue pendiente la comparación de todas las pantallas y estados con los mockups aprobados, y la cobertura integral del checklist de navegador, incluido CacheStorage, alta del primer sillón en sede vacía y casos de error de configuración. Los flujos que se probaron por HTTP cuentan como evidencia del contrato del servidor. C-11 queda abierto.
+
+Regresión frontend local: `npm.cmd test`, 205/205. OpenSpec validó C-11 y C-12 en modo estricto. `git diff --check` sin errores. La nueva ejecución de la suite de backend se interrumpió antes de iniciar porque el entorno virtual temporal anterior ya no estaba disponible.
+
+## Comprobaciones adicionales de aceptación
+
+- Chrome sobre la PWA de Compose, con el service worker activo. `CacheStorage` tuvo diez recursos públicos, incluido el manifiesto, antes y después de cerrar sesión. No se encontraron rutas de API privada, datos del paciente de prueba ni tokens. `localStorage` y `sessionStorage` vacíos. La agenda ocultó datos al quedar offline, los recuperó al reconectar y pidió autenticación después de cerrar sesión.
+- Alta del primer sillón en una base independiente recién migrada, con una sede activa y cero sillones. Chrome usó la PWA de Compose y redirigió las solicitudes al backend local aislado, sin respuestas simuladas. Contexto 200 con el nombre de la sede, alta 201 con el ID del contexto y primer sillón visible en la lista.
+- Comparación visual exploratoria a 390×844 y 1440×900. Se revisaron agenda de secretaría, resumen de cobros, alta de sillón y edición de tratamiento. No se detectó desborde horizontal. Diferencias: la agenda presenta acciones dentro de la lista y no tiene el panel de detalle del mockup. Cobros usa un formulario en columna y no muestra el bloque de movimientos del diseño. Los formularios de configuración conservan panel lateral en escritorio, con botones y encabezados en otra posición. La comparación exhaustiva de estados de 6.3 sigue abierta.
+
+La regresión de backend posterior pasó con 325 pruebas en base separada con PostgreSQL y Redis reales. Después pasaron los cinco casos de contexto, incluido el nuevo error de lectura. También pasaron el lint, TypeScript y el build de frontend.

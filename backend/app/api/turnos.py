@@ -8,7 +8,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
 from fastapi.responses import JSONResponse
-from sqlalchemy import select
+from pydantic import BaseModel
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import deps
@@ -36,6 +37,7 @@ from app.services.reserva_service import (
     ReservaConflicto,
     ReservaService,
 )
+from app.shared.agenda_time import limites_dia_argentino
 
 router = APIRouter(tags=["turnos"])
 
@@ -188,6 +190,43 @@ async def patch_turno(
             actor=user,
         )
         return TurnoOut.model_validate(turno)
+
+
+class HigieneAgendaOut(BaseModel):
+    fecha: date
+    por_estado: dict[str, int]
+    total: int
+    sin_confirmar: int
+    porcentaje_confirmados: float | None
+    alerta: bool
+
+
+@router.get("/agenda/higiene", response_model=HigieneAgendaOut)
+async def higiene_agenda(
+    fecha: Annotated[date, Query()],
+    response: Response,
+    user: Annotated[Usuario, Depends(require_role("odontologo", "secretaria"))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    inicio, fin = limites_dia_argentino(fecha)
+    rows = await db.execute(
+        select(Turno.estado, func.count())
+        .where(Turno.is_active.is_(True), Turno.inicio >= inicio, Turno.inicio < fin)
+        .group_by(Turno.estado)
+    )
+    estados = {estado: cantidad for estado, cantidad in rows}
+    reservados = estados.get("reservado", 0)
+    confirmados = estados.get("confirmado", 0)
+    base = reservados + confirmados
+    response.headers["Cache-Control"] = "no-store"
+    return HigieneAgendaOut(
+        fecha=fecha,
+        por_estado=estados,
+        total=sum(estados.values()),
+        sin_confirmar=reservados,
+        porcentaje_confirmados=round(100 * confirmados / base, 2) if base else None,
+        alerta=reservados > 0,
+    )
 
 
 @router.get("/agenda", response_model=list[AgendaSillonOut])

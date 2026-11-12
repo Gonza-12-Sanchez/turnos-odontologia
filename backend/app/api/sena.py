@@ -66,6 +66,7 @@ async def obtener_sena(
     intento = await db.get(IntentoSena, intento_id)
     if intento is None or not intento.is_active:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Intento inexistente")
-    if intento.paciente_id != user.id:
+    paciente = await PacienteRepository(db).get_by_usuario_id(user.id)
+    if paciente is None or intento.paciente_id != paciente.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Intento inexistente")
     return intento

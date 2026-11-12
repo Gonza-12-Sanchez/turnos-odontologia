@@ -27,3 +27,9 @@ satisfecho. Se necesita disponer de un entorno aislado para continuar.
 - El endpoint devuelve el único consultorio activo con id y nombre, o null si el contexto es ambiguo. La respuesta tiene Cache-Control: no-store. La PWA obtiene el contexto de esa ruta antes de enviar el alta.
 - Se ejecutaron cuatro pruebas HTTP de contexto, permisos y alta contra un clúster descartable de PostgreSQL 18. Los casos cubren sede única, cero y dos activas, sede inactiva, alta del primer sillón con auditoría y rechazo tras desactivar el consultorio. Se simuló Redis por TCP en un puerto efímero.
 - La UI tiene pruebas DOM/HTTP de sede válida y contexto ausente. Ambos changes pasaron la validación estricta de OpenSpec. Sigue pendiente la aceptación con Redis real y navegador integrado.
+
+## Verificación de la primera silla con Compose
+
+Se partió de una base PostgreSQL independiente migrada a 005, una sede activa ficticia y cero sillones. Chrome abrió la PWA de Compose apuntando a un backend local con esa base y Redis real. El contexto respondió 200 y la creación respondió 201 con el ID de la sede devuelto por el contexto. El sillón apareció en la lista.
+
+Cinco casos de contexto pasaron con PostgreSQL y Redis reales. El error de lectura se inyectó en la consulta de contexto y devolvió HTTP 500 sin datos de sede. Ruff y OpenSpec estricto aprobados.

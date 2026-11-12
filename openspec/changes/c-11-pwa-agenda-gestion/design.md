@@ -220,3 +220,7 @@ futuras de historial/cobros están marcadas ficticias y no satisfacen gates back
    Mantener C11 abierto hasta satisfacer todo el alcance y obtener revisión humana.
 5. Rollback de UI restaura navegación sin borrar registros ni revertir pagos;
    no downgrade DB ni cambio de reglas backend. No build de imagen final ni deploy.
+
+## Verificación visual parcial de revisión 1
+
+Se compararon agenda de secretaría, resumen de cobros, formulario de sillón y formulario de tratamiento a 390×844 y 1440×900. Se observó una diferencia mayor en agenda (acciones en la lista en lugar del panel de detalle) y en cobros (formulario en columna y bloque de movimientos ausente). En configuración, los formularios conservan el panel lateral en escritorio, con distinta ubicación de las acciones. Los demás estados del catálogo y la verificación visual de 6.3 siguen pendientes.
