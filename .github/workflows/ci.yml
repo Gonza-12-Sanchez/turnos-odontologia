@@ -55,7 +55,7 @@ jobs:
         working-directory: ./backend
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -77,7 +77,7 @@ jobs:
         working-directory: ./frontend
 
   compose-smoke:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       POSTGRES_HOST_PORT: 55432
