@@ -49,3 +49,5 @@ no elimina datos. Sin migraciones.
 
 Decision: no (no UI). Este correctivo solo define backend; C-11 posee mockups
 aprobados para el alta y mantiene su propia verificación visual.
+
+El delta de este correctivo amplía la especificación canónica de [configuración de agenda](../../../specs/agenda/catalogo-config/spec.md).

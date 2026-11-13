@@ -309,7 +309,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-11] `pwa-agenda-gestion`
-- **Estado**: `[x]` archivado 2026-11-13 (verificado en Docker Compose: backend 337/338 pruebas, frontend 208/208, 4/4 E2E backend real).
+- **Estado**: `[x]` archivado 2026-11-12. Revisión del 2026-11-13: backend 338/338, frontend 208/208 y 5 E2E contra Compose. Correctivo de sede archivado.
 - **Evidencia**: `openspec/changes/archive/2026-11-12-c-11-pwa-agenda-gestion/verification.md` (verificación completa: 47 estados × 3 anchos, 94 capturas, visual verify sin blocker).
 - **Scope**: PWA consultorio: agenda del día, gestión de turnos, cobros, config (US-004/005/007 UI)
   - Pages: `/agenda` (vista día por sillón con paciente/tratamiento/estado/tolerancia, aviso de sobreturnos y solapamientos intentados), `/cobros` (registrar cobro + conciliar seña, override auditado, aviso "sin factura electrónica en v1"), `/config` (sillones, tratamientos, bloqueos — solo secretaria)
@@ -329,7 +329,7 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ## FASE 5 — Cierre MVP
 
 ### [C-12] `hardening-e2e`
-- **Estado**: `[x]` archivado 2026-11-13 (verificado en Docker Compose: backend 337/338 pruebas — 1 fallo de red Windows no de lógica, frontend 208/208, CI verde, migración 005 head).
+- **Estado**: `[x]` archivado 2026-11-12. Revisión del 2026-11-13: backend 338/338, frontend 208/208, migración 005 en head y CI verde en 3cc0c25.
 - **Evidencia**: `openspec/changes/archive/2026-11-12-c-12-hardening-e2e/verification.md` (verificación completa: 335 pruebas backend, Playwright 15 pruebas, piloto académico ejecutado, revisión de secretos sin hallazgos).
 - **Scope**: Endurecimiento y cierre del MVP v1 (listo para piloto con 1 consultorio)
   - Tests E2E felices + errores de negocio + borde (Etapa 6): doble reserva concurrente, ventana 2 h, webhook duplicado, pago rechazado, proveedor WA caído, día completo multi-sillón

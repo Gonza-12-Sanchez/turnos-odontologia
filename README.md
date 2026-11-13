@@ -65,7 +65,7 @@ docker compose down                      # detiene y conserva los volúmenes
 ## Tests
 
 Backend actual (C-03 correctivo + C-04): **213 pruebas pasan** con PostgreSQL y Redis reales.
-Configuración de entorno y contratos en [docs/auth.md](docs/auth.md) y [docs/configuracion.md](docs/configuracion.md).
+Variables de entorno en [backend/.env.example](backend/.env.example). Contratos en las especificaciones de [autenticación](openspec/specs/identity/auth/spec.md) y [configuración de agenda](openspec/specs/agenda/catalogo-config/spec.md).
 Aplicar `alembic upgrade head` desde `backend/` con `DATABASE_URL` apuntando a la base autorizada antes de correr la suite.
 Los tests permiten `TEST_DATABASE_URL` y `TEST_REDIS_URL`; usan exclusivamente una base llamada `turnos_test`.
 

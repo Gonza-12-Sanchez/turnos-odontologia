@@ -37,3 +37,11 @@
 - La regresión local completa de backend obtuvo 338 pruebas aprobadas con PostgreSQL y Redis reales en el entorno de prueba separado. Ruff y su verificación de formato también pasaron.
 - Se agregaron seis casos HTTP que comprueban la persistencia de la acción, el actor, la fecha con zona y el origen de confirmación, cancelación, reprogramación, ausencia, sobreturno y cambio de origen. La suite también comprueba creación directa, creación tras pago simulado y asistencia. Los intentos fuera de ventana conservan el turno y el historial.
 - La trazabilidad del piloto académico quedó verificada. El sandbox de C-10 requiere configuración de prueba autorizada y permanece como pendiente separado de C-10. Con el alcance académico confirmado, se cierra la tarea 2.3.
+
+## Revisión del repositorio del equipo — 2026-11-13
+
+- Base revisada: 3cc0c25. Compose levantó los cuatro servicios con volúmenes de prueba separados y migración 005 en head.
+- Backend: 338 pruebas aprobadas con PostgreSQL y Redis reales. Ruff sin hallazgos. Frontend: 208 pruebas aprobadas, TypeScript y build correctos.
+- Playwright: 15 casos con API interceptada contra el build local y 5 casos contra Compose. Los dos escenarios marcados skip se verificaron aparte con datos ficticios: reserva 201 desde Chrome, reserva duplicada 409 y cancelación dentro de dos horas 422 por HTTP real.
+- Se ajustó la prueba de reconexión para esperar la consulta de disponibilidad. GitHub Actions #43434644029 pasó sobre 3cc0c25, antes de los ajustes locales de esta revisión.
+- Se archivó el correctivo de sede y se validaron las 14 especificaciones canónicas con OpenSpec estricto.

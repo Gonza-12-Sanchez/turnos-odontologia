@@ -13,4 +13,4 @@
 
 ## Workflow follow-up
 
-- Mantener C-11 abierto y sus demás gates independientes; no archivar sin revisión.
+- Archivado el 2026-11-13 tras revisar el contrato y sus cinco tareas. El delta quedó consolidado en la especificación de configuración de agenda.

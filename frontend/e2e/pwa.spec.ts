@@ -138,7 +138,7 @@ for (const patient of [false, true]) test(`offline no encola escrituras ${patien
   const oldReads = reads
   await context.setOffline(false)
   await expect(page.getByRole('button', { name: /09:00/ })).toBeVisible()
-  expect(reads).toBeGreaterThan(oldReads)
+  await expect.poll(() => reads).toBeGreaterThan(oldReads)
   expect(writes).toBe(0)
 })
 
