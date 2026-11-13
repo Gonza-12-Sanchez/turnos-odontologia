@@ -1,5 +1,7 @@
 # Spec Delta — platform/health
 
+> Spec canónico: `openspec/specs/platform/health/spec.md`. Este archivo es un delta del change archivado C-01; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Expone el estado agregado del sistema (API + PostgreSQL + Redis) para que el deploy, C-12 y cualquier operador verifiquen de forma observable que la plataforma está levantada y qué dependencia falla.

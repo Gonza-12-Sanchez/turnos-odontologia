@@ -1,5 +1,7 @@
 # Spec Delta — agenda/catalogo-config
 
+> Spec canónico: `openspec/specs/agenda/catalogo-config/spec.md`. Este archivo es un delta del change archivado C-04; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Permitir a la secretaria administrar sillones, tratamientos y bloqueos del consultorio con validación, historial preservado y trazabilidad de cada cambio, como base del cálculo futuro de disponibilidad.

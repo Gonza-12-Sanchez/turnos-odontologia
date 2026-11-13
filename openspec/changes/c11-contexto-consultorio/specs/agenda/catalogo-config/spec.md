@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/agenda/catalogo-config/spec.md`. Este archivo es un delta del change suelto `c11-contexto-consultorio`; la fuente de verdad vigente está en la ruta indicada.
+
 ## ADDED Requirements
 
 ### Requirement: Contexto administrativo de consultorio único

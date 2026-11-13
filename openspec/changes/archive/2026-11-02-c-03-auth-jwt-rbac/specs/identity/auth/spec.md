@@ -1,5 +1,7 @@
 # Spec Delta — identity/auth
 
+> Spec canónico: `openspec/specs/identity/auth/spec.md`. Este archivo es un delta del change archivado C-03; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Proveer gestión de identidad y acceso para el sistema de turnos odontológicos: registro de pacientes, autenticación basada en JWT con refresh tokens rotativos, rate limiting, control de acceso basado en roles y una cookie HttpOnly de refresh, para que cada endpoint protegido pueda autenticar usuarios y aplicar la matriz RBAC.

@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/consultorio/gestion-pwa/spec.md`. Este archivo es un delta del change archivado C-11; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Permitir al equipo del consultorio consultar y gestionar su agenda, configuración

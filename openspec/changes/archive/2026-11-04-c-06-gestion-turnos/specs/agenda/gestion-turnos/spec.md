@@ -1,5 +1,7 @@
 # Spec Delta — agenda/gestion-turnos
 
+> Spec canónico: `openspec/specs/agenda/gestion-turnos/spec.md`. Este archivo es un delta del change archivado C-06; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Manage the lifecycle of a turno: confirm, cancel, reschedule and mark attendance, enforcing the 2-hour window and anti-overlap at the engine, supporting sobreturnos by secretaria and full audit trail.

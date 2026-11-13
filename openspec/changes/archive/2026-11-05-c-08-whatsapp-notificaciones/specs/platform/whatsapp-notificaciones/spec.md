@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/platform/whatsapp-notificaciones/spec.md`. Este archivo es un delta del change archivado C-08; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Automate WhatsApp reminders and patient confirmations/cancellations via a Meta template provider, a Redis-backed worker with retries, and a signed idempotent webhook, reducing no-shows without manual work.

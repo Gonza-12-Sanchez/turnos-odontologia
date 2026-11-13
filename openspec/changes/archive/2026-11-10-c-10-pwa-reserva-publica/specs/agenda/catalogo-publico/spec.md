@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/agenda/catalogo-publico/spec.md`. Este archivo es un delta del change archivado C-10; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Ofrecer al paciente los sillones y tratamientos activos necesarios para elegir horarios, sin exponer configuracion administrativa ni datos de pacientes.

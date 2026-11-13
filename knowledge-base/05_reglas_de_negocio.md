@@ -28,6 +28,19 @@ Cada regla tiene código único `RN-{DOMINIO}-{NN}` para trazabilidad (usado en 
 - **RN-CO-02**: El cobro en local (efectivo/transferencia/MP) se registra contra el turno y la secretaria puede asignar turnos cobrados.
 - **RN-CO-03**: Montos siempre en centavos ARS; sin facturación electrónica en v1 (ARCA = fase 2).
 
+## Dominio: Notificaciones (RN-NT)
+
+- **RN-NT-01**: Todo turno reservado genera recordatorio automático por WhatsApp (plantilla Meta) con botón confirmar/cancelar.
+- **RN-NT-02**: La respuesta del paciente (confirmo/cancelo) actualiza el estado del turno; cancelar por WhatsApp respeta RN-TU-02.
+- **RN-NT-03**: Cada envío y respuesta queda registrado (RecordatorioWA) con estado de entrega.
+
+## Dominio: WhatsApp — costo y proveedor (IN-10-02 / IN-10-04)
+
+- Proveedor recomendado para etapa 6: Meta Cloud API directa o un BSP (360dialog/Twilio) según disponibilidad de cuenta WABA (IN-10-02).
+- Costo estimado: USD 0.005–0.015 por mensaje de plantilla (varía por país/categoría; Argentina ~ USD 0.008).
+- IN-10-04 (quién paga los mensajes) queda abierto para el piloto.
+- Reintentos: máximo 5 con backoff exponencial; luego se marca fallido y no se reencola. Monitorear vía conteo de RecordatorioWA.
+
 ## Dominio: Excepciones globales
 
 - **RN-GL-01**: Ninguna regla de UI sustituye a su constraint de motor (RN-TU-01/02 se verifican en backend aunque el cliente no las pida).

@@ -1,5 +1,7 @@
 # Spec Delta — core/models
 
+> Spec canónico: `openspec/specs/core/models/spec.md`. Este archivo es un delta del change archivado C-02; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Persistencia e invariantes del modelo de datos núcleo del sistema de turnos odontológicos: nueve entidades de dominio, AuditMixin compartido, constraint de exclusión a nivel de motor contra doble reserva (RN-TU-01), reglas de almacenamiento TIMESTAMPTZ y centavos INTEGER, migración Alembic 001 con btree_gist e índices, y seed ficticio (RN-GL-02).

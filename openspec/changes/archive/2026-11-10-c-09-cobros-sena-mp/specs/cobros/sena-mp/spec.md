@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/cobros/sena-mp/spec.md`. Este archivo es un delta del change archivado C-09; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Gestionar senas Mercado Pago desde una politica servidor hasta la verificacion del pago y su aplicacion unica a una reserva, sin confundir dinero recibido con cupo confirmado.

@@ -1,5 +1,7 @@
 # Spec Delta — agenda/disponibilidad-reserva
 
+> Spec canónico: `openspec/specs/agenda/disponibilidad-reserva/spec.md`. Este archivo es un delta del change archivado C-05; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Provide public availability calculation by treatment duration and authenticated patient reservation with engine-level anti-overlap, concurrency handling, and contracts for deposit and WhatsApp reminder.

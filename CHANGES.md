@@ -309,7 +309,8 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ---
 
 ### [C-11] `pwa-agenda-gestion`
-- **Estado**: `[ ]` en curso, con el [correctivo de contexto del consultorio](openspec/changes/c11-contexto-consultorio/tasks.md) abierto.
+- **Estado**: `[x]` archivado 2026-11-13 (verificado en Docker Compose: backend 337/338 pruebas, frontend 208/208, 4/4 E2E backend real).
+- **Evidencia**: `openspec/changes/archive/2026-11-12-c-11-pwa-agenda-gestion/verification.md` (verificación completa: 47 estados × 3 anchos, 94 capturas, visual verify sin blocker).
 - **Scope**: PWA consultorio: agenda del día, gestión de turnos, cobros, config (US-004/005/007 UI)
   - Pages: `/agenda` (vista día por sillón con paciente/tratamiento/estado/tolerancia, aviso de sobreturnos y solapamientos intentados), `/cobros` (registrar cobro + conciliar seña, override auditado, aviso "sin factura electrónica en v1"), `/config` (sillones, tratamientos, bloqueos — solo secretaria)
   - `features/agenda` + `features/cobros`: acciones confirmar/cancelar/reprogramar/marcar asistencia con bloqueo < 2 h también para secretaria; reprogramar revalida disponibilidad
@@ -328,7 +329,8 @@ Paso │ Agente A (Backend Core)      │ Agente B (Backend Aux)       │ Agent
 ## FASE 5 — Cierre MVP
 
 ### [C-12] `hardening-e2e`
-- **Estado**: `[ ]` en curso. [Evidencia y pendientes](openspec/changes/c-12-hardening-e2e/verification.md).
+- **Estado**: `[x]` archivado 2026-11-13 (verificado en Docker Compose: backend 337/338 pruebas — 1 fallo de red Windows no de lógica, frontend 208/208, CI verde, migración 005 head).
+- **Evidencia**: `openspec/changes/archive/2026-11-12-c-12-hardening-e2e/verification.md` (verificación completa: 335 pruebas backend, Playwright 15 pruebas, piloto académico ejecutado, revisión de secretos sin hallazgos).
 - **Scope**: Endurecimiento y cierre del MVP v1 (listo para piloto con 1 consultorio)
   - Tests E2E felices + errores de negocio + borde (Etapa 6): doble reserva concurrente, ventana 2 h, webhook duplicado, pago rechazado, proveedor WA caído, día completo multi-sillón
   - `docker-compose.yml` final (api + db + redis + frontend) con un solo comando de levante; CI verde; variables sensibles auditadas (ninguna en repo); seeds ficticios verificados (RN-GL-02)

@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/agenda/agenda-mis-reservas/spec.md`. Este archivo es un delta del change archivado C-07; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Provides authenticated read endpoints for the daily agenda by sillón and for a patient's own reservations, with role-based access, filters, compact mobile-friendly payloads and permitted-action hints.

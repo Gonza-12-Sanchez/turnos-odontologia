@@ -1,3 +1,5 @@
+> Spec canónico: `openspec/specs/platform/pilot-readiness/spec.md`. Este archivo es un delta del change archivado C-12; la fuente de verdad vigente está en la ruta indicada.
+
 ## ADDED Requirements
 
 ### Requirement: Arranque local verificable

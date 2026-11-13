@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/paciente/reserva-pwa/spec.md`. Este archivo es un delta del change archivado C-10; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Permitir al paciente consultar horarios, autenticarse, reservar y gestionar sus propias reservas desde una PWA movil accesible, preservando la autoridad del backend y la privacidad.

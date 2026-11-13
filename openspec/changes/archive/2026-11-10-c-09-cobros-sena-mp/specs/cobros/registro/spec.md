@@ -1,5 +1,7 @@
 # Spec Delta
 
+> Spec canónico: `openspec/specs/cobros/registro/spec.md`. Este archivo es un delta del change archivado C-09; la fuente de verdad vigente está en la ruta indicada.
+
 ## Purpose
 
 Registrar cobros contra turnos, conciliar senas ya recibidas y mantener trazabilidad monetaria y acceso autorizado sin facturacion electronica.
